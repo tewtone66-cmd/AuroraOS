@@ -34,22 +34,34 @@ jobs:
         run: |
           python3 - <<'PY'
           from pathlib import Path
+          import re
+
           manifest = Path('android/app/src/main/AndroidManifest.xml')
-          s = manifest.read_text()
-          if '<activity ' not in s or '<application ' not in s:
-              raise SystemExit('Unexpected AndroidManifest.xml format')
-          s = s.replace('<activity ', '<activity android:screenOrientation="landscape" ', 1)
-          a = s.index('<application ')
-          end = s.index('>', a)
-          app = s[a:end]
-          if 'android:icon="' in app:
-              i = app.index('android:icon="')
-              j = app.index('"', i + len('android:icon="'))
-              app = app[:i] + 'android:icon="@drawable/aurora_launcher"' + app[j+1:]
+          content = manifest.read_text(encoding='utf-8')
+
+          # Capacitor's generated XML may put the tag name and attributes on separate lines.
+          activity = re.search(r'<activity\\b[^>]*>', content, re.DOTALL)
+          application = re.search(r'<application\\b[^>]*>', content, re.DOTALL)
+          if not activity or not application:
+              raise SystemExit('Could not locate activity/application tags in AndroidManifest.xml')
+
+          activity_tag = activity.group(0)
+          if 'android:screenOrientation=' in activity_tag:
+              activity_tag = re.sub(r'android:screenOrientation="[^"]*"', 'android:screenOrientation="landscape"', activity_tag)
           else:
-              app += ' android:icon="@drawable/aurora_launcher"'
-          s = s[:a] + app + s[end:]
-          manifest.write_text(s)
+              activity_tag = activity_tag[:-1] + ' android:screenOrientation="landscape">'
+
+          content = content[:activity.start()] + activity_tag + content[activity.end():]
+          application = re.search(r'<application\\b[^>]*>', content, re.DOTALL)
+          app_tag = application.group(0)
+          if 'android:icon=' in app_tag:
+              app_tag = re.sub(r'android:icon="[^"]*"', 'android:icon="@drawable/aurora_launcher"', app_tag)
+          else:
+              app_tag = app_tag[:-1] + ' android:icon="@drawable/aurora_launcher">'
+
+          content = content[:application.start()] + app_tag + content[application.end():]
+          manifest.write_text(content, encoding='utf-8')
+          print('Android manifest updated: landscape orientation and Aurora launcher icon')
           PY
           npm install --no-save sharp
           node -e "const sharp=require('sharp'); sharp('assets/aurora-icon.svg').resize(1024,1024).png().toFile('assets/aurora-icon.png')"
