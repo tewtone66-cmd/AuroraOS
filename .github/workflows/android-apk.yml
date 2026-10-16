@@ -115,9 +115,9 @@ jobs:
           import android.database.Cursor;
           import android.net.Uri;
           import android.provider.DocumentsContract;
-          import com.getcapacitor.ActivityCallback;
-          import com.getcapacitor.ActivityResult;
-          import com.getcapacitor.CapacitorPlugin;
+          import androidx.activity.result.ActivityResult;
+          import com.getcapacitor.annotation.ActivityCallback;
+          import com.getcapacitor.annotation.CapacitorPlugin;
           import com.getcapacitor.JSObject;
           import com.getcapacitor.Plugin;
           import com.getcapacitor.PluginCall;
