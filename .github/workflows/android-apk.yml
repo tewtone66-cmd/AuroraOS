@@ -40,8 +40,8 @@ jobs:
           content = manifest.read_text(encoding='utf-8')
 
           # Capacitor's generated XML may put the tag name and attributes on separate lines.
-          activity = re.search(r'<activity\\b[^>]*>', content, re.DOTALL)
-          application = re.search(r'<application\\b[^>]*>', content, re.DOTALL)
+          activity = re.search(r'<activity\b[^>]*>', content, re.DOTALL)
+          application = re.search(r'<application\b[^>]*>', content, re.DOTALL)
           if not activity or not application:
               raise SystemExit('Could not locate activity/application tags in AndroidManifest.xml')
 
@@ -52,7 +52,7 @@ jobs:
               activity_tag = activity_tag[:-1] + ' android:screenOrientation="landscape">'
 
           content = content[:activity.start()] + activity_tag + content[activity.end():]
-          application = re.search(r'<application\\b[^>]*>', content, re.DOTALL)
+          application = re.search(r'<application\b[^>]*>', content, re.DOTALL)
           app_tag = application.group(0)
           if 'android:icon=' in app_tag:
               app_tag = re.sub(r'android:icon="[^"]*"', 'android:icon="@drawable/aurora_launcher"', app_tag)
