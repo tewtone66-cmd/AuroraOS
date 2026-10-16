@@ -27,6 +27,12 @@ jobs:
         run: npm run prepare:web
       - name: Install dependencies
         run: npm install
+      - name: Bundle native plugin bridge and validate JavaScript
+        run: |
+          mkdir -p www/capacitor-core
+          cp -R node_modules/@capacitor/core/dist/esm/. www/capacitor-core/
+          node --check apps/aurora-apps.js
+          node --check scripts/prepare-web.mjs
       - name: Add Android platform
         run: npx cap add android
       - name: Set landscape orientation and launcher icon
@@ -109,7 +115,6 @@ jobs:
           import android.database.Cursor;
           import android.net.Uri;
           import android.provider.DocumentsContract;
-          import android.webkit.MimeTypeMap;
           import com.getcapacitor.ActivityCallback;
           import com.getcapacitor.ActivityResult;
           import com.getcapacitor.CapacitorPlugin;
@@ -122,7 +127,8 @@ jobs:
           public class AuroraFilesPlugin extends Plugin {
               @PluginMethod
               public void openExternal(PluginCall call) {
-                  String url = call.getString("url", "");
+                  String url = call.getString("url");
+                  if (url == null) url = "";
                   if (!(url.startsWith("https://") || url.startsWith("http://"))) {
                       call.reject("Only http and https links are allowed");
                       return;
@@ -182,7 +188,7 @@ jobs:
                   String rootId;
                   try { rootId = DocumentsContract.getTreeDocumentId(treeUri); }
                   catch (Exception e) { call.reject("Invalid folder permission", e); return; }
-                  String documentId = call.getString("documentId", rootId);
+                  String documentId = call.getString("documentId");
                   if (documentId == null || documentId.isEmpty()) documentId = rootId;
                   Uri childrenUri = DocumentsContract.buildChildDocumentsUriUsingTree(treeUri, documentId);
                   String[] columns = {
@@ -231,7 +237,7 @@ jobs:
               @PluginMethod
               public void parentDirectory(PluginCall call) {
                   String raw = call.getString("treeUri");
-                  String current = call.getString("documentId", "");
+                  String current = call.getString("documentId");
                   if (raw == null) { call.reject("Folder is not selected"); return; }
                   Uri treeUri = Uri.parse(raw);
                   String root = DocumentsContract.getTreeDocumentId(treeUri);
@@ -252,7 +258,8 @@ jobs:
 
               @PluginMethod
               public void openFile(PluginCall call) {
-                  String raw = call.getString("uri", "");
+                  String raw = call.getString("uri");
+                  if (raw == null) raw = "";
                   if (raw.isEmpty()) { call.reject("No file selected"); return; }
                   String mime = call.getString("mimeType", "*/*");
                   try {
