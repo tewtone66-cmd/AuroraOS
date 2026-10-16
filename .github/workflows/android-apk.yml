@@ -1,0 +1,65 @@
+name: Build Aurora OS APK
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  build-apk:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout source
+        uses: actions/checkout@v4
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+      - name: Set up Java
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '21'
+      - name: Restore original Aurora OS web app
+        run: npm run prepare:web
+      - name: Install dependencies
+        run: npm install
+      - name: Add Android platform
+        run: npx cap add android
+      - name: Set landscape orientation and launcher icon
+        shell: bash
+        run: |
+          python3 - <<'PY'
+          from pathlib import Path
+          p=Path('android/app/src/main/AndroidManifest.xml')
+          s=p.read_text()
+          s=s.replace('<activity android:configChanges=', '<activity android:screenOrientation="landscape" android:configChanges=')
+          p.write_text(s)
+          PY
+          npm install --no-save sharp
+          node -e "const sharp=require('sharp'); sharp('assets/aurora-icon.svg').resize(1024,1024).png().toFile('assets/aurora-icon.png')"
+          mkdir -p android/app/src/main/res/drawable
+          cp assets/aurora-icon.png android/app/src/main/res/drawable/aurora_launcher.png
+          python3 - <<'PY'
+          from pathlib import Path
+          p=Path('android/app/src/main/res/values/strings.xml')
+          s=p.read_text().replace('</resources>', '    <string name="app_name">Aurora OS</string>\n</resources>')
+          p.write_text(s)
+          p=Path('android/app/src/main/AndroidManifest.xml')
+          s=p.read_text().replace('android:label="@string/app_name"', 'android:label="@string/app_name" android:icon="@drawable/aurora_launcher"')
+          p.write_text(s)
+          PY
+      - name: Build debug APK
+        working-directory: android
+        run: ./gradlew assembleDebug --no-daemon
+      - name: Upload APK artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: AuroraOS-APK
+          path: android/app/build/outputs/apk/debug/app-debug.apk
+          if-no-files-found: error
+          retention-days: 30
