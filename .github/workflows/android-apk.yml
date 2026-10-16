@@ -30,7 +30,7 @@ jobs:
       - name: Bundle native plugin bridge and validate JavaScript
         run: |
           mkdir -p www/capacitor-core
-          cp -R node_modules/@capacitor/core/dist/esm/. www/capacitor-core/
+          cp -R node_modules/@capacitor/core/dist/. www/capacitor-core/
           node --check apps/aurora-apps.js
           node --check scripts/prepare-web.mjs
       - name: Add Android platform
