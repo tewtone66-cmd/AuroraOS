@@ -39,8 +39,16 @@ jobs:
           if '<activity ' not in s or '<application ' not in s:
               raise SystemExit('Unexpected AndroidManifest.xml format')
           s = s.replace('<activity ', '<activity android:screenOrientation="landscape" ', 1)
-          import re
-          s = re.sub(r'(<application\\s+[^>]*?)>', lambda m: re.sub(r'\\s+android:icon="[^"]*"', '', m.group(1)) + ' android:icon="@drawable/aurora_launcher">', s, count=1)
+          a = s.index('<application ')
+          end = s.index('>', a)
+          app = s[a:end]
+          if 'android:icon="' in app:
+              i = app.index('android:icon="')
+              j = app.index('"', i + len('android:icon="'))
+              app = app[:i] + 'android:icon="@drawable/aurora_launcher"' + app[j+1:]
+          else:
+              app += ' android:icon="@drawable/aurora_launcher"'
+          s = s[:a] + app + s[end:]
           manifest.write_text(s)
           PY
           npm install --no-save sharp
