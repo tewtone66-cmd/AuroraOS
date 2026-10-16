@@ -34,15 +34,13 @@ jobs:
         run: |
           python3 - <<'PY'
           from pathlib import Path
-          import re
           manifest = Path('android/app/src/main/AndroidManifest.xml')
           s = manifest.read_text()
-          s, n = re.subn(r'<activity\\b', '<activity android:screenOrientation="landscape"', s, count=1)
-          if n != 1:
-              raise SystemExit('Could not lock Android activity to landscape')
-          s, n = re.subn(r'(<application\\b[^>]*?)>', lambda m: re.sub(r'\\s+android:icon="[^"]*"', '', m.group(1)) + ' android:icon="@drawable/aurora_launcher">', s, count=1)
-          if n != 1:
-              raise SystemExit('Could not set Aurora launcher icon')
+          if '<activity ' not in s or '<application ' not in s:
+              raise SystemExit('Unexpected AndroidManifest.xml format')
+          s = s.replace('<activity ', '<activity android:screenOrientation="landscape" ', 1)
+          import re
+          s = re.sub(r'(<application\\s+[^>]*?)>', lambda m: re.sub(r'\\s+android:icon="[^"]*"', '', m.group(1)) + ' android:icon="@drawable/aurora_launcher">', s, count=1)
           manifest.write_text(s)
           PY
           npm install --no-save sharp
