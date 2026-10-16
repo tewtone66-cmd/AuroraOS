@@ -28,7 +28,7 @@ if(fileTile){fileTile.addEventListener('click',e=>{e.preventDefault();e.stopImme
 if(!grid){grid=document.createElement('div');grid.className='aurShortcutGrid';grid.style.cssText='position:fixed;left:28px;top:20%;z-index:100;max-width:300px';document.body.appendChild(grid)}
 if(!grid.classList.contains('aurShortcutGrid')){grid.classList.add('aurShortcutGrid');}
 const browser=makeShortcut('browser','Browser',globe);
-if(fileTile&&fileTile.parentElement===grid){const clone=fileTile.cloneNode(true);cleanIds(clone);clone.dataset.aurApp='files';clone.addEventListener('click',e=>{e.preventDefault();e.stopImmediatePropagation();show('files')},true);const lab=clone.querySelector('.aurShortcutLabel');if(lab)lab.textContent='File Manager';else if(clone.children.length===0)clone.textContent='File Manager';grid.appendChild(browser);return}
+if(fileTile&&fileTile.parentElement===grid){grid.appendChild(browser);return}
 if(!fileTile){grid.appendChild(makeShortcut('files','File Manager',folder))}
 grid.appendChild(browser);
 }
