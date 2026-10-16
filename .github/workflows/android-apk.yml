@@ -61,7 +61,45 @@ jobs:
 
           content = content[:application.start()] + app_tag + content[application.end():]
           manifest.write_text(content, encoding='utf-8')
-          print('Android manifest updated: landscape orientation and Aurora launcher icon')
+
+          # Hide Android's native status/navigation bars so the app uses the full display.
+          # The Aurora dock remains the app's own taskbar; Android's battery/status strip is not overlaid.
+          import json
+          app_id = json.loads(Path('capacitor.config.json').read_text(encoding='utf-8'))['appId']
+          activity_file = Path('android/app/src/main/java') / Path(*app_id.split('.')) / 'MainActivity.java'
+          activity_file.parent.mkdir(parents=True, exist_ok=True)
+          activity_file.write_text(f'''package {app_id};
+
+          import android.os.Bundle;
+          import android.view.View;
+          import com.getcapacitor.BridgeActivity;
+
+          public class MainActivity extends BridgeActivity {{
+              private void enterImmersiveMode() {{
+                  getWindow().getDecorView().setSystemUiVisibility(
+                      View.SYSTEM_UI_FLAG_FULLSCREEN
+                      | View.SYSTEM_UI_FLAG_HIDE_NAVIGATION
+                      | View.SYSTEM_UI_FLAG_IMMERSIVE_STICKY
+                      | View.SYSTEM_UI_FLAG_LAYOUT_STABLE
+                      | View.SYSTEM_UI_FLAG_LAYOUT_HIDE_NAVIGATION
+                      | View.SYSTEM_UI_FLAG_LAYOUT_FULLSCREEN
+                  );
+              }}
+
+              @Override
+              public void onCreate(Bundle savedInstanceState) {{
+                  super.onCreate(savedInstanceState);
+                  enterImmersiveMode();
+              }}
+
+              @Override
+              public void onWindowFocusChanged(boolean hasFocus) {{
+                  super.onWindowFocusChanged(hasFocus);
+                  if (hasFocus) enterImmersiveMode();
+              }}
+          }}
+          ''', encoding='utf-8')
+          print('Android manifest updated: landscape orientation, Aurora icon, immersive fullscreen')
           PY
           npm install --no-save sharp
           node -e "const sharp=require('sharp'); sharp('assets/aurora-icon.svg').resize(1024,1024).png().toFile('assets/aurora-icon.png')"
