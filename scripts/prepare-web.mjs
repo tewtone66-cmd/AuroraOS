@@ -77,5 +77,10 @@ replaceOnce(' const wl=$(".walls",b),cw=+ls("wall")||0;', ' const slider=$("#uiS
 replaceOnce('function mag(px){hov=px;const d=$("#dock");if(px!=null)d.style.setProperty("--mx",(px-d.getBoundingClientRect().left)+"px");\n d.classList.toggle("hov",px!=null);if(!raf)raf=requestAnimationFrame(step)}', 'function mag(px){if(px!=null&&hov!=null&&Math.abs(px-hov)<1)return;hov=px;const d=$("#dock");if(px!=null)d.style.setProperty("--mx",(px-d.getBoundingClientRect().left)+"px");\n d.classList.toggle("hov",px!=null);if(!raf)raf=requestAnimationFrame(step)}', 'dock pointer-move guard');
 replaceOnce('magOn=ls("mag")!=="0";setWall(Math.min(+ls("wall")||0,W.length-1));render();', 'magOn=ls("mag")!=="0";applyUiScale(ls("uiScale")||82,false);setWall(Math.min(+ls("wall")||0,W.length-1));render();', 'boot scale restore');
 
+const appsSource = path.join(root, 'apps', 'aurora-apps.js');
+if (!fs.existsSync(appsSource)) throw new Error('Aurora app bundle is missing: apps/aurora-apps.js');
+fs.copyFileSync(appsSource, path.join(outDir, 'aurora-apps.js'));
+replaceOnce('</body>', '<script src="aurora-apps.js"></script>\n</body>', 'body close for real apps bundle');
+
 fs.writeFileSync(output, page);
 console.log(`Applied launcher scale/performance patch: ${Buffer.byteLength(page)} bytes`);
