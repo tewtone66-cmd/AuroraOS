@@ -96,6 +96,10 @@ button,input,textarea{font:inherit;color:inherit}
 <div id="cur"><svg viewBox="0 0 26 28" width="26" height="28"><path d="M1 1L1 20L6 15L10 24L14 22L10 14L17 14Z" fill="#fff" stroke="#111" stroke-width="1.5" stroke-linejoin="round"/></svg></div>
 <div id="vbtns"><button id="vL">L</button><button id="vR">R</button><button id="vOff">&#10005;</button></div>
 <script>
+window.addEventListener('error',function(e){try{var d=document.createElement('pre');d.style.cssText='position:fixed;left:8px;right:8px;top:8px;z-index:99999;background:#400;color:#fff;padding:10px;border-radius:8px;font:12px monospace;white-space:pre-wrap;user-select:text';d.textContent='Aurora error: '+e.message+' (line '+(e.lineno||'?')+':'+(e.colno||'?')+')';(document.body||document.documentElement).appendChild(d)}catch(x){}});
+window.addEventListener('unhandledrejection',function(e){console.warn('rejection',e.reason)});
+</script>
+<script>
 const $=(s,r=document)=>r.querySelector(s),$$=(s,r=document)=>[...r.querySelectorAll(s)];
 const ls=(k,v)=>{try{if(v===undefined)return localStorage.getItem(k);localStorage.setItem(k,v)}catch(e){return null}};
 const jl=(k,d)=>{try{const v=JSON.parse(ls(k));return v==null?d:v}catch(e){return d}};
@@ -195,7 +199,7 @@ function pUp(id){if(!ptr.has(id))return;ptr.delete(id);if(g&&!ptr.size){clearTim
 pad.addEventListener('pointerdown',e=>{pad.setPointerCapture(e.pointerId);pDown(e.pointerId,e.clientX,e.clientY)});
 pad.addEventListener('pointermove',e=>pMove(e.pointerId,e.clientX,e.clientY));
 pad.addEventListener('pointerup',e=>pUp(e.pointerId));pad.addEventListener('pointercancel',e=>pUp(e.pointerId));
-if(NB)NB.addListener('vtouch',e=>{const id=1000+e.pid;if(e.type==='down')pDown(id,e.x,e.y);else if(e.type==='move')pMove(id,e.x,e.y);else pUp(id)});
+try{if(NB)NB.addListener('vtouch',e=>{const id=1000+e.pid;if(e.type==='down')pDown(id,e.x,e.y);else if(e.type==='move')pMove(id,e.x,e.y);else pUp(id)}).catch(()=>{})}catch(e){console.warn(e)}
 const vL=$('#vL');vL.onpointerdown=e=>{e.stopPropagation();vL.setPointerCapture(e.pointerId);VM.L=true;VM.d=press();VM.p={x:VM.x,y:VM.y};vL.classList.add('on')};
 vL.onpointerup=vL.onpointercancel=()=>{if(!VM.L)return;VM.L=false;vL.classList.remove('on');const moved=Math.hypot(VM.x-VM.p.x,VM.y-VM.p.y)>=8,d=VM.d;if(d&&d.id&&Lnat){release(d);return}const t=tgt();release(t);if(!moved){ev(t,'click');focusEl(t)}};
 $('#vR').onpointerdown=e=>{e.stopPropagation();rclick()};$('#vOff').onclick=()=>vmSet(false);
@@ -378,5 +382,5 @@ function appSet(w){const SP=[['Slow',1.1],['Normal',1.8],['Fast',3]];let granted
 NF&&NF.status().then(s=>{granted=s.granted;r()}).catch(()=>{});
 w.body.onclick=e=>{const b=e.target.closest('button');if(!b)return;const d=b.dataset;if(d.w!=null){S.wall=+d.w;ls('aur.wall',S.wall);applyWall()}if(d.t){S.theme=d.t;ls('aur.theme',d.t);applyTheme()}if(d.a){S.acc=d.a;ls('aur.acc',d.a);applyTheme()}if(d.m!=null)vmSet(d.m==='1');if(d.s){S.sp=+d.s;ls('aur.sp',S.sp)}if(d.e){S.se=d.e;ls('aur.se',d.e)}if(d.p&&NF&&!granted)NF.requestAccess().catch(()=>{});r()}}
 function appAbout(w){w.body.innerHTML=`<div class="about"><div class="big">${tile('about')}</div><h2>Aurora OS</h2><p>Version 2.1.0</p><ul><li>Real browser (Android WebView)</li><li>File Explorer on your real storage</li><li>Notepad, Photos, Media Player</li><li>Virtual mouse &amp; touchpad</li></ul></div>`}
-applyTheme();applyWall();buildUI();clock();setInterval(clock,20000);vmSet(ls('aur.vm')==='1');matchMedia('(prefers-color-scheme:dark)').addEventListener&&matchMedia('(prefers-color-scheme:dark)').addEventListener('change',applyTheme);
+[()=>applyTheme(),()=>applyWall(),()=>buildUI(),()=>clock(),()=>setInterval(clock,20000),()=>vmSet(ls('aur.vm')==='1'),()=>matchMedia('(prefers-color-scheme:dark)').addEventListener('change',applyTheme)].forEach(f=>{try{f()}catch(e){console.error(e);window.dispatchEvent(new ErrorEvent('error',{message:String(e&&e.message||e)+' in '+f.toString().slice(0,40),lineno:0,colno:0}))}});
 </script></body></html>
