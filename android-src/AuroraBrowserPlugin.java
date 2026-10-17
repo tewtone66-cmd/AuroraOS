@@ -350,6 +350,14 @@ public class AuroraBrowserPlugin extends Plugin {
             else if ("fwd".equals(a) && w.canGoForward()) w.goForward();
             else if ("rl".equals(a)) w.reload();
             else if ("stop".equals(a)) w.stopLoading();
+            else if ("zin".equals(a) || "zout".equals(a) || "zreset".equals(a)) {
+                int zt = w.getSettings().getTextZoom();
+                zt = "zin".equals(a) ? Math.min(250, zt + 10) : ("zout".equals(a) ? Math.max(40, zt - 10) : 100);
+                w.getSettings().setTextZoom(zt);
+            } else if ("mobile".equals(a) || "desktop".equals(a)) {
+                w.getSettings().setUserAgentString("mobile".equals(a) ? null : DESKTOP_UA);
+                w.reload();
+            }
             call.resolve();
         });
     }
