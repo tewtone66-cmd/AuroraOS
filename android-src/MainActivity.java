@@ -39,6 +39,7 @@ public class MainActivity extends BridgeActivity {
     public void onCreate(Bundle savedInstanceState) {
         registerPlugin(AuroraFilesPlugin.class);
         registerPlugin(AuroraBrowserPlugin.class);
+        registerPlugin(AuroraWinePlugin.class);
         pickLauncher = registerForActivityResult(new ActivityResultContracts.StartActivityForResult(), r -> {
             PickCb c = pending;
             pending = null;
