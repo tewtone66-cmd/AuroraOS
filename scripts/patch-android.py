@@ -16,7 +16,7 @@ def set_attr(text, tag, attr, val):
     return text[:m.start()] + t2 + text[m.end():]
 
 c = set_attr(c, 'activity', 'android:screenOrientation', 'sensorLandscape')
-c = set_attr(c, 'activity', 'android:windowSoftInputMode', 'adjustPan')
+c = set_attr(c, 'activity', 'android:windowSoftInputMode', 'adjustNothing')
 c = set_attr(c, 'application', 'android:usesCleartextTraffic', 'true')
 c = set_attr(c, 'application', 'android:requestLegacyExternalStorage', 'true')
 

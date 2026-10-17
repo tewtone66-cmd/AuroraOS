@@ -87,6 +87,14 @@ public class AuroraBrowserPlugin extends Plugin {
         return curD;
     }
     private void ui(Runnable r) { getActivity().runOnUiThread(r); }
+    private final Map<String, Integer> zoomOf = new HashMap<>();
+    private void applyZoom(WebView v, String tabId) {
+        try {
+            Integer z = zoomOf.get(tabId);
+            String val = (z == null || z == 100) ? "" : String.valueOf(z / 100f);
+            v.evaluateJavascript("(function(){try{document.documentElement.style.zoom='" + val + "'}catch(e){}})()", null);
+        } catch (Throwable ignored) { }
+    }
 
     /** Arrow cursor drawn natively so it stays visible above the browser surface. */
     private static class CursorView extends View {
@@ -139,7 +147,7 @@ public class AuroraBrowserPlugin extends Plugin {
         final String id = call.getString("id", "");
         final String url = call.getString("url", "about:blank");
         // PAGE_K = Aurora CSS px per page CSS px (bigger = bigger pages). Tune here if sites look too small/large.
-        final float PAGE_K = 1.3f;
+        final float PAGE_K = 1.4f;
         final float pageScale = Math.max(25f, Math.min(300f, dens(call) / density() * 100f * PAGE_K));
         ui(() -> {
             if (views.containsKey(id)) { call.resolve(); return; }
@@ -177,7 +185,8 @@ public class AuroraBrowserPlugin extends Plugin {
                     return true;
                 }
                 @Override public void onPageStarted(WebView v, String u, Bitmap f) { emit(id, v, true); }
-                @Override public void onPageFinished(WebView v, String u) { emit(id, v, false); }
+                @Override public void onPageFinished(WebView v, String u) { applyZoom(v, id); emit(id, v, false); }
+                @Override public void onPageCommitVisible(WebView v, String u) { applyZoom(v, id); }
                 @Override public void doUpdateVisitedHistory(WebView v, String u, boolean reload) { emit(id, v, v.getProgress() < 100); }
             });
             w.setWebChromeClient(new WebChromeClient() {
@@ -354,26 +363,34 @@ public class AuroraBrowserPlugin extends Plugin {
     public void hideAll(final PluginCall call) {
         final String id = call.getString("id", "");
         ui(() -> {
-            JSObject out = new JSObject();
+            Bitmap shot = null;
             try {
                 WebView w = views.get(id);
                 if (w != null && w.getVisibility() == View.VISIBLE && w.getWidth() > 0 && w.getHeight() > 0) {
                     Bitmap b = Bitmap.createBitmap(w.getWidth(), w.getHeight(), Bitmap.Config.ARGB_8888);
                     w.draw(new Canvas(b));
-                    int tw = Math.min(900, b.getWidth());
+                    int tw = Math.min(1600, b.getWidth());
                     int th = Math.max(1, Math.round(b.getHeight() * (tw / (float) b.getWidth())));
-                    Bitmap sm = Bitmap.createScaledBitmap(b, tw, th, true);
-                    ByteArrayOutputStream bo = new ByteArrayOutputStream();
-                    sm.compress(Bitmap.CompressFormat.JPEG, 72, bo);
-                    out.put("img", "data:image/jpeg;base64," + Base64.encodeToString(bo.toByteArray(), Base64.NO_WRAP));
-                    if (sm != b) sm.recycle();
-                    b.recycle();
+                    Bitmap sm = tw == b.getWidth() ? b : Bitmap.createScaledBitmap(b, tw, th, true);
+                    if (sm != b) b.recycle();
+                    shot = sm;
                 }
-            } catch (Throwable ignored) { }
+            } catch (Throwable ignored) { shot = null; }
             for (WebView w : views.values()) w.setVisibility(View.GONE);
             shownId = null;
             if (cursor != null) cursor.setVisibility(View.GONE);
-            call.resolve(out);
+            final Bitmap fin = shot;
+            if (fin == null) { call.resolve(new JSObject()); return; }
+            new Thread(() -> {
+                JSObject out = new JSObject();
+                try {
+                    ByteArrayOutputStream bo = new ByteArrayOutputStream();
+                    fin.compress(Bitmap.CompressFormat.JPEG, 82, bo);
+                    out.put("img", "data:image/jpeg;base64," + Base64.encodeToString(bo.toByteArray(), Base64.NO_WRAP));
+                } catch (Throwable ignored) { }
+                fin.recycle();
+                call.resolve(out);
+            }).start();
         });
     }
 
@@ -397,7 +414,8 @@ public class AuroraBrowserPlugin extends Plugin {
             else if ("stop".equals(a)) w.stopLoading();
             else if ("zset".equals(a)) {
                 int zv = call.getInt("v", 100);
-                w.getSettings().setTextZoom(Math.max(40, Math.min(300, zv)));
+                zoomOf.put(call.getString("id", ""), Math.max(40, Math.min(300, zv)));
+                applyZoom(w, call.getString("id", ""));
             } else if ("zin".equals(a) || "zout".equals(a) || "zreset".equals(a)) {
                 int zt = w.getSettings().getTextZoom();
                 zt = "zin".equals(a) ? Math.min(250, zt + 10) : ("zout".equals(a) ? Math.max(40, zt - 10) : 100);
@@ -415,6 +433,7 @@ public class AuroraBrowserPlugin extends Plugin {
         final String id = call.getString("id", "");
         ui(() -> {
             WebView w = views.remove(id);
+            zoomOf.remove(id);
             if (w != null) {
                 if (w.getParent() instanceof ViewGroup) ((ViewGroup) w.getParent()).removeView(w);
                 w.destroy();
