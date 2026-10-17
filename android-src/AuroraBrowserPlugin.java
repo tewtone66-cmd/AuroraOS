@@ -138,6 +138,8 @@ public class AuroraBrowserPlugin extends Plugin {
     public void create(final PluginCall call) {
         final String id = call.getString("id", "");
         final String url = call.getString("url", "about:blank");
+        // 1 page CSS px ~ 0.87 Aurora CSS px (desktop-like layout of ~1000 px), independent of the page's viewport meta
+        final float pageScale = Math.max(25f, Math.min(200f, dens(call) / density() * 100f * 1.15f));
         ui(() -> {
             if (views.containsKey(id)) { call.resolve(); return; }
             final WebView w = new WebView(getContext());
@@ -145,8 +147,9 @@ public class AuroraBrowserPlugin extends Plugin {
             s.setJavaScriptEnabled(true);
             s.setDomStorageEnabled(true);
             s.setDatabaseEnabled(true);
-            s.setLoadWithOverviewMode(true);
-            s.setUseWideViewPort(true);
+            s.setLoadWithOverviewMode(false);
+            s.setUseWideViewPort(false);
+            w.setInitialScale(Math.round(pageScale));
             s.setSupportZoom(true);
             s.setBuiltInZoomControls(true);
             s.setDisplayZoomControls(false);
@@ -391,7 +394,10 @@ public class AuroraBrowserPlugin extends Plugin {
             else if ("fwd".equals(a) && w.canGoForward()) w.goForward();
             else if ("rl".equals(a)) w.reload();
             else if ("stop".equals(a)) w.stopLoading();
-            else if ("zin".equals(a) || "zout".equals(a) || "zreset".equals(a)) {
+            else if ("zset".equals(a)) {
+                int zv = call.getInt("v", 100);
+                w.getSettings().setTextZoom(Math.max(40, Math.min(300, zv)));
+            } else if ("zin".equals(a) || "zout".equals(a) || "zreset".equals(a)) {
                 int zt = w.getSettings().getTextZoom();
                 zt = "zin".equals(a) ? Math.min(250, zt + 10) : ("zout".equals(a) ? Math.max(40, zt - 10) : 100);
                 w.getSettings().setTextZoom(zt);
