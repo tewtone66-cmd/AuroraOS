@@ -181,7 +181,7 @@ const S={wall:+ls('aur.wall')||0,theme:ls('aur.theme')||'auto',acc:ls('aur.acc')
 const plug=n=>{const C=window.Capacitor;if(!C||!C.isNativePlatform||!C.isNativePlatform())return null;let p=null;try{if(typeof C.registerPlugin==='function')p=C.registerPlugin(n)}catch(e){}
 if(!p&&C.Plugins)p=C.Plugins[n]||null;if(!p){const call=(m,o)=>C.nativePromise?C.nativePromise(n,m,o||{}):Promise.reject(new Error('Capacitor bridge missing'));const ls={};p=new Proxy({},{get:(t,k)=>k==='addListener'?((ev,cb)=>{let id=null;const pr=C.nativeCallback?new Promise(r=>{id=C.nativeCallback(n,'addListener',{eventName:ev},cb);r({remove:()=>C.nativeCallback&&C.nativeCallback(n,'removeListener',{eventName:ev,callbackId:id})})}):Promise.resolve({remove(){}});return pr}):k==='then'?undefined:(o=>call(k,o))})}
 return p};
-const NB=plug('AuroraBrowser'),NF=plug('AuroraFiles');
+const NB=plug('AuroraBrowser'),NF=plug('AuroraFiles'),NW=plug('AuroraWine');
 const fsrc=p=>{const q=p.split('/').map(encodeURIComponent).join('/');return window.Capacitor&&Capacitor.convertFileSrc?Capacitor.convertFileSrc(q):location.origin+'/_capacitor_file_'+q};
 const W={};let ctxNew=false,zi=10,topId=null,dragging=false,menuOpen=false,BR=null,tt,uid=0,shown=null,shownTab=null,snapSeq=0;
 const listen=(n,f)=>{try{return Promise.resolve(NB.addListener(n,f))}catch(e){return Promise.resolve({remove(){}})}};
@@ -510,7 +510,18 @@ function mkFloppy(name,bytes){
 }
 /* ---------- download window (Windows-style green progress bar) ---------- */
 window.aurora=window.aurora||{};
-window.aurora.openExe=p=>openApp('win',{exe:p});
+let wineBusy=false;
+window.aurora.openExe=async p=>{
+if(!NW)return openApp('win',{exe:p});
+if(wineBusy)return toast('Windows runtime is still being prepared');
+wineBusy=true;
+try{const st=await NW.status();if(!st.installed||!st.containers){toast('Preparing Windows runtime…');await NW.init()}await NW.runExe({path:p})}
+catch(e){toast((e&&e.message)||'Could not start the program')}
+finally{wineBusy=false}};
+function wineEvents(){if(!NW)return;const lw=(n,f)=>{try{return Promise.resolve(NW.addListener(n,f))}catch(e){return Promise.resolve({remove(){}})}};
+lw('progress',e=>toast(e.step==='container'?'Creating Windows container…':'Installing Windows runtime… '+(e.pct|0)+'%'));
+lw('exeStarted',e=>toast('Started '+String(e.path||'').split('/').pop()));
+lw('exeExited',e=>toast('Closed '+String(e.path||'').split('/').pop()))}
 const DL={};
 const dirOf=p=>p.replace(/\/[^/]*$/,'')||'/';
 function dlOpen(d){const p=d.path;if(!p)return;const k=kind({name:d.name});
@@ -641,6 +652,5 @@ function appWin(w,arg){
 }
 }
 
-[()=>applyTheme(),()=>applyWall(),()=>applyMouse(),()=>buildUI(),()=>listen('dlprogress',dlEv),()=>clock(),()=>setInterval(clock,20000),()=>vmSet(ls('aur.vm')==='1'),()=>{const mq=window.matchMedia&&window.matchMedia('(prefers-color-scheme:dark)');if(mq){if(typeof mq.addEventListener==='function')mq.addEventListener('change',applyTheme);else if(typeof mq.addListener==='function')mq.addListener(applyTheme)}}].forEach(f=>{try{f()}catch(e){console.error(e);window.dispatchEvent(new ErrorEvent('error',{message:String(e&&e.message||e)+' in '+f.toString().slice(0,40),lineno:0,colno:0}))}});
-[()=>applyTheme(),()=>applyWall(),()=>applyMouse(),()=>buildUI(),()=>clock(),()=>setInterval(clock,20000),()=>vmSet(ls('aur.vm')==='1'),()=>{const mq=window.matchMedia&&window.matchMedia('(prefers-color-scheme:dark)');if(mq){if(typeof mq.addEventListener==='function')mq.addEventListener('change',applyTheme);else if(typeof mq.addListener==='function')mq.addListener(applyTheme)}}].forEach(f=>{try{f()}catch(e){console.error(e);window.dispatchEvent(new ErrorEvent('error',{message:String(e&&e.message||e)+' in '+f.toString().slice(0,40),lineno:0,colno:0}))}});
+[()=>applyTheme(),()=>applyWall(),()=>applyMouse(),()=>buildUI(),()=>listen('dlprogress',dlEv),()=>wineEvents(),()=>clock(),()=>setInterval(clock,20000),()=>vmSet(ls('aur.vm')==='1'),()=>{const mq=window.matchMedia&&window.matchMedia('(prefers-color-scheme:dark)');if(mq){if(typeof mq.addEventListener==='function')mq.addEventListener('change',applyTheme);else if(typeof mq.addListener==='function')mq.addListener(applyTheme)}}].forEach(f=>{try{f()}catch(e){console.error(e);window.dispatchEvent(new ErrorEvent('error',{message:String(e&&e.message||e)+' in '+f.toString().slice(0,40),lineno:0,colno:0}))}});
 </script></body></html>

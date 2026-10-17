@@ -40,26 +40,13 @@ jobs:
           node scripts/make-icons.mjs
       - name: Patch Android project
         run: python3 scripts/patch-android.py
-      - name: Fetch Winlator assets (pinned commit)
+      - name: Install NDK and CMake (Winlator core)
         run: |
-          set -e
-          SHA=8077f374ef2d54127b088de9e8cd7b4af14d9c8b
-          mkdir -p /tmp/winlator-app
-          cd /tmp/winlator-app
-          git init -q
-          git remote add origin https://github.com/brunodev85/winlator-app.git
-          git fetch --depth 1 origin $SHA
-          git checkout -q FETCH_HEAD
-          cd "$GITHUB_WORKSPACE"
-          mkdir -p android/app/src/main/assets
-          cp -r /tmp/winlator-app/app/src/main/assets/. android/app/src/main/assets/
-          rm -rf android/app/src/main/assets/wallpapers android/app/src/main/assets/soundfont
-          test -s android/app/src/main/assets/rootfs.tzst
-          test -s android/app/src/main/assets/container_pattern.tzst
-          test -s android/app/src/main/assets/common_dlls.json
-          ls -la android/app/src/main/assets
-      - name: Patch Winlator infra (targetSdk 28, arm64, deps)
-        run: python3 scripts/patch-winlator.py
+          SDKM="$ANDROID_HOME/cmdline-tools/latest/bin/sdkmanager"
+          yes | "$SDKM" --licenses > /dev/null || true
+          "$SDKM" "ndk;24.0.8215888" "cmake;3.22.1"
+      - name: Integrate Winlator core
+        run: python3 scripts/setup-winlator.py
       - name: Build debug APK
         working-directory: android
         run: ./gradlew assembleDebug --no-daemon
