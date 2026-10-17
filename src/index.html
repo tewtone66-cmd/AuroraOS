@@ -603,7 +603,7 @@ function appWin(w,arg){
   sc.addEventListener('pointermove',e=>{const p=pts.get(e.pointerId);if(!p||!g)return;const dx=e.clientX-p.x,dy=e.clientY-p.y;p.x=e.clientX;p.y=e.clientY;g.m+=Math.abs(dx)+Math.abs(dy);if(pts.size===1&&V.emu)send('mouse-delta',[dx*MS,-dy*MS])});
   const up=e=>{if(!pts.delete(e.pointerId))return;if(!pts.size&&g){if(g.m<10&&Date.now()-g.t<350&&V.emu)click(g.n>=2?[false,false,true]:[true,false,false]);g=null}};
   sc.addEventListener('pointerup',up);sc.addEventListener('pointercancel',up);
-  w.open=a=>{if(a&&a.exe){V.exe=a.exe;if(V.running)toast('Restart Windows to attach this program');else setup()}};
+  w.open=a=>{if(a&&a.exe){V.exe=a.exe;if(a.autorun)V.autorun=true;if(V.running)toast('Stop the current session before launching another program');else setup()}};
   w.onclose=()=>{try{V.emu&&V.emu.destroy()}catch(e){}V.emu=null;V.running=false;V.held=false;if(V.wine){try{if(window.__bwXHRRestore){window.__bwXHRRestore();window.__bwXHRRestore=null}const cv=document.getElementById('canvas');if(cv)cv.remove();}catch(e){}V.wine=false;window.__bwBooted=false;window.__bwStatus=null;document.querySelectorAll('script').forEach(s=>{if(s.src&&s.src.includes('/boxedwine/'))s.remove()})}};
   setup();
 }
