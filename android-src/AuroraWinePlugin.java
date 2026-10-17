@@ -7,6 +7,9 @@ import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.os.Environment;
+import android.view.Gravity;
+import android.view.Window;
+import android.view.WindowManager;
 import androidx.preference.PreferenceManager;
 import com.getcapacitor.JSArray;
 import com.getcapacitor.JSObject;
@@ -45,6 +48,10 @@ public class AuroraWinePlugin extends Plugin {
     private String curPath = "";
     private Activity curActivity = null;
 
+    /** Frame of the program window in CSS px of the Aurora page; gd = device px per CSS px. */
+    private float gx = 0, gy = 0, gw = 640, gh = 480, gd = 1;
+    private boolean gvis = true, gfocus = true, hasGeom = false;
+
     @Override
     public void load() {
         Application app = (Application) getContext().getApplicationContext();
@@ -53,6 +60,7 @@ public class AuroraWinePlugin extends Plugin {
             public void onActivityCreated(Activity a, Bundle state) {
                 if (a instanceof XServerDisplayActivity) {
                     curActivity = a;
+                    applyGeom(a);
                     JSObject o = new JSObject();
                     o.put("id", curId);
                     o.put("path", curPath);
@@ -79,6 +87,7 @@ public class AuroraWinePlugin extends Plugin {
             public void onActivityDestroyed(Activity a) {
                 if (a == curActivity) {
                     curActivity = null;
+                    hasGeom = false;
                     JSObject o = new JSObject();
                     o.put("id", curId);
                     o.put("path", curPath);
@@ -86,6 +95,48 @@ public class AuroraWinePlugin extends Plugin {
                 }
             }
         });
+    }
+
+    /** Reads x,y,w,h (CSS px), cw (page width in CSS px), visible, focus from a call into the stored frame. */
+    private void readGeom(PluginCall call) {
+        float d = getContext().getResources().getDisplayMetrics().density;
+        try {
+            Float cw = call.getFloat("cw", 0f);
+            int wpx = getBridge().getWebView().getWidth();
+            if (cw != null && cw > 0 && wpx > 0) d = wpx / cw;
+        } catch (Exception ignored) { }
+        gd = d;
+        gx = call.getFloat("x", gx);
+        gy = call.getFloat("y", gy);
+        gw = call.getFloat("w", gw);
+        gh = call.getFloat("h", gh);
+        Boolean v = call.getBoolean("visible", gvis);
+        gvis = v == null || v;
+        Boolean f = call.getBoolean("focus", gfocus);
+        gfocus = f == null || f;
+    }
+
+    /** Puts the program window (a transparent, non-modal Activity window) exactly over the Aurora window frame. UI thread only. */
+    private void applyGeom(Activity a) {
+        if (!hasGeom || a == null) return;
+        try {
+            Window win = a.getWindow();
+            int[] loc = new int[2];
+            try { getBridge().getWebView().getLocationOnScreen(loc); } catch (Exception ignored) { }
+            WindowManager.LayoutParams lp = win.getAttributes();
+            lp.gravity = Gravity.TOP | Gravity.START;
+            lp.x = loc[0] + Math.round(gx * gd);
+            lp.y = loc[1] + Math.round(gy * gd);
+            lp.width = Math.max(1, Math.round(gw * gd));
+            lp.height = Math.max(1, Math.round(gh * gd));
+            lp.alpha = gvis ? 1f : 0f;
+            win.setAttributes(lp);
+            win.addFlags(WindowManager.LayoutParams.FLAG_NOT_TOUCH_MODAL | WindowManager.LayoutParams.FLAG_LAYOUT_NO_LIMITS);
+            if (gvis) win.clearFlags(WindowManager.LayoutParams.FLAG_NOT_TOUCHABLE);
+            else win.addFlags(WindowManager.LayoutParams.FLAG_NOT_TOUCHABLE);
+            if (gvis && gfocus) win.clearFlags(WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE);
+            else win.addFlags(WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE);
+        } catch (Throwable ignored) { }
     }
 
     private void progress(String step, int pct) {
@@ -269,11 +320,17 @@ public class AuroraWinePlugin extends Plugin {
             cid = list.get(0).id;
         }
         final int containerId = cid;
+        if (call.hasOption("w")) {
+            readGeom(call);
+            hasGeom = true;
+        }
         curId = ++runSeq;
         curPath = path;
         final Intent it = new Intent(ctx, XServerDisplayActivity.class);
         it.putExtra("container_id", containerId);
         it.putExtra("exec_path", path);
+        String scr = call.getString("screen");
+        if (scr != null && scr.matches("\\d{3,4}x\\d{3,4}")) it.putExtra("aurora_screen", scr);
         getActivity().runOnUiThread(() -> {
             try {
                 getActivity().startActivity(it);
@@ -296,6 +353,22 @@ public class AuroraWinePlugin extends Plugin {
         }
         a.runOnUiThread(() -> {
             a.finish();
+            call.resolve();
+        });
+    }
+
+    /** Moves/resizes/shows/hides the running program's window: {x,y,w,h,cw,visible?,focus?} (CSS px of the Aurora page). */
+    @PluginMethod
+    public void place(final PluginCall call) {
+        readGeom(call);
+        hasGeom = true;
+        final Activity a = curActivity;
+        if (a == null) {
+            call.resolve();
+            return;
+        }
+        a.runOnUiThread(() -> {
+            applyGeom(a);
             call.resolve();
         });
     }
