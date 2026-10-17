@@ -382,6 +382,8 @@ public class AuroraBrowserPlugin extends Plugin {
         final float x = call.getFloat("x", 0f), y = call.getFloat("y", 0f);
         final boolean vis = Boolean.TRUE.equals(call.getBoolean("visible", true));
         final float dd = dens(call);
+        final Float ksz = call.getFloat("s", 1f);
+        final float kscale = (ksz != null && ksz >= 0.3f && ksz <= 5f) ? ksz : 1f;
         ui(() -> {
             if (cursor == null) {
                 float d = dd;
@@ -395,6 +397,10 @@ public class AuroraBrowserPlugin extends Plugin {
             float d = dd;
             cursor.setTranslationX(x * d + (a[0] - b[0]));
             cursor.setTranslationY(y * d + (a[1] - b[1]));
+            cursor.setPivotX(0f);
+            cursor.setPivotY(0f);
+            cursor.setScaleX(kscale);
+            cursor.setScaleY(kscale);
             if (vis && shownId != null) {
                 if (cursor.getVisibility() != View.VISIBLE) cursor.setVisibility(View.VISIBLE);
                 cursor.bringToFront();
