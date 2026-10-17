@@ -56,7 +56,7 @@ button,input,textarea{font:inherit;color:inherit}
 .btool{display:flex;gap:2px;align-items:center;padding:3px 6px;background:var(--surf);flex:none}
 .addr{flex:1;min-width:30px;height:30px;border:1px solid var(--line);border-radius:15px;background:var(--surf2);padding:0 14px;margin:0 4px;user-select:text;-webkit-user-select:text;outline:none}.addr:focus{border-color:var(--acc);background:var(--surf)}
 .btool .ib{min-height:28px;padding:3px 8px}.br.fb .bfav{display:flex}.bfav{display:none;gap:4px;padding:2px 8px 5px;background:var(--surf);border-bottom:1px solid var(--line);overflow:auto;flex:none;scrollbar-width:none}.bfav .ib{padding:3px 8px;min-height:24px;font-size:12px}
-.bprog{height:2px;background:var(--acc);flex:none;opacity:0;transition:opacity .3s;width:0}.bview{flex:1;min-height:0;position:relative;background:#fff center/100% 100% no-repeat}.exv{position:absolute;top:0;left:0;right:0;bottom:0;background:#0b0f1a;display:flex;align-items:center;justify-content:center;color:#9fb0d0;font:14px system-ui,sans-serif;text-align:center;padding:12px;overflow:hidden}.exm{max-width:90%;word-break:break-word}
+.bprog{height:2px;background:var(--acc);flex:none;opacity:0;transition:opacity .3s;width:0}.bview{flex:1;min-height:0;position:relative;background:#fff center/100% 100% no-repeat}
 .bpage{position:absolute;inset:0;overflow:auto;background:var(--surf);touch-action:pan-y}
 .bhome{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;gap:8px;color:#e8eefc;background:radial-gradient(ellipse at 50% 30%,#473c91,#0b1d3a 80%);overflow:auto}.bhome h2{margin:0;font-size:26px}.bhome p{margin:0;opacity:.8}
 .bq{display:flex;gap:6px;width:min(80%,460px);margin-top:10px}.bq input{flex:1;height:40px;border-radius:20px;border:0;padding:0 18px;background:#fff;color:#111;user-select:text;outline:none}.bq button{border:0;border-radius:20px;padding:0 18px;background:var(--acc);color:var(--accT)}
@@ -171,6 +171,8 @@ about:{n:'About',g:'linear-gradient(135deg,#111d46,#473c91 55%,#111d46)',w:340,h
 const PIN=['browser','files','notes','calc','set'],DESK=[['browser'],['files','This PC'],['notes'],['photos'],['calc'],['set'],['win']];
 let SITES=(a=>Array.isArray(a)?a.filter(s=>s&&typeof s.u==='string'):[])(jl('aur.sites',[]));
 SITES.forEach(s=>DESK.push(['site',s.t||'',s.u]));
+let EXES=(a=>Array.isArray(a)?a.filter(e=>e&&typeof e.id==='string'&&typeof e.p==='string'):[])(jl('aur.exes',[]));
+EXES.forEach(e=>DESK.push(['exe',e.t||'',e.id]));
 const dkey=d=>d[0]+'|'+(d[1]||'')+(d[2]?'|'+d[2]:'');try{const o=jl('aur.desk',null);if(Array.isArray(o)){const m=new Map(DESK.map(d=>[dkey(d),d])),n=o.map(k=>m.get(k)).filter(Boolean);DESK.forEach(d=>{if(!n.includes(d))n.push(d)});DESK.splice(0,DESK.length,...n)}}catch(e){}
 const tile=id=>`<div class="ico" style="--g:${A[id].g}">${IC[id]}</div>`;
 const stile=s=>{const hs=hostOf(s.u),c=[...hs].reduce((a,x)=>(a*31+x.charCodeAt(0))|0,7),src=s.ic||(hs?'https://www.google.com/s2/favicons?sz=128&domain='+encodeURIComponent(hs):'');return`<div class="ico sico" style="--g:hsl(${Math.abs(c)%360} 45% 38%)"><b>${esc((hs[0]||'•').toUpperCase())}</b>${src?`<img alt="" src="${esc(src)}" onerror="this.remove()">`:''}</div>`};
@@ -192,14 +194,7 @@ function applyWall(){$('#desk').style.setProperty('--wall',WALL[S.wall]||WALL[0]
 /* ---- native browser surface: shown only when nothing covers it ---- */
 function obscured(w,r){const hit=el=>{const b=el.getBoundingClientRect();return b.width>0&&b.left<r.right&&b.right>r.left&&b.top<r.bottom&&b.bottom>r.top};if(!document.body.classList.contains('fs')&&hit($('#dock')))return true;const z=+w.el.style.zIndex||0;for(const k in W){const o=W[k];if(o===w||o.el.classList.contains('min'))continue;if((+o.el.style.zIndex||0)>z&&hit(o.el))return true}return false}
 function applySnap(){if(!BR)return;const v=$('.bview',BR.w.body);v.style.backgroundImage=BR.snap&&BR.snap.id===BR.cur?'url('+BR.snap.img+')':''}
-var exeKey='',EXE={run:false,starting:false,w:null};
-/* native program window (Winlator): same rules as the browser surface; hidden when covered or minimized */
-function syncExe(){if(!NW||!EXE.run||!EXE.w)return;const w=EXE.w;if(!W[w.id])return;const v=$('.exv',w.body);if(!v)return;
-const r=v.getBoundingClientRect(),tt=$('#toast');
-const vis=!w.el.classList.contains('min')&&!/opening|minning|closing|\btr\b/.test(w.el.className)&&!menuOpen&&!dragging&&!(tt&&tt.classList.contains('show'))&&r.width>20&&r.height>20&&!obscured(w,r);
-const foc=topId===w.id,key=[vis?1:0,foc?1:0,r.left|0,r.top|0,r.width|0,r.height|0].join();if(key===exeKey)return;exeKey=key;
-NW.place({x:r.left,y:r.top,w:r.width,h:r.height,cw:innerWidth,visible:vis,focus:foc}).catch(()=>{})}
-function sync(){syncExe();if(!NB)return;const w=wins('browser')[0],t=BR&&BR.tabs.find(x=>x.id===BR.cur);let vis=false,r=null;
+function sync(){if(!NB)return;const w=wins('browser')[0],t=BR&&BR.tabs.find(x=>x.id===BR.cur);let vis=false,r=null;
 if(w&&t&&t.made&&!t.page&&t.url&&!w.el.classList.contains('min')&&!/opening|minning|closing|\btr\b/.test(w.el.className)&&!menuOpen&&!dragging){r=$('.bview',w.body).getBoundingClientRect();vis=r.width>20&&r.height>20&&!obscured(w,r)}
 if(!vis){if(shown){const id=shownTab;shown=null;const q=++snapSeq;NB.hideAll({id}).then(res=>{if(q===snapSeq&&res&&res.img&&BR){BR.snap={id,img:res.img};applySnap()}}).catch(()=>{});vmCursor()}return}
 const key=[t.id,r.left|0,r.top|0,r.width|0,r.height|0].join();if(shown===key)return;shown=key;shownTab=t.id;snapSeq++;if(BR.snap){BR.snap=null;applySnap()}NB.show({id:t.id,x:r.left,y:r.top,w:r.width,h:r.height,cw:innerWidth}).then(vmCursor).catch(()=>{})}
@@ -234,16 +229,38 @@ $$('.dk',box).forEach(b=>b.classList.toggle('open',run.includes(b.dataset.id)));
 function dbl(el,fn,touchOpen){let t=0;el.addEventListener('click',e=>{const n=Date.now();if((touchOpen&&e.pointerType==='touch')||n-t<450){t=0;fn()}else t=n})}
 function dialog(w,o,cb){const d=h('div','dlg');d.innerHTML=`<div class="dbox"><b></b>${o.msg?'<p></p>':''}${o.html?'<div class="hx"></div>':''}${o.def==null?'':'<input>'}<div class="dbtn">${o.extra?'<button class="ib" data-k="extra"></button>':''}${o.noCancel?'':'<button class="ib" data-k="cancel">Cancel</button>'}<button class="ib pri" data-k="ok"></button></div></div>`;$('b',d).textContent=o.title;if(o.msg)$('p',d).textContent=o.msg;if(o.html)$('.hx',d).innerHTML=o.html;const i=$('input',d);if(i)i.value=o.def;$('[data-k=ok]',d).textContent=o.ok||'OK';if(o.extra)$('[data-k=extra]',d).textContent=o.extra;w.body.appendChild(d);if(i){i.focus();i.select()}
 const done=k=>{const v=i?i.value.trim():true;d.remove();if(k!=='cancel'&&cb)cb(v,k)};$$('button',d).forEach(b=>b.onclick=()=>done(b.dataset.k));if(i)i.onkeydown=e=>{if(e.key==='Enter')done('ok');if(e.key==='Escape')done('cancel')};return d}
-function buildIcons(re){const ic=$('#icons');ic.innerHTML='';DESK.forEach((d,ix)=>{const id=d[0],lb=d[1],u=d[2],site=id==='site';const b=h('button','di'+(re?' re':''),`<div class="t">${site?stile(SITES.find(s=>s.u===u)||{u}):tile(id)}</div><span></span>`);$('span',b).textContent=lb||(site?hostOf(u):A[id].n);b.dataset.k=dkey(d);if(site)b.dataset.s=u;b.style.setProperty('--i',ix);b.onclick=()=>{$$('.di.sel').forEach(x=>x.classList.remove('sel'));b.classList.add('sel')};dbl(b,()=>site?openApp('browser',u):openApp(id),true);ic.appendChild(b)})}
+function buildIcons(re){const ic=$('#icons');ic.innerHTML='';DESK.forEach((d,ix)=>{const id=d[0],lb=d[1],u=d[2],site=id==='site',exe=id==='exe',ex=exe?EXES.find(x=>x.id===u):null;const b=h('button','di'+(re?' re':''),`<div class="t">${site?stile(SITES.find(s=>s.u===u)||{u}):exe?etile(ex):tile(id)}</div><span></span>`);$('span',b).textContent=lb||(site?hostOf(u):exe?'Program':A[id].n);b.dataset.k=dkey(d);if(site)b.dataset.s=u;if(exe)b.dataset.e=u;b.style.setProperty('--i',ix);b.onclick=()=>{$$('.di.sel').forEach(x=>x.classList.remove('sel'));b.classList.add('sel')};dbl(b,()=>site?openApp('browser',u):exe?(ex&&launchExe(ex)):openApp(id),true);ic.appendChild(b)})}
 const saveSites=()=>{ls('aur.sites',JSON.stringify(SITES));ls('aur.desk',JSON.stringify(DESK.map(dkey)))};
 function pinSite(t){const u=t&&t.url;if(!u||!/^https?:\/\//i.test(u))return toast('Open a website first');if(SITES.some(s=>s.u===u))return toast('Already on the desktop');const ttl=(t.title||hostOf(u)).slice(0,40),ic=t.ic&&t.ic.h===hostOf(u)?t.ic.img:'';SITES.push({u,t:ttl,ic});DESK.push(['site',ttl,u]);saveSites();buildIcons(true);toast('Added to desktop: '+ttl)}
 function unpinSite(u){const i=DESK.findIndex(d=>d[0]==='site'&&d[2]===u);if(i>=0)DESK.splice(i,1);SITES=SITES.filter(s=>s.u!==u);saveSites();buildIcons(true);toast('Removed from desktop')}
+/* ---------- installed Windows programs on the desktop ---------- */
+const etile=e=>e&&e.ic?`<div class="ico sico" style="--g:linear-gradient(145deg,#475569,#1e293b)"><img alt="" src="${esc(e.ic)}" onerror="this.remove()"></div>`:tile('win');
+const saveExes=()=>{ls('aur.exes',JSON.stringify(EXES));ls('aur.desk',JSON.stringify(DESK.map(dkey)))};
+const exeTitle=p=>String(p||'').split('/').pop().replace(/\.(exe|lnk)$/i,'').slice(0,40)||'Program';
+async function exeIconOf(path,iconPath,index){if(!NW)return'';try{const r=await NW.exeIcon({path:iconPath||path,index:index|0,fallback:path});return(r&&r.png)||''}catch(e){return''}}
+async function addExe(o,quiet,ord){if(!o||!o.p)return false;
+if(EXES.some(x=>x.p===o.p&&(x.a||'')===(o.a||''))){if(!quiet)toast('Already on the desktop');return false}
+const e={id:'x'+Date.now().toString(36)+Math.random().toString(36).slice(2,6),t:(o.t||exeTitle(o.p)).slice(0,40),p:o.p,a:o.a||'',w:o.w||'',l:o.l||'',ic:''};
+e.ic=await exeIconOf(o.p,o.ip,o.ii);EXES.push(e);DESK.push(['exe',e.t,e.id]);saveExes();buildIcons(true);
+const b=$('.di[data-e="'+e.id+'"]');if(b){b.style.setProperty('--i',ord|0);b.classList.remove('re')}
+if(!quiet)toast('Added to desktop: '+e.t);return true}
+function removeExe(id){const i=DESK.findIndex(d=>d[0]==='exe'&&d[2]===id);if(i>=0)DESK.splice(i,1);EXES=EXES.filter(e=>e.id!==id);saveExes();buildIcons(true);toast('Removed from desktop')}
+function launchExe(e){if(!e)return;return window.aurora.openExe(e.l||e.p,{alt:e.l?e.p:'',args:e.a,cwd:e.w})}
+const seenLnk=()=>new Set(jl('aur.lnkseen',[]));
+async function lnkBaseline(){if(!NW||ls('aur.lnkseen')!=null)return;try{const r=await NW.scanStart({});ls('aur.lnkseen',JSON.stringify(((r&&r.items)||[]).map(i=>i.lnk)))}catch(e){}}
+/* after a Windows program closes: new Start Menu shortcuts (installer) become icons; a portable exe is added by itself */
+async function afterExe(path){if(!NW)return;try{const r=await NW.scanStart({}),items=(r&&r.items)||[],seen=seenLnk(),fresh=items.filter(i=>!seen.has(i.lnk));
+items.forEach(i=>seen.add(i.lnk));ls('aur.lnkseen',JSON.stringify([...seen]));let n=0;
+for(const i of fresh)if(await addExe({p:i.target,t:i.name,a:i.args,w:i.cwd,l:i.lnk,ip:i.iconPath,ii:i.iconIndex},true,n))n++;
+if(n){toast(n===1?'Added to desktop: '+EXES[EXES.length-1].t:n+' programs added to desktop');return}
+const low=String(path||'').toLowerCase();
+if(path&&/\.exe$/.test(low)&&!/\/\.wine\/drive_c\//.test(low)&&!/(setup|install|unins|update|redist)/.test(low.split('/').pop())&&!EXES.some(x=>x.p===path||x.l===path))await addExe({p:path},false,0)}catch(e){}}
 function buildUI(){buildIcons();const ic=$('#icons');
-Object.keys(A).filter(id=>id!=='dl'&&id!=='exe').forEach((id,ix)=>{const p=h('button','',`<div class="t">${tile(id)}</div><span>${A[id].n}</span>`);p.style.setProperty('--i',ix);p.onclick=()=>openApp(id);$('#pins').appendChild(p)});dockUpdate();
+Object.keys(A).filter(id=>id!=='dl').forEach((id,ix)=>{const p=h('button','',`<div class="t">${tile(id)}</div><span>${A[id].n}</span>`);p.style.setProperty('--i',ix);p.onclick=()=>openApp(id);$('#pins').appendChild(p)});dockUpdate();
 $('#startBtn').innerHTML=`<div class="ico" style="--g:${A.about.g}">${STAR}</div>`;
 $('#startBtn').onclick=e=>{e.stopPropagation();const o=!$('#start').classList.contains('show');closeMenus();if(o){$('#start').classList.add('show');menuOpen=true;sync()}};
 $('#power').onclick=()=>{Object.keys(W).forEach(k=>closeW(k,true));closeMenus()};$('#mbtn').onclick=()=>vmSet(!VM.on);
-$('#desk').addEventListener('contextmenu',e=>{if(e.target.closest('.win'))return;const di=e.target.closest('.di[data-s]');if(di){const u=di.dataset.s;ctx(e.clientX,e.clientY,[['Open',()=>openApp('browser',u)],null,['Remove from Desktop',()=>unpinSite(u)]]);return}ctx(e.clientX,e.clientY,[['Settings',()=>openApp('set')],['File Explorer',()=>openApp('files')],[VM.on?'Virtual mouse: off':'Virtual mouse: on',()=>vmSet(!VM.on)]])});
+$('#desk').addEventListener('contextmenu',e=>{if(e.target.closest('.win'))return;const di=e.target.closest('.di[data-s]');if(di){const u=di.dataset.s;ctx(e.clientX,e.clientY,[['Open',()=>openApp('browser',u)],null,['Remove from Desktop',()=>unpinSite(u)]]);return}const dx=e.target.closest('.di[data-e]');if(dx){const id=dx.dataset.e;ctx(e.clientX,e.clientY,[['Open',()=>launchExe(EXES.find(x=>x.id===id))],null,['Remove from Desktop',()=>removeExe(id)]]);return}ctx(e.clientX,e.clientY,[['Settings',()=>openApp('set')],['File Explorer',()=>openApp('files')],[VM.on?'Virtual mouse: off':'Virtual mouse: on',()=>vmSet(!VM.on)]])});
 document.addEventListener('contextmenu',e=>e.preventDefault());
 document.addEventListener('click',e=>{if(!ctxNew&&!e.target.closest('#start,#startBtn,#ctx')&&menuOpen)closeMenus();if(!e.target.closest('.di'))$$('.di.sel').forEach(x=>x.classList.remove('sel'))});
 document.addEventListener('keydown',e=>{if(e.key==='Escape'){const m=menuOpen;closeMenus();if(!m&&document.body.classList.contains('fs')&&W[topId])$('.mx',W[topId].el).click()}});addEventListener('resize',()=>{if(innerWidth===RW){RH=Math.max(RH,innerHeight);return}RW=innerWidth;RH=innerHeight;fitWins();sync()})}
@@ -396,7 +413,7 @@ b('back').disabled=E.hi<1;b('fwd').disabled=E.hi>=E.hist.length-1;b('up').disabl
 const n=E.path==null?E.roots.length:vis().length;$('.sc',B).textContent=n+' item'+(n===1?'':'s')+(s.length?'  ·  '+s.length+' selected'+(s.length===1&&!s[0].isDirectory?' ('+fsz(s[0].size)+')':''):'')}
 function mk(it){const k=kind(it),th=k==='img'&&it.size>0&&it.size<8e6;const r=h('div','row'+(E.sel.has(it.path)?' sel':''),`<div class="nm">${th?`<img class="th" loading="lazy" decoding="async" alt="" src="${fsrc(it.path)}">`:ficon(it)}<span></span></div><span>${fdate(it.lastModified)}</span><span>${esc(ftype(it))}</span><span>${it.isDirectory?'':fsz(it.size)}</span>`);r.dataset.p=it.path;$('.nm span',r).textContent=it.name;const im=$('img.th',r);if(im)im.onerror=()=>{im.outerHTML=ficon(it)};
 r.onclick=e=>{L.focus();if(e.shiftKey||e.ctrlKey||e.metaKey||E.multi){pick(it,e);return}if(act(r,()=>open(it),e))return;pick(it,e)};
-r.oncontextmenu=e=>{e.preventDefault();e.stopPropagation();if(!E.sel.has(it.path)){E.sel=new Set([it.path]);E.anchor=it;paint()}const one=E.sel.size===1;ctx(e.clientX,e.clientY,[['Open',()=>open(it),'',!one],null,['Cut',()=>cmd('cut'),'Ctrl+X'],['Copy',()=>cmd('copy'),'Ctrl+C'],null,['Rename',()=>cmd('ren'),'F2',!one],['Delete',()=>cmd('del'),'Del'],null,['Properties',()=>cmd('props')]])};return r}
+r.oncontextmenu=e=>{e.preventDefault();e.stopPropagation();if(!E.sel.has(it.path)){E.sel=new Set([it.path]);E.anchor=it;paint()}const one=E.sel.size===1;ctx(e.clientX,e.clientY,[['Open',()=>open(it),'',!one],...(one&&!it.isDirectory&&kind(it)==='exe'?[['Add to Desktop',()=>addExe({p:it.path})]]:[]),null,['Cut',()=>cmd('cut'),'Ctrl+X'],['Copy',()=>cmd('copy'),'Ctrl+C'],null,['Rename',()=>cmd('ren'),'F2',!one],['Delete',()=>cmd('del'),'Del'],null,['Properties',()=>cmd('props')]])};return r}
 function draw(){const v=vis();L.className='elist'+(E.view==='i'&&E.path!=null?' ic':'');
 nav.innerHTML='';const sec=t=>nav.appendChild(h('h5','',t)),item=(label,ico,path)=>{const n=h('div','ni'+(E.path===path?' sel':''),ico+'<span></span>');$('span',n).textContent=label;n.onclick=()=>go(path);nav.appendChild(n)};
 const hm=h('div','ni'+(E.path==null?' sel':''),'<svg viewBox="0 0 24 24" width="20" height="20"><rect x="3" y="4" width="18" height="12" rx="2" fill="#4facfe"/><path d="M8 20h8M12 16v4" stroke="#7a8599" stroke-width="2"/></svg><span>This PC</span>');hm.onclick=()=>go(null);nav.appendChild(hm);
@@ -518,39 +535,19 @@ function mkFloppy(name,bytes){
 /* ---------- download window (Windows-style green progress bar) ---------- */
 window.aurora=window.aurora||{};
 let wineBusy=false;
-if(typeof A!=='undefined'){
-IC.exe=P('<rect x="3" y="5" width="18" height="12" rx="2"/><path d="M8 21h8M12 17v4"/>');
-A.exe={n:'Windows program',g:'linear-gradient(145deg,#38bdf8,#0369a1)',w:820,h:540,f:appExe};
-}
-function appExe(w,arg){
-const p=(arg&&arg.path)||'',nm=p.split('/').pop()||'Program',B=w.body;
-w.path=p;w.setTitle(nm);
-B.innerHTML='<div class="exv"><div class="exm"></div></div>';
-const v=$('.exv',B),m=$('.exm',B);m.textContent='Starting '+nm+'…';
-let dead=false;exeKey='';EXE.w=w;EXE.run=false;EXE.starting=false;
-const stop=()=>{try{NW.stopExe().catch(()=>{})}catch(e){}};
-w.onclose=()=>{dead=true;const was=EXE.run||EXE.starting;EXE.run=false;EXE.starting=false;EXE.w=null;exeKey='';if(NW&&was)stop()};
-setTimeout(async()=>{
-if(dead)return;
-const r=v.getBoundingClientRect(),ev=n=>Math.round(n)&~1;
-EXE.starting=true;
-try{await NW.runExe({path:p,x:r.left,y:r.top,w:r.width,h:r.height,cw:innerWidth,screen:Math.max(640,ev(r.width))+'x'+Math.max(480,ev(r.height))});
-EXE.starting=false;
-if(dead){stop();setTimeout(stop,1500);return}
-EXE.run=true;m.textContent=nm;syncExe()}
-catch(e){EXE.starting=false;if(dead)return;const t=(e&&e.message)||'Could not start the program';m.textContent=t;toast(t)}},420)}
-window.aurora.openExe=async p=>{
+window.aurora.openExe=async(p,o)=>{
 if(!NW)return openApp('win',{exe:p});
 if(wineBusy)return toast('Windows runtime is still being prepared');
-const cur=wins('exe')[0];if(cur){showW(cur);return toast('A Windows program is already open: close it first')}
 wineBusy=true;
-try{const st=await NW.status();if(!st.installed||!st.containers){toast('Preparing Windows runtime…');await NW.init()}openApp('exe',{path:p})}
+try{const st=await NW.status();if(!st.installed||!st.containers){toast('Preparing Windows runtime…');await NW.init()}
+await lnkBaseline();
+try{await NW.runExe({path:p})}catch(e){if(o&&o.alt&&/not found/i.test((e&&e.message)||''))await NW.runExe({path:o.alt});else throw e}}
 catch(e){toast((e&&e.message)||'Could not start the program')}
 finally{wineBusy=false}};
 function wineEvents(){if(!NW)return;const lw=(n,f)=>{try{return Promise.resolve(NW.addListener(n,f))}catch(e){return Promise.resolve({remove(){}})}};
 lw('progress',e=>toast(e.step==='container'?'Creating Windows container…':'Installing Windows runtime… '+(e.pct|0)+'%'));
-lw('exeStarted',e=>{if(EXE.w){EXE.run=true;exeKey='';syncExe()}else toast('Started '+String(e.path||'').split('/').pop())});
-lw('exeExited',e=>{const w=wins('exe')[0];if(w){EXE.run=false;EXE.starting=false;closeW(w.id,true)}toast('Closed '+String(e.path||'').split('/').pop())})}
+lw('exeStarted',e=>toast('Started '+String(e.path||'').split('/').pop()));
+lw('exeExited',e=>{toast('Closed '+String(e.path||'').split('/').pop());afterExe(e.path)})}
 const DL={};
 const dirOf=p=>p.replace(/\/[^/]*$/,'')||'/';
 function dlOpen(d){const p=d.path;if(!p)return;const k=kind({name:d.name});

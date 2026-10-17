@@ -47,8 +47,6 @@ jobs:
           "$SDKM" "ndk;24.0.8215888" "cmake;3.22.1"
       - name: Integrate Winlator core
         run: python3 scripts/setup-winlator.py
-      - name: Patch EXE window
-        run: python3 scripts/patch-exe-window.py
       - name: Build debug APK
         working-directory: android
         run: ./gradlew assembleDebug --no-daemon
