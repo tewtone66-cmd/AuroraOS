@@ -57,6 +57,23 @@ public class AuroraBrowserPlugin extends Plugin {
     private View customView;
     private WebChromeClient.CustomViewCallback customCb;
 
+    /** Time of the last synthetic ACTION_DOWN: every MOVE/UP of the same gesture must carry it as downTime. */
+    private long downT = 0;
+
+    /** Finger moves are merged and forwarded to JS at most once per ~16 ms (latest position per pointer). */
+    private final Map<Integer, float[]> pend = new HashMap<>();
+    private boolean pendOn = false;
+    private final Runnable flushMoves = new Runnable() {
+        @Override
+        public void run() {
+            pendOn = false;
+            for (Map.Entry<Integer, float[]> en : pend.entrySet()) {
+                sendTouch("move", en.getKey(), en.getValue()[0], en.getValue()[1]);
+            }
+            pend.clear();
+        }
+    };
+
     private float curD = 0;
     private float density() { return getContext().getResources().getDisplayMetrics().density; }
     /** Device pixels per CSS pixel of the Aurora page (works with any viewport scaling). */
@@ -163,6 +180,23 @@ public class AuroraBrowserPlugin extends Plugin {
                 @Override public void onReceivedTitle(WebView v, String t) { emit(id, v, v.getProgress() < 100); }
                 @Override public void onProgressChanged(WebView v, int p) { emit(id, v, p < 100); }
 
+                /** Real site icon (favicon) so pinned sites show it instead of a screenshot. */
+                @Override
+                public void onReceivedIcon(WebView v, Bitmap icon) {
+                    if (icon == null) return;
+                    try {
+                        Bitmap sm = Bitmap.createScaledBitmap(icon, 96, 96, true);
+                        ByteArrayOutputStream bo = new ByteArrayOutputStream();
+                        sm.compress(Bitmap.CompressFormat.PNG, 100, bo);
+                        JSObject o = new JSObject();
+                        o.put("id", id);
+                        o.put("url", v.getUrl() == null ? "" : v.getUrl());
+                        o.put("img", "data:image/png;base64," + Base64.encodeToString(bo.toByteArray(), Base64.NO_WRAP));
+                        notifyListeners("icon", o);
+                        if (sm != icon) sm.recycle();
+                    } catch (Throwable ignored) { }
+                }
+
                 @Override
                 public boolean onShowFileChooser(WebView v, final ValueCallback<Uri[]> cb, FileChooserParams p) {
                     try {
@@ -244,8 +278,15 @@ public class AuroraBrowserPlugin extends Plugin {
                 if (e.getToolType(0) == MotionEvent.TOOL_TYPE_MOUSE) return false; // real mouse works natively
                 int a = e.getActionMasked();
                 if (a == MotionEvent.ACTION_MOVE) {
-                    for (int i = 0; i < e.getPointerCount(); i++) sendTouch("move", e.getPointerId(i), e.getX(i), e.getY(i));
+                    for (int i = 0; i < e.getPointerCount(); i++) pend.put(e.getPointerId(i), new float[] { e.getX(i), e.getY(i) });
+                    if (!pendOn) {
+                        pendOn = true;
+                        main.postDelayed(flushMoves, 16);
+                    }
                 } else {
+                    // keep order: deliver any merged moves before down/up
+                    main.removeCallbacks(flushMoves);
+                    flushMoves.run();
                     int i = e.getActionIndex();
                     String t = (a == MotionEvent.ACTION_DOWN || a == MotionEvent.ACTION_POINTER_DOWN) ? "down" : "up";
                     sendTouch(t, e.getPointerId(i), e.getX(i), e.getY(i));
@@ -350,6 +391,14 @@ public class AuroraBrowserPlugin extends Plugin {
             else if ("fwd".equals(a) && w.canGoForward()) w.goForward();
             else if ("rl".equals(a)) w.reload();
             else if ("stop".equals(a)) w.stopLoading();
+            else if ("zin".equals(a) || "zout".equals(a) || "zreset".equals(a)) {
+                int zt = w.getSettings().getTextZoom();
+                zt = "zin".equals(a) ? Math.min(250, zt + 10) : ("zout".equals(a) ? Math.max(40, zt - 10) : 100);
+                w.getSettings().setTextZoom(zt);
+            } else if ("mobile".equals(a) || "desktop".equals(a)) {
+                w.getSettings().setUserAgentString("mobile".equals(a) ? null : DESKTOP_UA);
+                w.reload();
+            }
             call.resolve();
         });
     }
@@ -430,20 +479,24 @@ public class AuroraBrowserPlugin extends Plugin {
             synthetic = true;
             try {
                 if ("down".equals(act)) {
-                    MotionEvent e = MotionEvent.obtain(now, now, MotionEvent.ACTION_DOWN, px, py, 0);
+                    downT = now;
+                    MotionEvent e = MotionEvent.obtain(downT, now, MotionEvent.ACTION_DOWN, px, py, 0);
                     e.setSource(InputDevice.SOURCE_TOUCHSCREEN);
                     w.dispatchTouchEvent(e);
                     e.recycle();
                 } else if ("move".equals(act)) {
-                    MotionEvent e = MotionEvent.obtain(now, now, MotionEvent.ACTION_MOVE, px, py, 0);
+                    long dtm = downT > 0 ? downT : now;
+                    MotionEvent e = MotionEvent.obtain(dtm, now, MotionEvent.ACTION_MOVE, px, py, 0);
                     e.setSource(InputDevice.SOURCE_TOUCHSCREEN);
                     w.dispatchTouchEvent(e);
                     e.recycle();
                 } else if ("up".equals(act)) {
-                    MotionEvent e = MotionEvent.obtain(now, now, MotionEvent.ACTION_UP, px, py, 0);
+                    long dtu = downT > 0 ? downT : now;
+                    MotionEvent e = MotionEvent.obtain(dtu, now, MotionEvent.ACTION_UP, px, py, 0);
                     e.setSource(InputDevice.SOURCE_TOUCHSCREEN);
                     w.dispatchTouchEvent(e);
                     e.recycle();
+                    downT = 0;
                 } else if ("hover".equals(act)) {
                     MotionEvent e = MotionEvent.obtain(now, now, MotionEvent.ACTION_HOVER_MOVE, px, py, 0);
                     e.setSource(InputDevice.SOURCE_MOUSE);
@@ -490,6 +543,7 @@ public class AuroraBrowserPlugin extends Plugin {
 
     @Override
     protected void handleOnDestroy() {
+        main.removeCallbacks(flushMoves);
         for (WebView w : views.values()) w.destroy();
         views.clear();
     }
