@@ -163,7 +163,8 @@ gp = Path('android/gradle.properties')
 t = gp.read_text(encoding='utf-8') if gp.exists() else ''
 t = re.sub(r'(?m)^org\.gradle\.jvmargs=.*\n?', '', t)
 t = re.sub(r'(?m)^android\.nonFinalResIds=.*\n?', '', t)
-t = t.rstrip('\n') + '\norg.gradle.jvmargs=-Xmx4g -Dfile.encoding=UTF-8\nandroid.nonFinalResIds=false\n'
+t = re.sub(r'(?m)^android\.nonTransitiveRClass=.*\n?', '', t)
+t = t.rstrip('\n') + '\norg.gradle.jvmargs=-Xmx4g -Dfile.encoding=UTF-8\nandroid.nonFinalResIds=false\nandroid.nonTransitiveRClass=false\n'
 gp.write_text(t, encoding='utf-8')
 
 if not local:
