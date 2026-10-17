@@ -566,7 +566,7 @@ function appWin(w,arg){
       say('<b>Wine</b><p>Loading runtime…</p>');
       await bwLoad(base+'/jszip.min.js');await bwLoad(base+'/browserfs.boxedwine.js');
       [['status','div'],['progress','progress'],['spinner','div'],['output','pre'],['startbtn','button'],['uploadbtn','button'],['downloadbtn','button'],['inline-runbtn','button'],['inline','div'],['run-inline','button'],['loading','div'],['showConsole','input'],['sound-checkbox','input'],['soundToggle','input'],['message','div'],['modalLink','a'],['modalLinkExe','a'],['openModal','div'],['openModalExe','div'],['openModalExeClick','button'],['dropzone','div'],['tree','div'],['items','div'],['selectedItem','input'],['loadStatus','h3'],['file-input','input'],['upload','input'],['download','a'],['spinner-inner','div']].forEach(([id,tag])=>{if(!document.getElementById(id)){const e=document.createElement(tag);e.id=id;if(tag==='input')e.type='checkbox';e.style.display='none';document.body.appendChild(e)}});
-      const zip=new JSZip();files.forEach(f=>zip.file('userapp/'+f.path,f.bytes));
+      const zip=new JSZip();files.forEach(f=>zip.file(f.path,f.bytes));
       const blob=new Blob([zip.generate({type:'uint8array',compression:'STORE'})],{type:'application/zip'});
       const NX=window.XMLHttpRequest,oo=NX.prototype.open,os=NX.prototype.send,oh=NX.prototype.setRequestHeader;
       NX.prototype.open=function(m,u,a,us,pw){this.__bu=String(u);return oo.call(this,m,u,a!==false,us,pw)};
