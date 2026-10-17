@@ -121,6 +121,11 @@ body.fs #dock{transform:translate(-50%,170%);opacity:0;pointer-events:none}
 .tbar button:active{transform:scale(.86)}.calc button:active{transform:scale(.97)}.walls button:active{transform:scale(.94)}.ib:active{transform:scale(.95)}
 #ctx{transform:scale(.94);transform-origin:0 0;transition:opacity .15s,transform .2s,visibility 0s .2s}#ctx.show{transform:none;transition:opacity .15s,transform .2s}
 .dbox{animation:rise .22s cubic-bezier(.2,.9,.3,1.1)}.dlg{animation:fade .18s}
+.dlw{padding:18px 20px;display:flex;flex-direction:column;gap:10px;height:100%;box-sizing:border-box}.dlw .dh{display:flex;gap:12px;align-items:center}.dlw .dh svg{width:40px;height:40px;flex:none}.dlw .dn{font-weight:600;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}.dlw .ds,.dlw .dst{color:var(--mut);font-size:12px}
+.dlw .pb{height:18px;border:1px solid var(--line);background:var(--surf2);border-radius:3px;overflow:hidden;position:relative}.dlw .pf{height:100%;width:0;background:linear-gradient(#3fd07a,#06b025);transition:width .35s linear;position:relative;overflow:hidden}.dlw .pf::after{content:'';position:absolute;inset:0;background:linear-gradient(90deg,transparent,#ffffff66,transparent);transform:translateX(-100%);animation:dlsh 1.4s infinite}
+.dlw.done .pf::after,.dlw.bad .pf::after{display:none}.dlw.ind .pf{width:35%!important;animation:dlind 1.2s ease-in-out infinite alternate}.dlw.bad .pf{background:#e5484d}
+.dlw .db{display:flex;gap:8px;justify-content:flex-end;margin-top:auto}.dlw .db .ib{border:1px solid var(--line);background:var(--surf2)}.dlw .db .ib.pri{background:var(--acc);color:var(--accT);border-color:transparent}.dlw .db .ib:disabled{opacity:.45;cursor:default}
+@keyframes dlsh{to{transform:translateX(100%)}}@keyframes dlind{from{margin-left:0}to{margin-left:65%}}
 .bpage,.bhome{animation:fade .25s}
 #cur.grab svg{transform:scale(.9);transform-origin:0 0}#cur.grab svg path{fill:var(--acc)}
 .di.ghost{position:fixed;z-index:9400;pointer-events:none;margin:0;animation:none;transition:none;background:#ffffff40;box-shadow:0 10px 24px #0006}.di.drag{opacity:.3}.di.re{animation:none}
@@ -227,7 +232,7 @@ const saveSites=()=>{ls('aur.sites',JSON.stringify(SITES));ls('aur.desk',JSON.st
 function pinSite(t){const u=t&&t.url;if(!u||!/^https?:\/\//i.test(u))return toast('Open a website first');if(SITES.some(s=>s.u===u))return toast('Already on the desktop');const ttl=(t.title||hostOf(u)).slice(0,40),ic=t.ic&&t.ic.h===hostOf(u)?t.ic.img:'';SITES.push({u,t:ttl,ic});DESK.push(['site',ttl,u]);saveSites();buildIcons(true);toast('Added to desktop: '+ttl)}
 function unpinSite(u){const i=DESK.findIndex(d=>d[0]==='site'&&d[2]===u);if(i>=0)DESK.splice(i,1);SITES=SITES.filter(s=>s.u!==u);saveSites();buildIcons(true);toast('Removed from desktop')}
 function buildUI(){buildIcons();const ic=$('#icons');
-Object.keys(A).forEach((id,ix)=>{const p=h('button','',`<div class="t">${tile(id)}</div><span>${A[id].n}</span>`);p.style.setProperty('--i',ix);p.onclick=()=>openApp(id);$('#pins').appendChild(p)});dockUpdate();
+Object.keys(A).filter(id=>id!=='dl').forEach((id,ix)=>{const p=h('button','',`<div class="t">${tile(id)}</div><span>${A[id].n}</span>`);p.style.setProperty('--i',ix);p.onclick=()=>openApp(id);$('#pins').appendChild(p)});dockUpdate();
 $('#startBtn').innerHTML=`<div class="ico" style="--g:${A.about.g}">${STAR}</div>`;
 $('#startBtn').onclick=e=>{e.stopPropagation();const o=!$('#start').classList.contains('show');closeMenus();if(o){$('#start').classList.add('show');menuOpen=true;sync()}};
 $('#power').onclick=()=>{Object.keys(W).forEach(k=>closeW(k,true));closeMenus()};$('#mbtn').onclick=()=>vmSet(!VM.on);
@@ -354,7 +359,7 @@ on('nav',e=>{const t=st.tabs.find(x=>x.id===e.id);if(!t||t.page)return;const url
 if(!e.loading&&url&&(!HIS[0]||HIS[0].u!==url)){HIS.unshift({u:url,t:t.title,ts:Date.now()});saveH()}draw()});
 on('icon',e=>{const hs=hostOf(e.url||'');if(!hs||!e.img)return;const t=st.tabs.find(x=>x.id===e.id);if(t)t.ic={h:hs,img:e.img};const s=SITES.find(x=>!x.ic&&hostOf(x.u)===hs);if(s){s.ic=e.img;saveSites();buildIcons(true)}});
 on('popup',e=>newTab(e.url));
-on('download',e=>{if(e.ok){DLS.unshift({n:e.name,ts:Date.now()});ls('aur.dl',JSON.stringify(DLS.slice(0,50)));toast('Downloading '+e.name+' → Downloads')}else toast(e.error||'Download failed')});
+on('download',e=>{if(e.ok){DLS.unshift({n:e.name,ts:Date.now()});ls('aur.dl',JSON.stringify(DLS.slice(0,50)));dlBegin(e)}else toast(e.error||'Download failed')});
 on('tabtouch',()=>{if(topId!==w.id)focusW(w.id)})}
 w.onclose=()=>{document.removeEventListener('keydown',kd);if(NB){st.tabs.forEach(t=>t.made&&NB.close({id:t.id}));shown=null;NB.hideAll({id:''}).catch(()=>{});L.forEach(l=>l.then(x=>x&&x.remove&&x.remove()).catch(()=>{}))}BR=null};
 w.open=u=>{if(u)newTab(u)};newTab();if(typeof arg==='string'&&arg)nav(arg)}
@@ -375,7 +380,7 @@ function hist(d){const i=E.hi+d;if(i<0||i>=E.hist.length)return;E.hi=i;E.path=E.
 const rootOf=p=>E.roots.filter(r=>p===r.path||p.startsWith(r.path+'/')).sort((a,b)=>b.path.length-a.path.length)[0];
 function up(){if(E.path==null)return;const r=E.roots.find(x=>x.path===E.path);go(r?null:dirname(E.path))}
 function open(it){if(it.isDirectory)return go(it.path);const k=kind(it),sib=kk=>E.items.filter(x=>!x.isDirectory&&kind(x)===kk).sort((a,b)=>a.name.localeCompare(b.name,undefined,{numeric:true})).map(x=>x.path);
-if(k==='img')openApp('photos',{path:it.path,list:sib('img')});else if(k==='vid'||k==='aud')openApp('media',{path:it.path,list:[...sib(k)]});else if(k==='txt')openApp('notes',{path:it.path});else if(k==='exe')openApp('win',{exe:it.path});else NF.open({path:it.path,mimeType:it.mimeType}).catch(err)}
+if(k==='img')openApp('photos',{path:it.path,list:sib('img')});else if(k==='vid'||k==='aud')openApp('media',{path:it.path,list:[...sib(k)]});else if(k==='txt')openApp('notes',{path:it.path});else if(k==='exe')window.aurora.openExe(it.path);else NF.open({path:it.path,mimeType:it.mimeType}).catch(err)}
 function act(el,fn,e){if(e.pointerType==='touch'&&!E.multi&&!e.ctrlKey){fn();return true}const n=Date.now();if(E.last.el===el&&n-E.last.t<500){E.last={};fn();return true}E.last={el,t:n};return false}
 function pick(it,e){const v=vis();if(e.shiftKey&&E.anchor){const a=v.findIndex(x=>x.path===E.anchor.path),b=v.findIndex(x=>x.path===it.path);E.sel=new Set(v.slice(Math.min(a,b),Math.max(a,b)+1).map(x=>x.path))}else if(E.multi||e.ctrlKey||e.metaKey){E.sel.has(it.path)?E.sel.delete(it.path):E.sel.add(it.path);E.anchor=it}else{E.sel=new Set([it.path]);E.anchor=it}paint()}
 function paint(){$$('.row[data-p]',L).forEach(r=>{r.classList.toggle('sel',E.sel.has(r.dataset.p));r.classList.toggle('cut',CLIP.move&&CLIP.paths.includes(r.dataset.p))});const s=selItems(),b=k=>$(`[data-a=${k}]`,B);const here=E.path!=null;
@@ -503,6 +508,37 @@ function mkFloppy(name,bytes){
   d.set(bytes,DATA*SS);
   return {buffer:d.buffer,dosName:base+'.'+ext};
 }
+/* ---------- download window (Windows-style green progress bar) ---------- */
+window.aurora=window.aurora||{};
+window.aurora.openExe=p=>openApp('win',{exe:p});
+const DL={};
+const dirOf=p=>p.replace(/\/[^/]*$/,'')||'/';
+function dlOpen(d){const p=d.path;if(!p)return;const k=kind({name:d.name});
+if(k==='exe')return window.aurora.openExe(p);if(k==='img')return openApp('photos',{path:p,list:[p]});if(k==='vid'||k==='aud')return openApp('media',{path:p,list:[p]});if(k==='txt')return openApp('notes',{path:p});
+NF&&NF.open({path:p}).catch(e=>toast((e&&e.message)||'Could not open file'))}
+function dlPaint(d){const u=d.ui;if(!u||!u.isConnected)return;const tot=d.total>0?d.total:0,pct=d.state==='done'?100:tot?Math.min(99,Math.floor(d.got*100/tot)):0;
+u.classList.toggle('done',d.state==='done');u.classList.toggle('bad',d.state==='failed');u.classList.toggle('ind',d.state==='run'&&!tot);
+$('.pf',u).style.width=(d.state==='failed'?100:pct)+'%';
+$('.ds',u).textContent=d.state==='done'?'Download complete':d.state==='failed'?'Download failed':'Downloading…';
+$('.dst',u).textContent=d.state==='run'?(tot?fsz(d.got)+' of '+fsz(tot)+'  ·  '+pct+'%':fsz(d.got))+(d.speed>0?'  ·  '+fsz(d.speed)+'/s':''):d.state==='done'?fsz(tot||d.got):'Could not download this file';
+$('[data-k=open]',u).disabled=$('[data-k=dir]',u).disabled=d.state!=='done'||!d.path;
+if(d.w)d.w.setTitle(d.state==='done'?'Download complete':d.state==='failed'?'Download failed':(tot?pct+'% of ':'Downloading ')+d.name)}
+function dlGet(id,name){id=String(id);return DL[id]||(DL[id]={id,name:name||'File',got:0,total:0,state:'run',path:'',speed:0,t:Date.now(),lg:0,w:null,ui:null})}
+function dlBegin(e){const d=dlGet(e.id!=null?e.id:Date.now(),e.name);if(e.name)d.name=e.name;openApp('dl',{path:'dl:'+d.id,id:d.id})}
+function dlEv(e){if(!e||e.id==null)return;const d=dlGet(e.id,e.name),was=d.state,now=Date.now();if(e.name)d.name=e.name;
+if(typeof e.got==='number'){const dt=(now-d.t)/1000;if(dt>.15&&e.state==='run'){const v=Math.max(0,e.got-d.lg)/dt;d.speed=d.speed?d.speed*.6+v*.4:v;d.t=now;d.lg=e.got}d.got=e.got}
+if(typeof e.total==='number')d.total=e.total;if(e.path)d.path=e.path;if(e.state)d.state=e.state;if(d.state!=='run')d.speed=0;
+const open=d.w&&W[d.w.id];if(open)dlPaint(d);
+if(was==='run'&&d.state!=='run'&&(!open||d.w.el.classList.contains('min')))toast((d.state==='done'?'Download complete: ':'Download failed: ')+d.name)}
+function appDl(w,arg){const d=arg&&DL[arg.id];if(!d){w.body.innerHTML='<div class="dlw"><div class="ds">Nothing to show.</div></div>';return}
+w.path=arg.path;d.w=w;const u=h('div','dlw','<div class="dh">'+ficon({name:d.name})+'<div style="min-width:0"><div class="dn"></div><div class="ds"></div></div></div><div class="pb"><div class="pf"></div></div><div class="dst"></div><div class="db"><button class="ib pri" data-k="open">Open</button><button class="ib" data-k="dir">Show in folder</button></div>');
+$('.dn',u).textContent=d.name;w.body.appendChild(u);d.ui=u;
+$('[data-k=open]',u).onclick=()=>dlOpen(d);$('[data-k=dir]',u).onclick=()=>{if(d.path)openApp('files',dirOf(d.path))};
+w.onclose=()=>{d.ui=null;d.w=null};dlPaint(d)}
+if(typeof A!=='undefined'){
+IC.dl=P('<path d="M12 4v11M7 11l5 5 5-5M5 20h14"/>');
+A.dl={n:'Download',g:'linear-gradient(145deg,#4ade80,#16a34a)',w:440,h:210,f:appDl,multi:1};
+}
 if(typeof A!=='undefined'){
 IC.win=P('<path d="M3 5l8-1.2V11H3zM13 3.6L21 2.5V11h-8zM3 13h8v7.2L3 19zM13 13h8v8.5L13 20.4z"/>');
 A.win={n:'Windows PC',g:'linear-gradient(145deg,#60a5fa,#1d4ed8)',w:760,h:520,f:appWin};
@@ -565,7 +601,7 @@ function appWin(w,arg){
       if(!files.some(f=>f.path===entry))return back('Could not stage the program (too large?).');
       say('<b>Wine</b><p>Loading runtime…</p>');
       await bwLoad(base+'/jszip.min.js');await bwLoad(base+'/browserfs.boxedwine.js');
-      [['status','div'],['progress','progress'],['spinner','div'],['output','pre'],['startbtn','button'],['uploadbtn','button'],['downloadbtn','button'],['inline-runbtn','button'],['inline','div'],['run-inline','button'],['loading','div'],['showConsole','input'],['sound-checkbox','input'],['soundToggle','input'],['message','div'],['modalLink','a'],['modalLinkExe','a'],['openModalExeClick','button'],['tree','div'],['items','div'],['selectedItem','div'],['loadStatus','div']].forEach(([id,tag])=>{if(!document.getElementById(id)){const e=document.createElement(tag);e.id=id;if(tag==='input')e.type='checkbox';e.style.display='none';document.body.appendChild(e)}});
+      [['status','div'],['progress','progress'],['spinner','div'],['output','pre'],['startbtn','button'],['uploadbtn','button'],['downloadbtn','button'],['inline-runbtn','button'],['inline','div'],['run-inline','button'],['loading','div'],['showConsole','input'],['sound-checkbox','input'],['soundToggle','input'],['message','div'],['modalLink','a'],['modalLinkExe','a'],['openModal','div'],['openModalExe','div'],['openModalExeClick','button'],['dropzone','div'],['tree','div'],['items','div'],['selectedItem','input'],['loadStatus','h3'],['file-input','input'],['upload','input'],['download','a'],['spinner-inner','div']].forEach(([id,tag])=>{if(!document.getElementById(id)){const e=document.createElement(tag);e.id=id;if(tag==='input')e.type='checkbox';e.style.display='none';document.body.appendChild(e)}});
       const zip=new JSZip();files.forEach(f=>zip.file('userapp/'+f.path,f.bytes));
       const blob=new Blob([zip.generate({type:'uint8array',compression:'STORE'})],{type:'application/zip'});
       const NX=window.XMLHttpRequest,oo=NX.prototype.open,os=NX.prototype.send,oh=NX.prototype.setRequestHeader;
@@ -605,5 +641,5 @@ function appWin(w,arg){
 }
 }
 
-[()=>applyTheme(),()=>applyWall(),()=>applyMouse(),()=>buildUI(),()=>clock(),()=>setInterval(clock,20000),()=>vmSet(ls('aur.vm')==='1'),()=>{const mq=window.matchMedia&&window.matchMedia('(prefers-color-scheme:dark)');if(mq){if(mq.addEventListener)mq.addEventListener('change',applyTheme);else if(mq.addListener)mq.addListener(applyTheme)}}].forEach(f=>{try{f()}catch(e){console.error(e);window.dispatchEvent(new ErrorEvent('error',{message:String(e&&e.message||e)+' in '+f.toString().slice(0,40),lineno:0,colno:0}))}});
+[()=>applyTheme(),()=>applyWall(),()=>applyMouse(),()=>buildUI(),()=>listen('dlprogress',dlEv),()=>clock(),()=>setInterval(clock,20000),()=>vmSet(ls('aur.vm')==='1'),()=>{const mq=window.matchMedia&&window.matchMedia('(prefers-color-scheme:dark)');if(mq){if(typeof mq.addEventListener==='function')mq.addEventListener('change',applyTheme);else if(typeof mq.addListener==='function')mq.addListener(applyTheme)}}].forEach(f=>{try{f()}catch(e){console.error(e);window.dispatchEvent(new ErrorEvent('error',{message:String(e&&e.message||e)+' in '+f.toString().slice(0,40),lineno:0,colno:0}))}});
 </script></body></html>

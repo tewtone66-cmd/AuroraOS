@@ -5,6 +5,7 @@ import android.app.DownloadManager;
 import android.content.ActivityNotFoundException;
 import android.content.Context;
 import android.content.Intent;
+import android.database.Cursor;
 import android.graphics.Bitmap;
 import android.graphics.Canvas;
 import android.graphics.Color;
@@ -87,6 +88,57 @@ public class AuroraBrowserPlugin extends Plugin {
         return curD;
     }
     private void ui(Runnable r) { getActivity().runOnUiThread(r); }
+
+    /** Polls DownloadManager and reports "dlprogress" events {id,name,got,total,state,path} until the download ends. */
+    private void trackDownload(final DownloadManager mgr, final long dlId, final String fileName) {
+        main.postDelayed(new Runnable() {
+            @Override
+            public void run() {
+                JSObject p = new JSObject();
+                p.put("id", String.valueOf(dlId));
+                p.put("name", fileName);
+                boolean again = true;
+                Cursor c = null;
+                try {
+                    c = mgr.query(new DownloadManager.Query().setFilterById(dlId));
+                    if (c != null && c.moveToFirst()) {
+                        int st = c.getInt(c.getColumnIndexOrThrow(DownloadManager.COLUMN_STATUS));
+                        long got = c.getLong(c.getColumnIndexOrThrow(DownloadManager.COLUMN_BYTES_DOWNLOADED_SO_FAR));
+                        long tot = c.getLong(c.getColumnIndexOrThrow(DownloadManager.COLUMN_TOTAL_SIZE_BYTES));
+                        p.put("got", got);
+                        p.put("total", tot);
+                        if (st == DownloadManager.STATUS_SUCCESSFUL) {
+                            String lu = c.getString(c.getColumnIndexOrThrow(DownloadManager.COLUMN_LOCAL_URI));
+                            String path = null;
+                            if (lu != null) {
+                                Uri pu = Uri.parse(lu);
+                                if ("file".equals(pu.getScheme())) path = pu.getPath();
+                            }
+                            if (path == null) path = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS).getAbsolutePath() + "/" + fileName;
+                            p.put("path", path);
+                            p.put("state", "done");
+                            again = false;
+                        } else if (st == DownloadManager.STATUS_FAILED) {
+                            p.put("state", "failed");
+                            again = false;
+                        } else {
+                            p.put("state", "run");
+                        }
+                    } else {
+                        p.put("state", "failed");
+                        again = false;
+                    }
+                } catch (Exception ex) {
+                    p.put("state", "failed");
+                    again = false;
+                } finally {
+                    if (c != null) c.close();
+                }
+                notifyListeners("dlprogress", p);
+                if (again) main.postDelayed(this, 400);
+            }
+        }, 400);
+    }
     private final Map<String, Integer> zoomOf = new HashMap<>();
     private void applyZoom(WebView v, String tabId) {
         try {
@@ -272,9 +324,12 @@ public class AuroraBrowserPlugin extends Plugin {
                     r.setTitle(fn);
                     r.setNotificationVisibility(DownloadManager.Request.VISIBILITY_VISIBLE_NOTIFY_COMPLETED);
                     r.setDestinationInExternalPublicDir(Environment.DIRECTORY_DOWNLOADS, fn);
-                    ((DownloadManager) getContext().getSystemService(Context.DOWNLOAD_SERVICE)).enqueue(r);
+                    DownloadManager dlMgr = (DownloadManager) getContext().getSystemService(Context.DOWNLOAD_SERVICE);
+                    long dlId = dlMgr.enqueue(r);
                     o.put("name", fn);
+                    o.put("id", String.valueOf(dlId));
                     o.put("ok", true);
+                    trackDownload(dlMgr, dlId, fn);
                 } catch (Exception e) {
                     o.put("ok", false);
                     o.put("error", e.getMessage() == null ? "Download failed" : e.getMessage());
