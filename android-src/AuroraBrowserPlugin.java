@@ -5,6 +5,9 @@ import android.app.DownloadManager;
 import android.content.ActivityNotFoundException;
 import android.content.Context;
 import android.content.Intent;
+import android.content.BroadcastReceiver;
+import android.content.IntentFilter;
+import android.os.Build;
 import android.graphics.Bitmap;
 import android.graphics.Canvas;
 import android.graphics.Color;
@@ -49,6 +52,26 @@ import java.util.Map;
 public class AuroraBrowserPlugin extends Plugin {
     private static final String DESKTOP_UA = "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/126.0.0.0 Safari/537.36 Edg/126.0.0.0";
     private final Map<String, WebView> views = new HashMap<>();
+    private final Map<Long, String> pendingDownloads = new HashMap<>();
+    private BroadcastReceiver downloadReceiver;
+
+    @Override public void load() {
+        super.load();
+        downloadReceiver = new BroadcastReceiver() {
+            @Override public void onReceive(Context context, Intent intent) {
+                if (!DownloadManager.ACTION_DOWNLOAD_COMPLETE.equals(intent.getAction())) return;
+                long id = intent.getLongExtra(DownloadManager.EXTRA_DOWNLOAD_ID, -1L);
+                String name = pendingDownloads.remove(id);
+                if (name == null) return;
+                JSObject out = new JSObject(); out.put("name", name);
+                out.put("path", new java.io.File(Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS), name).getAbsolutePath());
+                out.put("ok", true); notifyListeners("downloadComplete", out);
+            }
+        };
+        IntentFilter f = new IntentFilter(DownloadManager.ACTION_DOWNLOAD_COMPLETE);
+        if (Build.VERSION.SDK_INT >= 33) getContext().registerReceiver(downloadReceiver, f, Context.RECEIVER_NOT_EXPORTED);
+        else getContext().registerReceiver(downloadReceiver, f);
+    }
     private final Handler main = new Handler(Looper.getMainLooper());
     private boolean virtual = false, synthetic = false;
     private float vx = 0, vy = 0; // top-left of the visible tab in CSS px (for touch -> page coordinates)
@@ -272,9 +295,11 @@ public class AuroraBrowserPlugin extends Plugin {
                     r.setTitle(fn);
                     r.setNotificationVisibility(DownloadManager.Request.VISIBILITY_VISIBLE_NOTIFY_COMPLETED);
                     r.setDestinationInExternalPublicDir(Environment.DIRECTORY_DOWNLOADS, fn);
-                    ((DownloadManager) getContext().getSystemService(Context.DOWNLOAD_SERVICE)).enqueue(r);
+                    long downloadId = ((DownloadManager) getContext().getSystemService(Context.DOWNLOAD_SERVICE)).enqueue(r);
+                    pendingDownloads.put(downloadId, fn);
                     o.put("name", fn);
                     o.put("ok", true);
+                    o.put("queued", true);
                 } catch (Exception e) {
                     o.put("ok", false);
                     o.put("error", e.getMessage() == null ? "Download failed" : e.getMessage());
@@ -581,6 +606,8 @@ public class AuroraBrowserPlugin extends Plugin {
 
     @Override
     protected void handleOnDestroy() {
+        try { if (downloadReceiver != null) getContext().unregisterReceiver(downloadReceiver); } catch (Exception ignored) { }
+        pendingDownloads.clear();
         main.removeCallbacks(flushMoves);
         for (WebView w : views.values()) w.destroy();
         views.clear();
