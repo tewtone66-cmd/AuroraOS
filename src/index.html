@@ -166,6 +166,8 @@ about:{n:'About',g:'linear-gradient(135deg,#111d46,#473c91 55%,#111d46)',w:340,h
 const PIN=['browser','files','notes','calc','set'],DESK=[['browser'],['files','This PC'],['notes'],['photos'],['calc'],['set'],['win']];
 let SITES=(a=>Array.isArray(a)?a.filter(s=>s&&typeof s.u==='string'):[])(jl('aur.sites',[]));
 SITES.forEach(s=>DESK.push(['site',s.t||'',s.u]));
+let EXEPINS=(a=>Array.isArray(a)?a.filter(s=>s&&typeof s.path==='string'&&typeof s.n==='string'):[])(jl('aur.exePins',[]));
+EXEPINS.forEach(s=>DESK.push(['exe',s.n,s.path]));
 const dkey=d=>d[0]+'|'+(d[1]||'')+(d[2]?'|'+d[2]:'');try{const o=jl('aur.desk',null);if(Array.isArray(o)){const m=new Map(DESK.map(d=>[dkey(d),d])),n=o.map(k=>m.get(k)).filter(Boolean);DESK.forEach(d=>{if(!n.includes(d))n.push(d)});DESK.splice(0,DESK.length,...n)}}catch(e){}
 const tile=id=>`<div class="ico" style="--g:${A[id].g}">${IC[id]}</div>`;
 const stile=s=>{const hs=hostOf(s.u),c=[...hs].reduce((a,x)=>(a*31+x.charCodeAt(0))|0,7),src=s.ic||(hs?'https://www.google.com/s2/favicons?sz=128&domain='+encodeURIComponent(hs):'');return`<div class="ico sico" style="--g:hsl(${Math.abs(c)%360} 45% 38%)"><b>${esc((hs[0]||'•').toUpperCase())}</b>${src?`<img alt="" src="${esc(src)}" onerror="this.remove()">`:''}</div>`};
@@ -222,7 +224,7 @@ $$('.dk',box).forEach(b=>b.classList.toggle('open',run.includes(b.dataset.id)));
 function dbl(el,fn,touchOpen){let t=0;el.addEventListener('click',e=>{const n=Date.now();if((touchOpen&&e.pointerType==='touch')||n-t<450){t=0;fn()}else t=n})}
 function dialog(w,o,cb){const d=h('div','dlg');d.innerHTML=`<div class="dbox"><b></b>${o.msg?'<p></p>':''}${o.html?'<div class="hx"></div>':''}${o.def==null?'':'<input>'}<div class="dbtn">${o.extra?'<button class="ib" data-k="extra"></button>':''}${o.noCancel?'':'<button class="ib" data-k="cancel">Cancel</button>'}<button class="ib pri" data-k="ok"></button></div></div>`;$('b',d).textContent=o.title;if(o.msg)$('p',d).textContent=o.msg;if(o.html)$('.hx',d).innerHTML=o.html;const i=$('input',d);if(i)i.value=o.def;$('[data-k=ok]',d).textContent=o.ok||'OK';if(o.extra)$('[data-k=extra]',d).textContent=o.extra;w.body.appendChild(d);if(i){i.focus();i.select()}
 const done=k=>{const v=i?i.value.trim():true;d.remove();if(k!=='cancel'&&cb)cb(v,k)};$$('button',d).forEach(b=>b.onclick=()=>done(b.dataset.k));if(i)i.onkeydown=e=>{if(e.key==='Enter')done('ok');if(e.key==='Escape')done('cancel')};return d}
-function buildIcons(re){const ic=$('#icons');ic.innerHTML='';DESK.forEach((d,ix)=>{const id=d[0],lb=d[1],u=d[2],site=id==='site';const b=h('button','di'+(re?' re':''),`<div class="t">${site?stile(SITES.find(s=>s.u===u)||{u}):tile(id)}</div><span></span>`);$('span',b).textContent=lb||(site?hostOf(u):A[id].n);b.dataset.k=dkey(d);if(site)b.dataset.s=u;b.style.setProperty('--i',ix);b.onclick=()=>{$$('.di.sel').forEach(x=>x.classList.remove('sel'));b.classList.add('sel')};dbl(b,()=>site?openApp('browser',u):openApp(id),true);ic.appendChild(b)})}
+function buildIcons(re){const ic=$('#icons');ic.innerHTML='';DESK.forEach((d,ix)=>{const id=d[0],lb=d[1],u=d[2],site=id==='site',exe=id==='exe';const b=h('button','di'+(re?' re':''),`<div class="t">${site?stile(SITES.find(s=>s.u===u)||{u}):tile(exe?'win':id)}</div><span></span>`);$('span',b).textContent=lb||(site?hostOf(u):exe?lb:A[id].n);b.dataset.k=dkey(d);if(site)b.dataset.s=u;b.style.setProperty('--i',ix);b.onclick=()=>{$('.di.sel').forEach(x=>x.classList.remove('sel'));b.classList.add('sel')};dbl(b,()=>site?openApp('browser',u):exe?openApp('win',{exe:u,autorun:true}):openApp(id),true);ic.appendChild(b)})}
 const saveSites=()=>{ls('aur.sites',JSON.stringify(SITES));ls('aur.desk',JSON.stringify(DESK.map(dkey)))};
 function pinSite(t){const u=t&&t.url;if(!u||!/^https?:\/\//i.test(u))return toast('Open a website first');if(SITES.some(s=>s.u===u))return toast('Already on the desktop');const ttl=(t.title||hostOf(u)).slice(0,40),ic=t.ic&&t.ic.h===hostOf(u)?t.ic.img:'';SITES.push({u,t:ttl,ic});DESK.push(['site',ttl,u]);saveSites();buildIcons(true);toast('Added to desktop: '+ttl)}
 function unpinSite(u){const i=DESK.findIndex(d=>d[0]==='site'&&d[2]===u);if(i>=0)DESK.splice(i,1);SITES=SITES.filter(s=>s.u!==u);saveSites();buildIcons(true);toast('Removed from desktop')}
@@ -354,7 +356,8 @@ on('nav',e=>{const t=st.tabs.find(x=>x.id===e.id);if(!t||t.page)return;const url
 if(!e.loading&&url&&(!HIS[0]||HIS[0].u!==url)){HIS.unshift({u:url,t:t.title,ts:Date.now()});saveH()}draw()});
 on('icon',e=>{const hs=hostOf(e.url||'');if(!hs||!e.img)return;const t=st.tabs.find(x=>x.id===e.id);if(t)t.ic={h:hs,img:e.img};const s=SITES.find(x=>!x.ic&&hostOf(x.u)===hs);if(s){s.ic=e.img;saveSites();buildIcons(true)}});
 on('popup',e=>newTab(e.url));
-on('download',e=>{if(e.ok){DLS.unshift({n:e.name,ts:Date.now()});ls('aur.dl',JSON.stringify(DLS.slice(0,50)));toast('Downloading '+e.name+' → Downloads')}else toast(e.error||'Download failed')});
+on('download',e=>{if(e.ok){toast('Downloading '+e.name+'…')}else toast(e.error||'Download failed')});
+on('downloadComplete',e=>{if(!e.ok||!e.path)return;DLS.unshift({n:e.name,ts:Date.now()});ls('aur.dl',JSON.stringify(DLS.slice(0,50)));if(/\.exe$/i.test(e.name)){if(!EXEPINS.some(x=>x.path===e.path)){EXEPINS.push({n:e.name,path:e.path});ls('aur.exePins',JSON.stringify(EXEPINS));DESK.push(['exe',e.name,e.path]);ls('aur.desk',JSON.stringify(DESK.map(dkey)));buildIcons(true)}openApp('win',{exe:e.path,autorun:true});toast('Download complete — added to Home and opening '+e.name)}else{toast('Download complete: '+e.name);openApp('files','/storage/emulated/0/Download')}});
 on('tabtouch',()=>{if(topId!==w.id)focusW(w.id)})}
 w.onclose=()=>{document.removeEventListener('keydown',kd);if(NB){st.tabs.forEach(t=>t.made&&NB.close({id:t.id}));shown=null;NB.hideAll({id:''}).catch(()=>{});L.forEach(l=>l.then(x=>x&&x.remove&&x.remove()).catch(()=>{}))}BR=null};
 w.open=u=>{if(u)newTab(u)};newTab();if(typeof arg==='string'&&arg)nav(arg)}
@@ -507,12 +510,12 @@ if(typeof A!=='undefined'){
 IC.win=P('<path d="M3 5l8-1.2V11H3zM13 3.6L21 2.5V11h-8zM3 13h8v7.2L3 19zM13 13h8v8.5L13 20.4z"/>');
 A.win={n:'Windows PC',g:'linear-gradient(145deg,#60a5fa,#1d4ed8)',w:760,h:520,f:appWin};
 function appWin(w,arg){
-  const B=w.body,V={emu:null,exe:(arg&&arg.exe)||null,held:false,running:false};
+  const B=w.body,V={emu:null,exe:(arg&&arg.exe)||null,held:false,running:false,autorun:!!(arg&&arg.autorun)};
   B.innerHTML=`<div class="vmw"><div class="vmt"><button class="ib" data-k="go">Start</button><button class="ib" data-k="kb">Keyboard</button><button class="ib" data-k="ent">Enter</button><button class="ib" data-k="esc">Esc</button><button class="ib" data-k="hold">Hold click</button><button class="ib" data-k="rc">Right click</button></div><div class="vsc"><div></div><canvas style="display:none"></canvas><div class="vsu"></div></div></div>`;
   const sc=$('.vsc',B),su=$('.vsu',B),bt=k=>$(`[data-k=${k}]`,B);
   const MS=1.6,say=(h2)=>{su.innerHTML=h2;su.style.display='flex'};
   const setup=()=>{su.style.display='flex';su.innerHTML=`<b>Windows PC</b><button class="ib pri vwl">Run with Winlator (real Wine, 32/64-bit)</button><p class="vnote">Opens the Winlator Cmod app full screen (not inside this window). Needs one exported shortcut per program.</p><button class="ib pri vbw">Run inside this window (Wine, 32-bit)</button><p class="vnote">Needs the 65 MB runtime from get-boxedwine.sh. Slow; simple 32-bit programs only.</p><b>Built-in mini emulator (v86)</b><p>Put a bootable image on your phone (for example the free ReactOS LiveCD .iso) and type its full path:</p><input class="vpath" spellcheck="false" autocapitalize="off"><p class="vexe"></p><button class="ib pri vgo">Start Windows</button><p class="vnote">Only old, light 32-bit programs work. Boot can take a few minutes.</p>`;
-    const i=$('.vpath',su);i.value=ls('aur.vmos')||'/storage/emulated/0/Download/reactos.iso';$('.vexe',su).textContent=V.exe?'Program: '+V.exe.split('/').pop()+' (will appear as drive A:)':'No program selected (open an .exe from File Explorer).';$('.vgo',su).onclick=()=>start(i.value.trim());$('.vwl',su).onclick=winlator;$('.vbw',su).onclick=wineRun};
+    const i=$('.vpath',su);i.value=ls('aur.vmos')||'/storage/emulated/0/Download/reactos.iso';$('.vexe',su).textContent=V.exe?'Program: '+V.exe.split('/').pop()+' (will appear as drive A:)':'No program selected (open an .exe from File Explorer).';$('.vgo',su).onclick=()=>start(i.value.trim());$('.vwl',su).onclick=winlator;$('.vbw',su).onclick=wineRun;if(V.autorun){V.autorun=false;setTimeout(()=>{const b=$('.vbw',su);if(b)b.click()},250)}};
   const loadLib=()=>window.V86||window.V86Starter?Promise.resolve():new Promise((ok,no)=>{const s=document.createElement('script');s.src='vendor/v86/libv86.js';s.onload=ok;s.onerror=()=>no(new Error('v86 files are missing from the app'));document.head.appendChild(s)});
   async function getBuf(path,label){const r=await fetch(fsrc(path));if(!r.ok)throw new Error('Cannot read '+path.split('/').pop()+' ('+r.status+')');if(!r.body||!r.body.getReader)return r.arrayBuffer();const rd=r.body.getReader(),ch=[];let n=0;for(;;){const x=await rd.read();if(x.done)break;ch.push(x.value);n+=x.value.length;say('<b>'+esc(label)+'</b><p>'+(n/1048576).toFixed(0)+' MB loaded…</p>')}const o=new Uint8Array(n);let k=0;for(const c of ch){o.set(c,k);k+=c.length}return o.buffer}
   async function start(p){if(!p)return;ls('aur.vmos',p);try{
@@ -556,9 +559,9 @@ function appWin(w,arg){
       if(miss.length)return back('Missing in '+BWD+': '+miss.join(', ')+'. Run get-boxedwine.sh in Termux first.');
       const base=fsrc(BWD+'/_').slice(0,-1);
       const dir=V.exe.replace(/\/[^/]*$/,''),alone=/\/(Download|Downloads|Documents|DCIM|Pictures)$/i.test(dir)||dir.split('/').length<=4;
-      const files=[];let total=0;const BUDGET=80*1048576;
+      const files=[];let total=0;const BUDGET=128*1048576;
       const rd=async p=>{const r=await fetch(fsrc(p));if(!r.ok)throw new Error('Cannot read '+p.split('/').pop());return new Uint8Array(await r.arrayBuffer())};
-      const walk=async(d,rel,depth)=>{const r=await NF.list({path:d});for(const it of r.items||[]){if(total>BUDGET||files.length>1500)return;if(it.isDirectory){if(depth<4)await walk(it.path,rel+it.name+'/',depth+1)}else if(it.size<=40*1048576&&total+it.size<=BUDGET){say('<b>Wine</b><p>Reading '+esc(it.name)+'…</p>');const s=bwSan(rel+it.name);if(s){files.push({path:s,bytes:await rd(it.path)});total+=it.size}}}};
+      const walk=async(d,rel,depth)=>{const r=await NF.list({path:d});for(const it of r.items||[]){if(total>BUDGET||files.length>=3000)return;if(it.isDirectory){if(depth<5)await walk(it.path,rel+it.name+'/',depth+1)}else if(it.size<=64*1048576&&total+it.size<=BUDGET){say('<b>Wine</b><p>Reading '+esc(it.name)+'…</p>');const s=bwSan(rel+it.name);if(s){files.push({path:s,bytes:await rd(it.path)});total+=it.size}}}};
       const exeName=V.exe.split('/').pop();
       if(alone){const s=bwSan(exeName);files.push({path:s,bytes:await rd(V.exe)})}else await walk(dir,'',0);
       const entry=bwSan((alone?'':V.exe.slice(dir.length+1))||exeName);
@@ -566,9 +569,10 @@ function appWin(w,arg){
       say('<b>Wine</b><p>Loading runtime…</p>');
       await bwLoad(base+'/jszip.min.js');await bwLoad(base+'/browserfs.boxedwine.js');
       [['status','div'],['progress','progress'],['spinner','div'],['output','pre'],['startbtn','button'],['uploadbtn','button'],['downloadbtn','button'],['inline-runbtn','button'],['inline','div'],['run-inline','button'],['loading','div'],['showConsole','input'],['sound-checkbox','input'],['soundToggle','input'],['message','div'],['modalLink','a'],['modalLinkExe','a'],['openModal','div'],['openModalExe','div'],['openModalExeClick','button'],['dropzone','div'],['tree','div'],['items','div'],['selectedItem','input'],['loadStatus','h3'],['file-input','input'],['upload','input'],['download','a'],['spinner-inner','div']].forEach(([id,tag])=>{if(!document.getElementById(id)){const e=document.createElement(tag);e.id=id;if(tag==='input')e.type='checkbox';e.style.display='none';document.body.appendChild(e)}});
-      const zip=new JSZip();files.forEach(f=>zip.file('userapp/'+f.path,f.bytes));
+      const zip=new JSZip();files.forEach(f=>zip.file(f.path,f.bytes));
       const blob=new Blob([zip.generate({type:'uint8array',compression:'STORE'})],{type:'application/zip'});
       const NX=window.XMLHttpRequest,oo=NX.prototype.open,os=NX.prototype.send,oh=NX.prototype.setRequestHeader;
+      window.__bwXHRRestore=()=>{NX.prototype.open=oo;NX.prototype.send=os;NX.prototype.setRequestHeader=oh};
       NX.prototype.open=function(m,u,a,us,pw){this.__bu=String(u);return oo.call(this,m,u,a!==false,us,pw)};
       NX.prototype.setRequestHeader=function(k,v){if(this.__bu&&this.__bu.includes('userapp.zip')){(this.__bh=this.__bh||{})[k.toLowerCase()]=v;return}return oh.call(this,k,v)};
       NX.prototype.send=function(b){if(!(this.__bu||'').includes('userapp.zip'))return os.call(this,b);const x=this,fr=new FileReader();fr.onload=()=>{let by=new Uint8Array(fr.result),st=200;const rg=x.__bh&&x.__bh.range,mm=rg&&/bytes=(\d+)-(\d+)?/.exec(rg);if(mm){const s=+mm[1],e=mm[2]?Math.min(+mm[2]+1,by.length):by.length;by=by.slice(s,e);st=206}let t='';for(let i=0;i<by.length;i++)t+=String.fromCharCode(by[i]);Object.defineProperty(x,'readyState',{value:4,writable:true});Object.defineProperty(x,'status',{value:st,writable:true});Object.defineProperty(x,'responseText',{value:t,writable:true});Object.defineProperty(x,'response',{value:by.buffer,writable:true});x.getResponseHeader=n=>n.toLowerCase()==='content-length'?String(blob.size):null;x.onreadystatechange&&x.onreadystatechange();x.onload&&x.onload()};fr.readAsArrayBuffer(blob)};
@@ -599,8 +603,8 @@ function appWin(w,arg){
   sc.addEventListener('pointermove',e=>{const p=pts.get(e.pointerId);if(!p||!g)return;const dx=e.clientX-p.x,dy=e.clientY-p.y;p.x=e.clientX;p.y=e.clientY;g.m+=Math.abs(dx)+Math.abs(dy);if(pts.size===1&&V.emu)send('mouse-delta',[dx*MS,-dy*MS])});
   const up=e=>{if(!pts.delete(e.pointerId))return;if(!pts.size&&g){if(g.m<10&&Date.now()-g.t<350&&V.emu)click(g.n>=2?[false,false,true]:[true,false,false]);g=null}};
   sc.addEventListener('pointerup',up);sc.addEventListener('pointercancel',up);
-  w.open=a=>{if(a&&a.exe){V.exe=a.exe;if(V.running)toast('Restart Windows to attach this program');else setup()}};
-  w.onclose=()=>{try{V.emu&&V.emu.destroy()}catch(e){}};
+  w.open=a=>{if(a&&a.exe){V.exe=a.exe;if(a.autorun)V.autorun=true;if(V.running)toast('Stop the current session before launching another program');else setup()}};
+  w.onclose=()=>{try{V.emu&&V.emu.destroy()}catch(e){}V.emu=null;V.running=false;V.held=false;if(V.wine){try{if(window.__bwXHRRestore){window.__bwXHRRestore();window.__bwXHRRestore=null}const cv=document.getElementById('canvas');if(cv)cv.remove();}catch(e){}V.wine=false;window.__bwBooted=false;window.__bwStatus=null;document.querySelectorAll('script').forEach(s=>{if(s.src&&s.src.includes('/boxedwine/'))s.remove()})}};
   setup();
 }
 }

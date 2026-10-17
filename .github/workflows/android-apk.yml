@@ -2,7 +2,7 @@ name: Build Aurora OS APK
 
 on:
   push:
-    branches: [main]
+    branches: [main, feature/exe-launcher-integration]
   workflow_dispatch:
 
 permissions:
