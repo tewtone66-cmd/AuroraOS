@@ -1,12 +1,10 @@
-# Aurora OS
+# Aurora OS 2.1
 
-Aurora OS is the original browser-based desktop simulation packaged as an Android app.
+Desktop-style OS shell packaged as an Android app (landscape). One theme, one icon set.
 
-## Android APK
-Every push to `main` runs the GitHub Actions workflow in `.github/workflows/android-apk.yml`. The workflow packages the web app as an Android APK in landscape orientation and uploads the APK as a workflow artifact.
+- **Browser** – Edge-style: real tabs on native Android WebView (desktop UA), favorites, history, downloads, file upload, pop-ups as tabs, fullscreen video.
+- **File Explorer** – Windows-style: This PC with drives, Quick access, address bar, details/icons view, sort, cut/copy/paste, rename, delete, properties, search. Needs the *All files access* permission (the app asks).
+- **Notepad / Photos / Media Player** – open files straight from Explorer.
+- **Virtual mouse** – works on the desktop AND inside the browser.
 
-## Design
-The app keeps the Aurora OS web UI and uses its star/sparkle logo as the launcher icon. Screen orientation is locked to landscape.
-
-## Download
-Open **Actions → Build Aurora OS APK → latest successful run → Artifacts** to download the debug APK.
+Build: push to `main`, then download the APK from **Actions → Build Aurora OS APK → Artifacts**.
