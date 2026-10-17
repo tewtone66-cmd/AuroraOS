@@ -3,6 +3,7 @@ package com.auroraos.desktop;
 import android.content.Intent;
 import android.os.Bundle;
 import android.view.View;
+import android.view.WindowManager;
 import androidx.activity.result.ActivityResultLauncher;
 import androidx.activity.result.contract.ActivityResultContracts;
 import com.getcapacitor.BridgeActivity;
@@ -49,6 +50,7 @@ public class MainActivity extends BridgeActivity {
             ws.setUseWideViewPort(true);
             ws.setLoadWithOverviewMode(true);
         } catch (Exception ignored) { }
+        getWindow().setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_ADJUST_NOTHING);
         immersive();
     }
 
