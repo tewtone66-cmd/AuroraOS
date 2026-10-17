@@ -248,8 +248,13 @@ public class AuroraWinePlugin extends Plugin {
             call.reject("path is required");
             return;
         }
-        if (!new File(path).isFile()) {
-            call.reject("File not found: " + path);
+        File exeFile = new File(path);
+        if (!exeFile.isFile()) {
+            call.reject("File not found: " + path + " (check that file access is allowed)");
+            return;
+        }
+        if (!exeFile.canRead()) {
+            call.reject("Cannot read file: " + path);
             return;
         }
         if (busy) {

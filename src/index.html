@@ -145,8 +145,9 @@ body.fs #dock{transform:translate(-50%,170%);opacity:0;pointer-events:none}
 <div id="cur"><svg viewBox="0 0 26 28" width="26" height="28"><path d="M1 1L1 20L6 15L10 24L14 22L10 14L17 14Z" fill="#fff" stroke="#111" stroke-width="1.5" stroke-linejoin="round"/></svg></div>
 <div id="vbtns"><button id="vL">L</button><button id="vR">R</button><button id="vOff">&#10005;</button></div>
 <script>
-window.addEventListener('error',function(e){try{var d=document.createElement('pre');d.style.cssText='position:fixed;left:8px;right:8px;top:8px;z-index:99999;background:#400;color:#fff;padding:10px;border-radius:8px;font:12px monospace;white-space:pre-wrap;user-select:text';d.textContent='Aurora error: '+e.message+' (line '+(e.lineno||'?')+':'+(e.colno||'?')+')';(document.body||document.documentElement).appendChild(d)}catch(x){}});
-window.addEventListener('unhandledrejection',function(e){console.warn('rejection',e.reason)});
+window.aurBar=function(m){try{var d=document.getElementById('aurerr');if(!d){d=document.createElement('pre');d.id='aurerr';d.style.cssText='position:fixed;left:8px;right:8px;top:8px;z-index:99999;background:#400;color:#fff;padding:10px;border-radius:8px;font:12px monospace;white-space:pre-wrap;user-select:text';d.onclick=function(){d.remove()};(document.body||document.documentElement).appendChild(d)}var t=(d.textContent?d.textContent+'\n':'')+m;d.textContent=t.length>1600?t.slice(-1600):t}catch(x){}};
+window.addEventListener('error',function(e){aurBar('Aurora error: '+e.message+' (line '+(e.lineno||'?')+':'+(e.colno||'?')+')')});
+window.addEventListener('unhandledrejection',function(e){var r=e.reason;aurBar('Aurora error: '+((r&&r.message)||String(r)));console.warn('rejection',r)});
 </script>
 <script>
 const $=(s,r=document)=>r.querySelector(s),$$=(s,r=document)=>[...r.querySelectorAll(s)];
@@ -247,14 +248,14 @@ if(!quiet)toast('Added to desktop: '+e.t);return true}
 function removeExe(id){const i=DESK.findIndex(d=>d[0]==='exe'&&d[2]===id);if(i>=0)DESK.splice(i,1);EXES=EXES.filter(e=>e.id!==id);saveExes();buildIcons(true);toast('Removed from desktop')}
 function launchExe(e){if(!e)return;return window.aurora.openExe(e.l||e.p,{alt:e.l?e.p:'',args:e.a,cwd:e.w})}
 const seenLnk=()=>new Set(jl('aur.lnkseen',[]));
-async function lnkBaseline(){if(!NW||ls('aur.lnkseen')!=null)return;try{const r=await NW.scanStart({});ls('aur.lnkseen',JSON.stringify(((r&&r.items)||[]).map(i=>i.lnk)))}catch(e){}}
+async function lnkBaseline(){if(!NW||ls('aur.lnkseen')!=null)return;try{const r=await NW.scanStart({});ls('aur.lnkseen',JSON.stringify(((r&&r.items)||[]).map(i=>i.lnk)))}catch(e){if(isJsErr(e))reportErr(e,'baseline')}}
 /* after a Windows program closes: new Start Menu shortcuts (installer) become icons; a portable exe is added by itself */
-async function afterExe(path){if(!NW)return;try{const r=await NW.scanStart({}),items=(r&&r.items)||[],seen=seenLnk(),fresh=items.filter(i=>!seen.has(i.lnk));
+async function afterExe(path){if(!NW)return;ls('aur.pend','');try{const r=await NW.scanStart({}),items=(r&&r.items)||[],seen=seenLnk(),fresh=items.filter(i=>!seen.has(i.lnk));
 items.forEach(i=>seen.add(i.lnk));ls('aur.lnkseen',JSON.stringify([...seen]));let n=0;
 for(const i of fresh)if(await addExe({p:i.target,t:i.name,a:i.args,w:i.cwd,l:i.lnk,ip:i.iconPath,ii:i.iconIndex},true,n))n++;
 if(n){toast(n===1?'Added to desktop: '+EXES[EXES.length-1].t:n+' programs added to desktop');return}
 const low=String(path||'').toLowerCase();
-if(path&&/\.exe$/.test(low)&&!/\/\.wine\/drive_c\//.test(low)&&!/(setup|install|unins|update|redist)/.test(low.split('/').pop())&&!EXES.some(x=>x.p===path||x.l===path))await addExe({p:path},false,0)}catch(e){}}
+if(path&&/\.exe$/.test(low)&&!/\/\.wine\/drive_c\//.test(low)&&!/(setup|install|unins|update|redist)/.test(low.split('/').pop())&&!EXES.some(x=>x.p===path||x.l===path))await addExe({p:path},false,0)}catch(e){reportErr(e,'after-exe','Could not read the Start Menu')}}
 function buildUI(){buildIcons();const ic=$('#icons');
 Object.keys(A).filter(id=>id!=='dl').forEach((id,ix)=>{const p=h('button','',`<div class="t">${tile(id)}</div><span>${A[id].n}</span>`);p.style.setProperty('--i',ix);p.onclick=()=>openApp(id);$('#pins').appendChild(p)});dockUpdate();
 $('#startBtn').innerHTML=`<div class="ico" style="--g:${A.about.g}">${STAR}</div>`;
@@ -535,14 +536,18 @@ function mkFloppy(name,bytes){
 /* ---------- download window (Windows-style green progress bar) ---------- */
 window.aurora=window.aurora||{};
 let wineBusy=false;
+/* JavaScript bugs go to the red bar; errors reported by the Java layer / Wine engine stay separate (toast) */
+const isJsErr=e=>e instanceof TypeError||e instanceof ReferenceError||e instanceof SyntaxError||e instanceof RangeError;
+const reportErr=(e,where,def)=>{if(isJsErr(e))aurBar('Aurora error ('+where+'): '+e.message);else toast((e&&e.message)||def||'Something went wrong')};
 window.aurora.openExe=async(p,o)=>{
 if(!NW)return openApp('win',{exe:p});
 if(wineBusy)return toast('Windows runtime is still being prepared');
 wineBusy=true;
 try{const st=await NW.status();if(!st.installed||!st.containers){toast('Preparing Windows runtime…');await NW.init()}
 await lnkBaseline();
-try{await NW.runExe({path:p})}catch(e){if(o&&o.alt&&/not found/i.test((e&&e.message)||''))await NW.runExe({path:o.alt});else throw e}}
-catch(e){toast((e&&e.message)||'Could not start the program')}
+let run=p;try{await NW.runExe({path:p})}catch(e){if(o&&o.alt&&/not found/i.test((e&&e.message)||'')){run=o.alt;await NW.runExe({path:run})}else throw e}
+ls('aur.pend',run)}
+catch(e){reportErr(e,'openExe','Could not start the program')}
 finally{wineBusy=false}};
 function wineEvents(){if(!NW)return;const lw=(n,f)=>{try{return Promise.resolve(NW.addListener(n,f))}catch(e){return Promise.resolve({remove(){}})}};
 lw('progress',e=>toast(e.step==='container'?'Creating Windows container…':'Installing Windows runtime… '+(e.pct|0)+'%'));
@@ -678,5 +683,5 @@ function appWin(w,arg){
 }
 }
 
-[()=>applyTheme(),()=>applyWall(),()=>applyMouse(),()=>buildUI(),()=>listen('dlprogress',dlEv),()=>wineEvents(),()=>clock(),()=>setInterval(clock,20000),()=>vmSet(ls('aur.vm')==='1'),()=>{const mq=window.matchMedia&&window.matchMedia('(prefers-color-scheme:dark)');if(mq){if(typeof mq.addEventListener==='function')mq.addEventListener('change',applyTheme);else if(typeof mq.addListener==='function')mq.addListener(applyTheme)}}].forEach(f=>{try{f()}catch(e){console.error(e);window.dispatchEvent(new ErrorEvent('error',{message:String(e&&e.message||e)+' in '+f.toString().slice(0,40),lineno:0,colno:0}))}});
+[()=>applyTheme(),()=>applyWall(),()=>applyMouse(),()=>buildUI(),()=>listen('dlprogress',dlEv),()=>{wineEvents();const pd=ls('aur.pend');if(pd)setTimeout(()=>afterExe(pd),1500)},()=>clock(),()=>setInterval(clock,20000),()=>vmSet(ls('aur.vm')==='1'),()=>{const mq=window.matchMedia&&window.matchMedia('(prefers-color-scheme:dark)');if(mq){if(typeof mq.addEventListener==='function')mq.addEventListener('change',applyTheme);else if(typeof mq.addListener==='function')mq.addListener(applyTheme)}}].forEach(f=>{try{f()}catch(e){console.error(e);window.dispatchEvent(new ErrorEvent('error',{message:String(e&&e.message||e)+' in '+f.toString().slice(0,40),lineno:0,colno:0}))}});
 </script></body></html>
