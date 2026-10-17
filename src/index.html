@@ -189,7 +189,7 @@ const fsrc=p=>{const q=p.split('/').map(encodeURIComponent).join('/');return win
 const W={};let ctxNew=false,zi=10,topId=null,dragging=false,menuOpen=false,BR=null,tt,uid=0,shown=null,shownTab=null,snapSeq=0;
 const listen=(n,f)=>{try{return Promise.resolve(NB.addListener(n,f))}catch(e){return Promise.resolve({remove(){}})}};
 const wins=app=>Object.values(W).filter(x=>x.app===app);
-function toast(m){const t=$('#toast');t.textContent=m;t.classList.add('show');sync();clearTimeout(tt);tt=setTimeout(()=>{t.classList.remove('show');sync()},2800)}
+function toast(m,duration=2800){const t=$('#toast');t.textContent=String(m||'Unknown error');t.classList.add('show');sync();clearTimeout(tt);tt=setTimeout(()=>{t.classList.remove('show');sync()},Math.max(0,duration|0))}
 function applyTheme(){const d=S.theme==='dark'||(S.theme==='auto'&&matchMedia('(prefers-color-scheme:dark)').matches);const r=document.documentElement;r.dataset.theme=d?'dark':'light';r.style.setProperty('--acc',S.acc);r.style.setProperty('--accT','#fff')}
 function applyWall(){$('#desk').style.setProperty('--wall',WALL[S.wall]||WALL[0])}
 /* ---- native browser surface: shown only when nothing covers it ---- */
@@ -538,7 +538,7 @@ window.aurora=window.aurora||{};
 let wineBusy=false;
 /* JavaScript bugs go to the red bar; errors reported by the Java layer / Wine engine stay separate (toast) */
 const isJsErr=e=>e instanceof TypeError||e instanceof ReferenceError||e instanceof SyntaxError||e instanceof RangeError;
-const reportErr=(e,where,def)=>{if(isJsErr(e))aurBar('Aurora error ('+where+'): '+e.message);else toast((e&&e.message)||def||'Something went wrong')};
+const reportErr=(e,where,def)=>{const msg=(e&&(e.message||String(e)))||def||'Something went wrong';if(isJsErr(e))aurBar('Aurora error ('+where+'): '+msg);toast('Error ('+where+'): '+msg,5000);};
 window.aurora.openExe=async(p,o)=>{
 if(!NW)return openApp('win',{exe:p});
 if(wineBusy)return toast('Windows runtime is still being prepared');
