@@ -285,6 +285,8 @@ public class AuroraWinePlugin extends Plugin {
         final Intent it = new Intent(ctx, XServerDisplayActivity.class);
         it.putExtra("container_id", containerId);
         it.putExtra("exec_path", path);
+        final String screen = call.getString("screen", "");
+        if (screen != null && screen.matches("\\d{3,4}x\\d{3,4}")) it.putExtra("aurora_screen", screen);
         getActivity().runOnUiThread(() -> {
             try {
                 getActivity().startActivity(it);
