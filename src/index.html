@@ -123,9 +123,11 @@ const WALL=['linear-gradient(135deg,#0b1d3a,#473c91 55%,#c26bff)','linear-gradie
 const ACC=['#4f7cff','#8b5cf6','#ec4899','#f59e0b','#10b981','#ef4444'];
 const SE={google:['Google','https://www.google.com/search?q='],bing:['Bing','https://www.bing.com/search?q='],ddg:['DuckDuckGo','https://duckduckgo.com/?q=']};
 const S={wall:+ls('aur.wall')||0,theme:ls('aur.theme')||'auto',acc:ls('aur.acc')||ACC[0],sp:+ls('aur.sp')||1.8,se:SE[ls('aur.se')]?ls('aur.se'):'google'};
-const plug=n=>window.Capacitor&&Capacitor.isNativePlatform&&Capacitor.isNativePlatform()?Capacitor.registerPlugin(n):null;
+const plug=n=>{const C=window.Capacitor;if(!C||!C.isNativePlatform||!C.isNativePlatform())return null;let p=null;try{if(typeof C.registerPlugin==='function')p=C.registerPlugin(n)}catch(e){}
+if(!p&&C.Plugins)p=C.Plugins[n]||null;if(!p){const call=(m,o)=>C.nativePromise?C.nativePromise(n,m,o||{}):Promise.reject(new Error('Capacitor bridge missing'));const ls={};p=new Proxy({},{get:(t,k)=>k==='addListener'?((ev,cb)=>{let id=null;const pr=C.nativeCallback?new Promise(r=>{id=C.nativeCallback(n,'addListener',{eventName:ev},cb);r({remove:()=>C.nativeCallback&&C.nativeCallback(n,'removeListener',{eventName:ev,callbackId:id})})}):Promise.resolve({remove(){}});return pr}):k==='then'?undefined:(o=>call(k,o))})}
+return p};
 const NB=plug('AuroraBrowser'),NF=plug('AuroraFiles');
-const fsrc=p=>{const q=p.split('/').map(encodeURIComponent).join('/');return window.Capacitor&&Capacitor.convertFileSrc?Capacitor.convertFileSrc(q):q};
+const fsrc=p=>{const q=p.split('/').map(encodeURIComponent).join('/');return window.Capacitor&&Capacitor.convertFileSrc?Capacitor.convertFileSrc(q):location.origin+'/_capacitor_file_'+q};
 const W={};let ctxNew=false,zi=10,topId=null,dragging=false,menuOpen=false,BR=null,tt,uid=0,shown=null,shownTab=null,snapSeq=0;
 const wins=app=>Object.values(W).filter(x=>x.app===app);
 function toast(m){const t=$('#toast');t.textContent=m;t.classList.add('show');sync();clearTimeout(tt);tt=setTimeout(()=>{t.classList.remove('show');sync()},2800)}

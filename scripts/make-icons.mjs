@@ -4,6 +4,10 @@ import sharp from 'sharp';
 const res = 'android/app/src/main/res';
 const out = (p, buf) => { fs.mkdirSync(path.dirname(p), { recursive: true }); fs.writeFileSync(p, buf); };
 const png = (svg, w, h = w) => sharp(svg).resize(w, h).png().toBuffer();
+for (const d of fs.existsSync(res) ? fs.readdirSync(res) : []) {
+  if (!d.startsWith('mipmap')) continue;
+  for (const f of fs.readdirSync(`${res}/${d}`)) if (f.startsWith('ic_launcher') && f.endsWith('.webp')) fs.rmSync(`${res}/${d}/${f}`);
+}
 const sizes = { mdpi: 48, hdpi: 72, xhdpi: 96, xxhdpi: 144, xxxhdpi: 192 };
 for (const [d, s] of Object.entries(sizes)) {
   const b = await png('assets/aurora-icon.svg', s);
