@@ -353,4 +353,85 @@ public class AuroraFilesPlugin extends Plugin {
             call.reject("Could not open file", e);
         }
     }
+
+    // ---------- Winlator Cmod hand-off ----------
+    private static final String WL_PKG = "com.winlator.cmod";
+    private static final String WL_ACT = "com.winlator.cmod.XServerDisplayActivity";
+
+    private File wlDir() { return new File(Environment.getExternalStorageDirectory(), "Download/Winlator/Frontend"); }
+
+    private String readSmall(File f) throws Exception {
+        ByteArrayOutputStream bo = new ByteArrayOutputStream();
+        try (InputStream in = new FileInputStream(f)) {
+            byte[] buf = new byte[8192];
+            int n;
+            while ((n = in.read(buf)) > 0) bo.write(buf, 0, n);
+        }
+        return new String(bo.toByteArray(), StandardCharsets.UTF_8);
+    }
+
+    private int wlContainerId(File f) {
+        try {
+            for (String line : readSmall(f).split("\\r?\\n")) {
+                String t = line.trim();
+                if (t.startsWith("container_id=")) return Integer.parseInt(t.substring(13).trim());
+            }
+        } catch (Exception ignored) { }
+        return -1;
+    }
+
+    /** Lists the .desktop shortcuts that Winlator Cmod exported with "Export shortcut to frontend". */
+    @PluginMethod
+    public void winlatorList(PluginCall call) {
+        try {
+            if (!hasAccess()) { call.reject("Storage access is not allowed yet"); return; }
+            File d = wlDir();
+            JSArray arr = new JSArray();
+            File[] kids = d.listFiles();
+            if (kids != null) {
+                for (File k : kids) {
+                    String n = k.getName();
+                    if (!k.isFile() || !n.toLowerCase().endsWith(".desktop") || k.length() > 65536) continue;
+                    JSObject o = new JSObject();
+                    o.put("name", n.substring(0, n.length() - 8));
+                    o.put("path", k.getAbsolutePath());
+                    o.put("text", readSmall(k));
+                    arr.put(o);
+                }
+            }
+            JSObject out = new JSObject();
+            out.put("dir", d.getAbsolutePath());
+            out.put("items", arr);
+            call.resolve(out);
+        } catch (Exception e) { call.reject("Could not read the Winlator export folder", e); }
+    }
+
+    /** Starts Winlator Cmod on one exported shortcut: explicit component + shortcut_path extra. */
+    @PluginMethod
+    public void winlatorRun(PluginCall call) {
+        try {
+            File f = guard(call.getString("path", ""));
+            String base = wlDir().getCanonicalFile().getAbsolutePath();
+            String n = f.getName();
+            if (!f.getAbsolutePath().startsWith(base + "/") || !n.toLowerCase().endsWith(".desktop") || !f.isFile()) {
+                call.reject("This is not a Winlator exported shortcut");
+                return;
+            }
+            Intent i = new Intent();
+            i.setClassName(WL_PKG, WL_ACT);
+            i.putExtra("shortcut_path", f.getAbsolutePath());
+            i.putExtra("shortcut_name", n.substring(0, n.length() - 8));
+            int cid = wlContainerId(f);
+            if (cid > 0) i.putExtra("container_id", cid);
+            i.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK | Intent.FLAG_ACTIVITY_CLEAR_TOP);
+            getContext().startActivity(i);
+            call.resolve();
+        } catch (android.content.ActivityNotFoundException e) {
+            call.reject("Winlator Cmod (com.winlator.cmod) is not installed", e);
+        } catch (SecurityException e) {
+            call.reject("This Winlator build does not let other apps start it. Use Winlator Cmod.", e);
+        } catch (Exception e) {
+            call.reject(e.getMessage() == null ? "Could not start Winlator" : e.getMessage(), e);
+        }
+    }
 }
