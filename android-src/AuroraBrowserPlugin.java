@@ -57,7 +57,18 @@ public class AuroraBrowserPlugin extends Plugin {
     private View customView;
     private WebChromeClient.CustomViewCallback customCb;
 
+    private float curD = 0;
     private float density() { return getContext().getResources().getDisplayMetrics().density; }
+    /** Device pixels per CSS pixel of the Aurora page (works with any viewport scaling). */
+    private float dens(PluginCall call) {
+        try {
+            Float cw = call.getFloat("cw", 0f);
+            int wpx = getBridge().getWebView().getWidth();
+            if (cw != null && cw > 0 && wpx > 0) { curD = wpx / cw; return curD; }
+        } catch (Exception ignored) { }
+        curD = density();
+        return curD;
+    }
     private void ui(Runnable r) { getActivity().runOnUiThread(r); }
 
     /** Arrow cursor drawn natively so it stays visible above the browser surface. */
@@ -250,7 +261,7 @@ public class AuroraBrowserPlugin extends Plugin {
     }
 
     private void sendTouch(String type, int pid, float x, float y) {
-        float d = density();
+        float d = curD > 0 ? curD : density();
         JSObject o = new JSObject();
         o.put("type", type);
         o.put("pid", pid);
@@ -264,12 +275,13 @@ public class AuroraBrowserPlugin extends Plugin {
         final String id = call.getString("id", "");
         final float x = call.getFloat("x", 0f), y = call.getFloat("y", 0f);
         final float ww = call.getFloat("w", 100f), hh = call.getFloat("h", 100f);
+        final float dd = dens(call);
         ui(() -> {
             int[] a = new int[2], b = new int[2];
             getBridge().getWebView().getLocationOnScreen(a);
             View content = getActivity().findViewById(android.R.id.content);
             content.getLocationOnScreen(b);
-            float d = density();
+            float d = dd;
             vx = x;
             vy = y;
             shownId = id;
@@ -369,9 +381,10 @@ public class AuroraBrowserPlugin extends Plugin {
     public void cursor(final PluginCall call) {
         final float x = call.getFloat("x", 0f), y = call.getFloat("y", 0f);
         final boolean vis = Boolean.TRUE.equals(call.getBoolean("visible", true));
+        final float dd = dens(call);
         ui(() -> {
             if (cursor == null) {
-                float d = density();
+                float d = dd;
                 cursor = new CursorView(getContext(), d);
                 getActivity().addContentView(cursor, new FrameLayout.LayoutParams(Math.round(26 * d), Math.round(28 * d)));
                 cursor.setVisibility(View.GONE);
@@ -379,7 +392,7 @@ public class AuroraBrowserPlugin extends Plugin {
             int[] a = new int[2], b = new int[2];
             getBridge().getWebView().getLocationOnScreen(a);
             getActivity().findViewById(android.R.id.content).getLocationOnScreen(b);
-            float d = density();
+            float d = dd;
             cursor.setTranslationX(x * d + (a[0] - b[0]));
             cursor.setTranslationY(y * d + (a[1] - b[1]));
             if (vis && shownId != null) {
@@ -403,8 +416,9 @@ public class AuroraBrowserPlugin extends Plugin {
         final float x = call.getFloat("x", 0f), y = call.getFloat("y", 0f);
         final float dy = call.getFloat("dy", 0f), dx = call.getFloat("dx", 0f);
         if (w == null) { call.resolve(); return; }
+        final float dd = dens(call);
         ui(() -> {
-            float d = density();
+            float d = dd;
             float px = x * d, py = y * d;
             long now = SystemClock.uptimeMillis();
             synthetic = true;

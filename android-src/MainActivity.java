@@ -44,6 +44,11 @@ public class MainActivity extends BridgeActivity {
             if (c != null) c.done(r.getResultCode(), r.getData());
         });
         super.onCreate(savedInstanceState);
+        try {
+            android.webkit.WebSettings ws = getBridge().getWebView().getSettings();
+            ws.setUseWideViewPort(true);
+            ws.setLoadWithOverviewMode(true);
+        } catch (Exception ignored) { }
         immersive();
     }
 
