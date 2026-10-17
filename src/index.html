@@ -15,8 +15,8 @@ button,input,textarea{font:inherit;color:inherit}
 .di span{max-width:80px;overflow:hidden;white-space:nowrap;text-overflow:ellipsis}
 .win{position:absolute;display:flex;flex-direction:column;background:var(--surf);border:1px solid var(--line);border-radius:10px;overflow:hidden;min-width:300px;min-height:200px;box-shadow:0 18px 50px #0006}
 .win:not(.on){box-shadow:0 8px 24px #0004}.win:not(.on) .tbar{opacity:.65}.win.min{display:none}
-.win.max{left:env(safe-area-inset-left,0px)!important;top:env(safe-area-inset-top,0px)!important;width:calc(100% - env(safe-area-inset-left,0px) - env(safe-area-inset-right,0px))!important;height:calc(100% - env(safe-area-inset-top,0px) - env(safe-area-inset-bottom,0px))!important;border-radius:0;border-width:0;box-shadow:none}
-.win.max .tbar{height:20px;padding-left:6px}.win.max .tbar .tt{width:12px;height:12px;margin-right:5px}.win.max .tbar span{font-size:10px}.win.max .tbar button{width:30px;height:20px;font-size:9px;line-height:1}.win.max .rz,.win.max .rzr,.win.max .rzb{display:none}
+.win.max{left:0!important;top:0!important;width:100%!important;height:100%!important;border-radius:0;border-width:0;box-shadow:none}
+.win.max .tbar{height:32px;padding-left:max(10px,env(safe-area-inset-left,0px))}.win.max .tbar .tt{width:16px;height:16px;margin-right:7px}.win.max .tbar span{font-size:12px}.win.max .tbar button{width:46px;height:32px;font-size:13px;line-height:1}.win.max .rz,.win.max .rzr,.win.max .rzb{display:none}
 .tbar{transition:height .25s}.win.nat .body{padding:0 8px 14px 0}.win.max.nat .body{padding:0}body.fs #start{display:none}body.vm .win.max .tbar{padding-right:56px}.bz{display:none;align-items:center;gap:8px;padding:3px 10px;background:var(--surf);border-bottom:1px solid var(--line);flex:none}.br.bzon .bz{display:flex}.bzs{flex:1;height:24px;position:relative;touch-action:none}.bzs:before{content:"";position:absolute;left:0;right:0;top:10px;height:4px;border-radius:2px;background:var(--line)}.bzs i{position:absolute;top:4px;width:16px;height:16px;margin-left:-8px;border-radius:50%;background:var(--acc);box-shadow:0 1px 4px #0006}.bzv{min-width:44px;text-align:right;font-size:12px}.bz .ib{padding:2px 8px;min-height:22px;font-size:12px}
 .tbar{display:flex;align-items:center;height:36px;flex:none;background:var(--surf2);padding-left:10px;touch-action:none}
 .tbar .tt{width:18px;height:18px;margin-right:8px;flex:none}.tbar span{flex:1;font-weight:600;font-size:12px;overflow:hidden;white-space:nowrap;text-overflow:ellipsis}
@@ -232,7 +232,7 @@ $('#power').onclick=()=>{Object.keys(W).forEach(k=>closeW(k,true));closeMenus()}
 $('#desk').addEventListener('contextmenu',e=>{if(e.target.closest('.win'))return;const di=e.target.closest('.di[data-s]');if(di){const u=di.dataset.s;ctx(e.clientX,e.clientY,[['Open',()=>openApp('browser',u)],null,['Remove from Desktop',()=>unpinSite(u)]]);return}ctx(e.clientX,e.clientY,[['Settings',()=>openApp('set')],['File Explorer',()=>openApp('files')],[VM.on?'Virtual mouse: off':'Virtual mouse: on',()=>vmSet(!VM.on)]])});
 document.addEventListener('contextmenu',e=>e.preventDefault());
 document.addEventListener('click',e=>{if(!ctxNew&&!e.target.closest('#start,#startBtn,#ctx')&&menuOpen)closeMenus();if(!e.target.closest('.di'))$$('.di.sel').forEach(x=>x.classList.remove('sel'))});
-document.addEventListener('keydown',e=>{if(e.key==='Escape'){const m=menuOpen;closeMenus();if(!m&&document.body.classList.contains('fs')&&W[topId])$('.mx',W[topId].el).click()}});addEventListener('resize',()=>{fitWins();sync()})}
+document.addEventListener('keydown',e=>{if(e.key==='Escape'){const m=menuOpen;closeMenus();if(!m&&document.body.classList.contains('fs')&&W[topId])$('.mx',W[topId].el).click()}});addEventListener('resize',()=>{if(innerWidth===RW){RH=Math.max(RH,innerHeight);return}RW=innerWidth;RH=innerHeight;fitWins();sync()})}
 function dockFx(x,y){const dk=$('#dock'),r=dk.getBoundingClientRect();if(x==null||y<r.top-34||y>r.bottom+12||x<r.left-8||x>r.right+8){if(dk.classList.contains('hov')){dk.classList.remove('hov');$$('.dk',dk).forEach(b=>{b.style.transform='';b.style.zIndex=''})}return}
 dk.style.setProperty('--mx',(x-r.left)+'px');dk.classList.add('hov');const bs=$$('.dk',dk),base=bs.length?bs[0].offsetWidth:56;
 const sc=bs.map(b=>{const c=r.left+dk.clientLeft+b.offsetLeft+b.offsetWidth/2,d=x-c;return 1+.42*Math.exp(-(d*d)/(2*56*56))}),ex=sc.map(v=>(v-1)*base),tot=ex.reduce((a,b)=>a+b,0);let acc=0;
@@ -245,6 +245,7 @@ const end=e=>{if(!d||e.pointerId!==d.pid)return;const s=d;d=null;if(!s.go)return
 addEventListener('pointerup',end);addEventListener('pointercancel',end);ic.addEventListener('click',e=>{if(sup){e.stopPropagation();e.preventDefault()}},true)})();
 function clock(){const d=new Date();$('#clock').innerHTML=d.toLocaleTimeString([],{hour:'2-digit',minute:'2-digit'})+'<small>'+d.toLocaleDateString([],{month:'short',day:'numeric'})+'</small>'}
 /* ---------- virtual mouse (works on the desktop AND on the native browser surface) ---------- */
+let RW=innerWidth,RH=innerHeight;const maxH=()=>Math.max(RH,innerHeight);
 const VM={on:false,x:innerWidth/2,y:innerHeight/2,L:false},curEl=$('#cur'),pad=$('#pad');let LC={t:0,x:0,y:0},rafC=0,lastHover=0,Lnat=null;
 const VH='.di,.tbar button,.ib,.row:not(.hd),.ni,.ftile,.drive,.btab,.btab i,.tile,.hp .it,.crumb b,#pins button,#ctx button';let vhEl=null;
 function vhover(){let n=null;if(VM.on&&!bpos()){const t=tgt();n=t&&t.closest?t.closest(VH):null}if(n===vhEl)return;if(vhEl)vhEl.classList.remove('vh');vhEl=n;if(n)n.classList.add('vh')}
@@ -266,6 +267,7 @@ const nqueue=()=>{if(!nraf)nraf=requestAnimationFrame(nflush)};
 const npt=(b,a,o)=>{if(a==='move'||a==='hover'){nq.m={b:{id:b.id,x:b.x,y:b.y},a};nqueue();return}if(a==='scroll'){const s=nq.s;if(s&&s.b.id===b.id){s.dx+=o.dx;s.dy+=o.dy;s.b=b}else nq.s={b,dx:o.dx,dy:o.dy};nqueue();return}nq.m=null;nrw(b,a,o)};
 const press=()=>{const b=bpos();if(b){Lnat=b;npt(b,'down');return b}const t=tgt();ev(t,'pointerdown',{buttons:1});ev(t,'mousedown',{buttons:1});return t},release=t=>{if(t&&t.id&&Lnat){const b=bpos()||Lnat;npt(b,'up');Lnat=null;return}ev(t,'pointerup');ev(t,'mouseup')};
 const focusEl=t=>{const f=t.closest&&t.closest('input,textarea,select');if(f){f.focus();NB&&NB.showKeyboard().catch(()=>{})}};
+document.addEventListener('focusout',()=>setTimeout(()=>{const a=document.activeElement;if(NB&&!(a&&a.closest&&a.closest('input,textarea,select')))Promise.resolve(NB.hideKeyboard()).catch(()=>{})},80));
 function vclick(){const b=bpos();if(b){npt(b,'down');setTimeout(()=>bpos()&&npt(b,'up'),40);ripple();return}
 const t=press();release(t);ev(t,'click');focusEl(t);ripple();const n=Date.now();if(n-LC.t<350&&Math.hypot(VM.x-LC.x,VM.y-LC.y)<24){ev(t,'dblclick');LC.t=0}else LC={t:n,x:VM.x,y:VM.y}}
 function rclick(){const b=bpos();if(b){npt(b,'rclick');ripple();return}const t=tgt();ev(t,'pointerdown',{button:2,buttons:2});ev(t,'contextmenu',{button:2,buttons:2});ev(t,'pointerup',{button:2});ripple()}
@@ -279,7 +281,7 @@ function inertia(tg,vx,vy){cancelAnimationFrame(svr);let last=performance.now();
 function pDown(id,x,y){cancelAnimationFrame(svr);ptr.set(id,{x,y});if(ptr.size===1){g={t:Date.now(),m:0,two:false,vx:0,vy:0,lt:0};g.lp=setTimeout(()=>{if(g&&!g.two&&g.m<10&&!g.dm){g.dm=true;VM.L=true;VM.d=press();VM.p={x:VM.x,y:VM.y};curEl.classList.add('grab');ripple();try{navigator.vibrate&&navigator.vibrate(20)}catch(e){}}},S.hd)}else if(g){g.two=true;clearTimeout(g.lp);if(g.dm){g.dm=false;lEnd()}}}
 function pMove(id,x,y){const p=ptr.get(id);if(!p||!g)return;const dx=x-p.x,dy=y-p.y;p.x=x;p.y=y;g.m+=Math.abs(dx)+Math.abs(dy);
 if(ptr.size>=2){const k=S.sc/ptr.size,sx=-dx*k,sy=-dy*k;if(g.st===undefined)g.st=scTarget();scDo(g.st,sx,sy);const n=performance.now();if(!g.lt)g.lt=n;g.lm=n;g.ax=(g.ax||0)+sx;g.ay=(g.ay||0)+sy;const dt=n-g.lt;if(dt>=16){g.vx=Math.max(-3,Math.min(3,g.vx*.5+g.ax/dt*.5));g.vy=Math.max(-3,Math.min(3,g.vy*.5+g.ay/dt*.5));g.ax=g.ay=0;g.lt=n}return}
-VM.x=Math.max(0,Math.min(innerWidth-1,VM.x+dx*S.sp));VM.y=Math.max(0,Math.min(innerHeight-1,VM.y+dy*S.sp));place();dockFx(VM.x,VM.y);
+VM.x=Math.max(0,Math.min(innerWidth-1,VM.x+dx*S.sp));VM.y=Math.max(0,Math.min(maxH()-1,VM.y+dy*S.sp));place();dockFx(VM.x,VM.y);
 if(VM.L){const b=bpos();if(Lnat&&b)npt(b,'move');else if(!Lnat)ev(tgt(),'pointermove',{buttons:1})}else{const b=bpos(),n=Date.now();if(b&&n-lastHover>60){lastHover=n;npt(b,'hover')}}}
 function pUp(id){if(!ptr.has(id))return;ptr.delete(id);if(g&&!ptr.size){clearTimeout(g.lp);const dt=Date.now()-g.t;if(g.dm)lEnd();else if(!g.two&&!g.done&&g.m<10&&dt<350)vclick();else if(g.two&&g.m<16&&dt<350)rclick();else if(g.two&&g.st!==undefined&&(Math.abs(g.vx)>.05||Math.abs(g.vy)>.05)&&performance.now()-g.lm<90)inertia(g.st,g.vx,g.vy);g=null}}
 pad.addEventListener('pointerdown',e=>{pad.setPointerCapture(e.pointerId);pDown(e.pointerId,e.clientX,e.clientY)});

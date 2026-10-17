@@ -138,8 +138,9 @@ public class AuroraBrowserPlugin extends Plugin {
     public void create(final PluginCall call) {
         final String id = call.getString("id", "");
         final String url = call.getString("url", "about:blank");
-        // 1 page CSS px ~ 0.87 Aurora CSS px (desktop-like layout of ~1000 px), independent of the page's viewport meta
-        final float pageScale = Math.max(25f, Math.min(200f, dens(call) / density() * 100f * 1.15f));
+        // PAGE_K = Aurora CSS px per page CSS px (bigger = bigger pages). Tune here if sites look too small/large.
+        final float PAGE_K = 1.3f;
+        final float pageScale = Math.max(25f, Math.min(300f, dens(call) / density() * 100f * PAGE_K));
         ui(() -> {
             if (views.containsKey(id)) { call.resolve(); return; }
             final WebView w = new WebView(getContext());
@@ -150,8 +151,8 @@ public class AuroraBrowserPlugin extends Plugin {
             s.setLoadWithOverviewMode(false);
             s.setUseWideViewPort(false);
             w.setInitialScale(Math.round(pageScale));
-            s.setSupportZoom(true);
-            s.setBuiltInZoomControls(true);
+            s.setSupportZoom(false);
+            s.setBuiltInZoomControls(false);
             s.setDisplayZoomControls(false);
             s.setSupportMultipleWindows(true);
             s.setJavaScriptCanOpenWindowsAutomatically(true);
@@ -530,6 +531,18 @@ public class AuroraBrowserPlugin extends Plugin {
             } finally {
                 synthetic = false;
             }
+            call.resolve();
+        });
+    }
+
+    @PluginMethod
+    public void hideKeyboard(final PluginCall call) {
+        ui(() -> {
+            try {
+                View v = getBridge().getWebView();
+                android.view.inputmethod.InputMethodManager m = (android.view.inputmethod.InputMethodManager) getContext().getSystemService(Context.INPUT_METHOD_SERVICE);
+                if (m != null) m.hideSoftInputFromWindow(v.getWindowToken(), 0);
+            } catch (Throwable ignored) { }
             call.resolve();
         });
     }
