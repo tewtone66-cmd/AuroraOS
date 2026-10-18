@@ -280,6 +280,7 @@ public class AuroraWinePlugin extends Plugin {
             cid = list.get(0).id;
         }
         final int containerId = cid;
+        try { new File(ctx.getFilesDir(), "aurora-last-error.txt").delete(); } catch (Exception ignored) { }
         curId = ++runSeq;
         curPath = path;
         final Intent it = new Intent(ctx, XServerDisplayActivity.class);
@@ -297,6 +298,18 @@ public class AuroraWinePlugin extends Plugin {
                 call.reject(e.getMessage() == null ? "Could not start the program" : e.getMessage());
             }
         });
+    }
+
+    /** Returns the most recent captured guest-process startup error, if any. */
+    @PluginMethod
+    public void getLastError(PluginCall call) {
+        File f = new File(getContext().getFilesDir(), "aurora-last-error.txt");
+        if (!f.isFile()) { JSObject r = new JSObject(); r.put("error", ""); call.resolve(r); return; }
+        try (FileInputStream in = new FileInputStream(f); ByteArrayOutputStream out = new ByteArrayOutputStream()) {
+            byte[] buf = new byte[2048]; int n; while ((n = in.read(buf)) > 0 && out.size() < 12000) out.write(buf, 0, n);
+            String message = new String(out.toByteArray(), java.nio.charset.StandardCharsets.UTF_8).trim();
+            JSObject r = new JSObject(); r.put("error", message); call.resolve(r);
+        } catch (Exception e) { JSObject r = new JSObject(); r.put("error", "Could not read native error log: " + e.getMessage()); call.resolve(r); }
     }
 
     /** Closes the running Windows program window (and its Wine session). */
