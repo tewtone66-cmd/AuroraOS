@@ -85,9 +85,22 @@ def patch_process_helper(s):
     old = '        catch (Exception e) {}\n        return pid;'
     new = '''        catch (Exception e) {
             android.util.Log.e("AuroraWine", "Failed to start guest process: " + command, e);
+            try {
+                java.io.File errorFile = new java.io.File("/data/data/%s/files/aurora-last-error.txt");
+                java.io.File parent = errorFile.getParentFile();
+                if (parent != null) parent.mkdirs();
+                java.io.PrintWriter writer = new java.io.PrintWriter(new java.io.FileWriter(errorFile, false));
+                writer.println("Failed to start guest process.");
+                writer.println("Command: " + command);
+                e.printStackTrace(writer);
+                writer.close();
+            } catch (Exception logError) {
+                android.util.Log.e("AuroraWine", "Could not save guest process error", logError);
+            }
             if (terminationCallback != null) terminationCallback.call(-1);
         }
         return pid;'''
+    new = new % APP_ID
     if old not in s:
         raise SystemExit('Could not patch ProcessHelper.java (guest process failure logging): pattern not found')
     return s.replace(old, new, 1)
