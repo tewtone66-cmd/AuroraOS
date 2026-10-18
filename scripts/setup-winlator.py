@@ -180,11 +180,18 @@ def patch_app_gradle(s):
 
 edit('android/app/build.gradle', patch_app_gradle, 'app/build.gradle')
 
+# Winlator's code uses library attrs through its own R class (R.attr.colorAccent, R.attr.colorError from appcompat,
+# R.attr.colorPrimarySurface from material). Upstream builds with an old Android Gradle Plugin where R classes are
+# transitive. AGP 8 (Capacitor 7) defaults to android.nonTransitiveRClass=true, so com.winlator.R then contains only
+# the app module's own resources and those attrs are "cannot find symbol". Restore transitive R classes.
 gp = Path('android/gradle.properties')
 t = gp.read_text(encoding='utf-8') if gp.exists() else ''
 t = re.sub(r'(?m)^org\.gradle\.jvmargs=.*\n?', '', t)
 t = re.sub(r'(?m)^android\.nonFinalResIds=.*\n?', '', t)
-t = t.rstrip('\n') + '\norg.gradle.jvmargs=-Xmx4g -Dfile.encoding=UTF-8\nandroid.nonFinalResIds=false\n'
+t = re.sub(r'(?m)^android\.nonTransitiveRClass=.*\n?', '', t)
+t = t.rstrip('\n') + ('\norg.gradle.jvmargs=-Xmx4g -Dfile.encoding=UTF-8\n'
+                      'android.nonFinalResIds=false\n'
+                      'android.nonTransitiveRClass=false\n')
 gp.write_text(t, encoding='utf-8')
 
 if not local:
