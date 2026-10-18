@@ -2,11 +2,18 @@ name: Build Aurora OS APK
 
 on:
   push:
+    branches:
+      - '**'
+  pull_request:
     branches: [main]
   workflow_dispatch:
 
 permissions:
   contents: read
+
+concurrency:
+  group: aurora-apk-${{ github.ref }}
+  cancel-in-progress: false
 
 jobs:
   build-apk:

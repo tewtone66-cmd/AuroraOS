@@ -49,7 +49,9 @@ public final class AuroraElf {
         String pkg = ctx.getPackageName();
         String alias = "/data/data/" + pkg + "/.ld";
 
-        try (RandomAccessFile f = new RandomAccessFile(bin, "rw")) {
+        // Inspect the ELF header without requesting write access. Opening a running executable
+        // with "rw" can fail on Android/Linux with ETXTBSY, even when no patch is needed.
+        try (RandomAccessFile f = new RandomAccessFile(bin, "r")) {
             byte[] eh = new byte[64];
             f.readFully(eh);
             if (eh[0] != 0x7f || eh[1] != 'E' || eh[2] != 'L' || eh[3] != 'F') return "box64 is not an ELF file: " + bin;
@@ -87,7 +89,7 @@ public final class AuroraElf {
                     return "box64 interpreter " + interp + " cannot be fixed: " + realLd + " does not exist";
                 }
                 if (viaAlias) {
-                    // already patched on an earlier run: make sure the symlink still points to the loader
+                    // Already patched: do not open the executable for writing while another process may be using it.
                     makeLink(ctx, realLd);
                     return "box64 interpreter (already patched) " + interp + " -> " + realLd;
                 }
@@ -100,10 +102,16 @@ public final class AuroraElf {
                 }
                 byte[] nb = target.getBytes(StandardCharsets.UTF_8);
                 if (nb.length + 1 > size) return "box64 interpreter " + interp + " cannot be fixed: new path too long (" + target + ")";
+
+                // Reopen for writing only when the PT_INTERP actually needs changing. Keep the
+                // read-only inspection handle separate so the common already-patched path never
+                // requests write access to a possibly-running box64 executable.
                 byte[] out = new byte[(int) size];
                 System.arraycopy(nb, 0, out, 0, nb.length);
-                f.seek(off);
-                f.write(out);
+                try (RandomAccessFile w = new RandomAccessFile(bin, "rw")) {
+                    w.seek(off);
+                    w.write(out);
+                }
                 bin.setExecutable(true, false);
                 return "box64 interpreter patched: " + interp + " -> " + target;
             }
