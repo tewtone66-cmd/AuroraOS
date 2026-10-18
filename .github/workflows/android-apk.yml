@@ -36,7 +36,7 @@ jobs:
           python3 - <<'PY'
           import re
           s = open('src/index.html', encoding='utf-8').read()
-          open('/tmp/aurora.js', 'w', encoding='utf-8').write('\\n'.join(re.findall(r'<script>(.*?)</script>', s, re.S)))
+          open('/tmp/aurora.js', 'w', encoding='utf-8').write('\n'.join(re.findall(r'<script>(.*?)</script>', s, re.S)))
           PY
           node --check /tmp/aurora.js
       - name: Add Android platform
