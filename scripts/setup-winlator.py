@@ -118,6 +118,28 @@ def patch_launcher_interp(s):
 edit(main / 'java/com/winlator/xenvironment/components/GuestProgramLauncherComponent.java',
      patch_launcher_interp, 'box64 interpreter fix')
 
+# Aurora downloads live in Android's absolute filesystem, outside the container's mapped drives.
+# Winlator's unixToDOSPath otherwise returns a drive-less path (e.g. \\data\\user\\0\\...),
+# so Wine's ShellExecuteEx cannot find the downloaded EXE when launched from the Aurora desktop.
+wine_utils = main / 'java/com/winlator/core/WineUtils.java'
+def patch_unix_to_dos(s):
+    marker = 'aurora-absolute-path-z-drive'
+    if marker in s:
+        return s
+    old = '''        if (!dosPath.startsWith("\\\\")) dosPath += "\\\\";
+        dosPath = driveLetter+StringUtils.removeEndSlash(dosPath);'''
+    new = '''        // aurora-absolute-path-z-drive: absolute Android paths must be addressed through Wine's Z: drive.
+        if (driveLetter.isEmpty() && unixPath.startsWith("/")) {
+            driveLetter = "Z:";
+            dosPath = unixPath.replace("/", "\\\\");
+        }
+        if (!dosPath.startsWith("\\\\")) dosPath += "\\\\";
+        dosPath = driveLetter+StringUtils.removeEndSlash(dosPath);'''
+    if s.count(old) != 1:
+        raise SystemExit('WineUtils.unixToDOSPath: expected path-conversion anchor exactly once')
+    return s.replace(old, new, 1)
+edit(wine_utils, patch_unix_to_dos, 'absolute Android EXE paths via Wine Z: drive')
+
 # ---- 4. resources: merge without overwriting the Capacitor app's own ----
 dst_res = main / 'res'
 merged = skipped = 0
