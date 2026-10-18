@@ -46,21 +46,30 @@ if MARK not in ph:
     if len(sig.findall(ph)) != 1:
         raise SystemExit('ProcessHelper: exec signature not found exactly once')
     catch = re.compile(r'catch \(Exception e\) \{\}(\s*)return pid;')
-    if len(catch.findall(ph)) != 1:
-        raise SystemExit('ProcessHelper: exec catch block not found exactly once')
+    n_orig = len(catch.findall(ph))
+    # setup-winlator.py may already have replaced the empty catch block with its own logging version
+    pat = 'android.util.Log.e("AuroraWine", "Failed to start guest process: " + command, e);'
+    n_pat = ph.count(pat)
+    if n_orig + n_pat != 1:
+        i = ph.find('return pid;')
+        raise SystemExit('ProcessHelper: exec catch block not recognised (original=%d, already-patched=%d). Context:\n%s'
+                         % (n_orig, n_pat, ph[max(0, ph.rfind('public static int exec(')):][:1500]))
 
     ph = ph.replace(a1, a1 + ' // ' + MARK + '\n    public static volatile String lastError = null;')
     ph = ph.replace(a2,
         'if (debugCallbacks.isEmpty()) processBuilder.redirectOutput(workingDir != null && new File(workingDir, "tmp").isDirectory() '
         '? new File(new File(workingDir, "tmp"), "aurora-guest.log") : new File("/dev/null")).redirectErrorStream(true);')
     ph = sig.sub(r'\1\n        lastError = null; // ' + MARK, ph)
-    ph = catch.sub(
-        'catch (Exception e) {\n'
-        '            Throwable root = e;\n'
-        '            while (root.getCause() != null) root = root.getCause();\n'
-        '            String first = command == null ? "" : command.split(" ")[0];\n'
-        '            lastError = root + "\\n(" + first + ")";\n'
-        '        }\\1return pid;', ph)
+    record = (
+        'Throwable auroraRoot = e;\n'
+        '            while (auroraRoot.getCause() != null) auroraRoot = auroraRoot.getCause();\n'
+        '            lastError = auroraRoot + "\\n(" + (command == null ? "" : command.split(" ")[0]) + ")";\n')
+    if n_orig == 1:
+        ph = catch.sub(
+            'catch (Exception e) {\n            ' + record.replace('\\', '\\\\') +
+            '        }\\1return pid;', ph)
+    else:
+        ph = ph.replace(pat, pat + '\n            ' + record)
     PH.write_text(ph, encoding='utf-8')
 
 # ---------------- GuestProgramLauncherComponent ----------------
@@ -117,8 +126,25 @@ if MARK not in xa:
         }
     }
 
+    private String auroraErrorFile() {
+        try {
+            java.io.File f = new java.io.File(getFilesDir(), "aurora-last-error.txt");
+            if (!f.isFile() || System.currentTimeMillis() - f.lastModified() > 120000) return "";
+            int n = (int)Math.min(f.length(), 900);
+            byte[] b = new byte[n];
+            try (java.io.FileInputStream in = new java.io.FileInputStream(f)) {
+                int off = 0;
+                while (off < n) { int r = in.read(b, off, n - off); if (r < 0) break; off += r; }
+            }
+            return "\\n\\n--- last error ---\\n" + new String(b, "UTF-8");
+        }
+        catch (Exception e) {
+            return "";
+        }
+    }
+
     public void auroraError(final String msg0) {
-        final String msg = msg0 + auroraLogTail();
+        final String msg = msg0 + auroraErrorFile() + auroraLogTail();
         android.util.Log.e("AuroraWine", msg);
         runOnUiThread(() -> {
             if (isFinishing()) return;
