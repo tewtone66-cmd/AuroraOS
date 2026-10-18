@@ -6,6 +6,8 @@ import com.winlator.xenvironment.RootFS;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.RandomAccessFile;
+import java.nio.file.Files;
+import java.util.ArrayList;
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
 import java.nio.charset.StandardCharsets;
@@ -30,6 +32,11 @@ public final class AuroraElf {
             result = doFix(ctx, bin);
         } catch (Throwable t) {
             result = "box64 interpreter check failed: " + t;
+        }
+        try {
+            result += "\n" + fixPaths(ctx);
+        } catch (Throwable t) {
+            result += "\nrootfs path fix failed: " + t;
         }
         android.util.Log.i("AuroraWine", result);
         note(ctx, result);
@@ -102,6 +109,118 @@ public final class AuroraElf {
             }
         }
         return "box64 has no PT_INTERP (statically linked?)";
+    }
+
+
+    // ---- hard-coded rootfs path inside Winlator's own binaries (wine, wineserver, ntdll.so, ...) ----
+    private static final String OLD_ROOT = "/data/data/com.winlator/files/rootfs";
+    private static final String MARKER = ".aurora-paths-v1";
+    private static final int CHUNK = 1 << 20;
+
+    /**
+     * Wine (and other binaries) from Winlator contain the absolute string /data/data/com.winlator/files/rootfs
+     * (e.g. wineserver creates /data/data/com.winlator/files/rootfs/tmp/.wine-UID, which cannot exist under another
+     * application id). The string is replaced IN PLACE by a same-length path that goes through a symlink in this
+     * app's data directory: "/data/data/<pkg>/r" followed by slashes up to the original length (extra slashes are
+     * harmless in paths), where <data dir>/r is a symlink to the real rootfs. Runs once per rootfs install.
+     */
+    private static String fixPaths(Context ctx) throws Exception {
+        File rootDir = RootFS.find(ctx).getRootDir();
+        byte[] oldB = OLD_ROOT.getBytes(StandardCharsets.UTF_8);
+        StringBuilder nb = new StringBuilder("/data/data/" + ctx.getPackageName() + "/r");
+        if (nb.length() > oldB.length) return "rootfs path fix skipped: package name too long";
+        while (nb.length() < oldB.length) nb.append('/');
+        byte[] newB = nb.toString().getBytes(StandardCharsets.UTF_8);
+
+        // symlink <data dir>/r -> rootfs (refreshed on every launch)
+        File link = new File(ctx.getApplicationInfo().dataDir, "r");
+        try {
+            if (!link.getCanonicalPath().equals(rootDir.getCanonicalPath())) {
+                link.delete();
+                Os.symlink(rootDir.getPath(), link.getPath());
+            }
+        } catch (Exception e) {
+            link.delete();
+            Os.symlink(rootDir.getPath(), link.getPath());
+        }
+
+        File marker = new File(rootDir, MARKER);
+        if (marker.isFile()) return "rootfs paths already patched (" + nb.toString().replaceAll("/+$", "") + ")";
+
+        int[] stat = new int[4]; // files scanned, files patched, occurrences, errors
+        StringBuilder errs = new StringBuilder();
+        walk(rootDir, true, oldB, newB, stat, errs);
+        String summary = "rootfs paths patched: scanned " + stat[0] + " ELF files, changed " + stat[1] + " files, "
+            + stat[2] + " occurrences, errors " + stat[3] + (errs.length() > 0 ? " [" + errs + "]" : "");
+        if (stat[3] == 0) {
+            try (FileOutputStream o = new FileOutputStream(marker)) {
+                o.write(summary.getBytes(StandardCharsets.UTF_8));
+            }
+        }
+        return summary;
+    }
+
+    private static void walk(File dir, boolean top, byte[] oldB, byte[] newB, int[] stat, StringBuilder errs) {
+        File[] list = dir.listFiles();
+        if (list == null) return;
+        for (File f : list) {
+            String name = f.getName();
+            if (Files.isSymbolicLink(f.toPath())) continue;
+            if (f.isDirectory()) {
+                if (top && (name.equals("home") || name.equals("tmp"))) continue; // wineprefix and temp files
+                if (name.equals("drive_c")) continue;
+                walk(f, false, oldB, newB, stat, errs);
+            } else if (f.isFile() && f.length() >= oldB.length) {
+                try {
+                    patchFile(f, oldB, newB, stat);
+                } catch (Exception e) {
+                    stat[3]++;
+                    if (errs.length() < 300) errs.append(name).append(": ").append(e.getMessage()).append("; ");
+                }
+            }
+        }
+    }
+
+    private static void patchFile(File f, byte[] oldB, byte[] newB, int[] stat) throws Exception {
+        ArrayList<Long> hits = new ArrayList<>();
+        try (RandomAccessFile r = new RandomAccessFile(f, "r")) {
+            byte[] magic = new byte[4];
+            r.readFully(magic);
+            if (magic[0] != 0x7f || magic[1] != 'E' || magic[2] != 'L' || magic[3] != 'F') return;
+            stat[0]++;
+            r.seek(0);
+            byte[] buf = new byte[CHUNK + oldB.length];
+            int carry = 0;
+            long pos = 0;
+            while (true) {
+                int n = r.read(buf, carry, CHUNK);
+                if (n <= 0) break;
+                int total = carry + n;
+                long base = pos - carry;
+                for (int i = 0; i + oldB.length <= total; i++) {
+                    if (buf[i] != oldB[0]) continue;
+                    int k = 1;
+                    while (k < oldB.length && buf[i + k] == oldB[k]) k++;
+                    if (k == oldB.length) {
+                        hits.add(base + i);
+                        i += oldB.length - 1;
+                    }
+                }
+                carry = Math.min(oldB.length - 1, total);
+                System.arraycopy(buf, total - carry, buf, 0, carry);
+                pos += n;
+            }
+        }
+        if (hits.isEmpty()) return;
+        f.setWritable(true, true);
+        try (RandomAccessFile w = new RandomAccessFile(f, "rw")) {
+            for (long h : hits) {
+                w.seek(h);
+                w.write(newB);
+            }
+        }
+        stat[1]++;
+        stat[2] += hits.size();
     }
 
     private static void makeLink(Context ctx, File realLd) throws Exception {
