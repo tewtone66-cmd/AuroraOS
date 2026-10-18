@@ -17,7 +17,6 @@ import com.getcapacitor.annotation.CapacitorPlugin;
 import com.winlator.XServerDisplayActivity;
 import com.winlator.container.Container;
 import com.winlator.container.ContainerManager;
-import com.winlator.container.Drive;
 import com.winlator.core.AppUtils;
 import com.winlator.core.DefaultVersion;
 import com.winlator.core.FileUtils;
@@ -25,12 +24,7 @@ import com.winlator.core.TarCompressorUtils;
 import com.winlator.core.WineInfo;
 import com.winlator.xenvironment.RootFS;
 import com.winlator.xenvironment.RootFSInstaller;
-import android.util.Base64;
 import java.io.File;
-import java.io.FileInputStream;
-import java.io.ByteArrayOutputStream;
-import java.util.HashSet;
-import java.util.Locale;
 import java.util.ArrayList;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
@@ -40,7 +34,7 @@ import org.json.JSONObject;
 /**
  * Windows program runner built on the Winlator core (Wine + Box64/Box86), compiled into this app.
  * Part 2: install the runtime, create a container, run an .exe and report its state.
- * Methods: status, init, runExe, stopExe, listRunning, scanStart, exeIcon.
+ * Methods: status, init, runExe, stopExe, listRunning.
  * Events: progress {step,pct}, exeStarted {id,path}, exeExited {id,path}.
  */
 @CapacitorPlugin(name = "AuroraWine")
@@ -104,6 +98,31 @@ public class AuroraWinePlugin extends Plugin {
     private boolean runtimeReady(Context ctx) {
         RootFS rfs = RootFS.find(ctx);
         return rfs.isValid() && rfs.getVersion() >= RootFSInstaller.LATEST_VERSION;
+    }
+
+    private static File box64File(Context ctx) {
+        return new File(RootFS.find(ctx).getRootDir(), "usr/local/bin/box64");
+    }
+
+    /** box64 lives in its own archive; unpack it whenever the binary is missing (even if a version was already recorded). */
+    private void ensureBox64(Context ctx) throws Exception {
+        File bin = box64File(ctx);
+        if (bin.isFile() && bin.length() > 0) {
+            bin.setExecutable(true, false);
+            return;
+        }
+        SharedPreferences.Editor ed = PreferenceManager.getDefaultSharedPreferences(ctx).edit();
+        ed.putString("box64_version", DefaultVersion.BOX64);
+        ed.remove("current_box64_version");
+        ed.apply();
+        File rootDir = RootFS.find(ctx).getRootDir();
+        new File(rootDir, "usr/local/bin").mkdirs();
+        boolean ok = TarCompressorUtils.extract(TarCompressorUtils.Type.ZSTD, ctx,
+            "box64/box64-" + DefaultVersion.BOX64 + ".tzst", rootDir);
+        if (!ok || !bin.isFile()) throw new Exception("Could not install the x86 translator (box64)");
+        bin.setExecutable(true, false);
+        PreferenceManager.getDefaultSharedPreferences(ctx).edit()
+            .putString("current_box64_version", DefaultVersion.BOX64).apply();
     }
 
     /** Same cleanup Winlator does before unpacking a new rootfs (keeps user data in home and installed wine builds). */
@@ -226,6 +245,7 @@ public class AuroraWinePlugin extends Plugin {
         new Thread(() -> {
             try {
                 if (!runtimeReady(ctx)) installRootFs(ctx);
+                ensureBox64(ctx);
                 int cid = ensureContainer(ctx);
                 progress("done", 100);
                 JSObject r = new JSObject();
@@ -248,13 +268,8 @@ public class AuroraWinePlugin extends Plugin {
             call.reject("path is required");
             return;
         }
-        File exeFile = new File(path);
-        if (!exeFile.isFile()) {
-            call.reject("File not found: " + path + " (check that file access is allowed)");
-            return;
-        }
-        if (!exeFile.canRead()) {
-            call.reject("Cannot read file: " + path);
+        if (!new File(path).isFile()) {
+            call.reject("File not found: " + path);
             return;
         }
         if (busy) {
@@ -280,14 +295,17 @@ public class AuroraWinePlugin extends Plugin {
             cid = list.get(0).id;
         }
         final int containerId = cid;
-        try { new File(ctx.getFilesDir(), "aurora-last-error.txt").delete(); } catch (Exception ignored) { }
+        try {
+            ensureBox64(ctx);
+        } catch (Exception e) {
+            call.reject(e.getMessage() == null ? "Could not prepare the runtime" : e.getMessage());
+            return;
+        }
         curId = ++runSeq;
         curPath = path;
         final Intent it = new Intent(ctx, XServerDisplayActivity.class);
         it.putExtra("container_id", containerId);
         it.putExtra("exec_path", path);
-        final String screen = call.getString("screen", "");
-        if (screen != null && screen.matches("\\d{3,4}x\\d{3,4}")) it.putExtra("aurora_screen", screen);
         getActivity().runOnUiThread(() -> {
             try {
                 getActivity().startActivity(it);
@@ -298,18 +316,6 @@ public class AuroraWinePlugin extends Plugin {
                 call.reject(e.getMessage() == null ? "Could not start the program" : e.getMessage());
             }
         });
-    }
-
-    /** Returns the most recent captured guest-process startup error, if any. */
-    @PluginMethod
-    public void getLastError(PluginCall call) {
-        File f = new File(getContext().getFilesDir(), "aurora-last-error.txt");
-        if (!f.isFile()) { JSObject r = new JSObject(); r.put("error", ""); call.resolve(r); return; }
-        try (FileInputStream in = new FileInputStream(f); ByteArrayOutputStream out = new ByteArrayOutputStream()) {
-            byte[] buf = new byte[2048]; int n; while ((n = in.read(buf)) > 0 && out.size() < 12000) out.write(buf, 0, n);
-            String message = new String(out.toByteArray(), java.nio.charset.StandardCharsets.UTF_8).trim();
-            JSObject r = new JSObject(); r.put("error", message); call.resolve(r);
-        } catch (Exception e) { JSObject r = new JSObject(); r.put("error", "Could not read native error log: " + e.getMessage()); call.resolve(r); }
     }
 
     /** Closes the running Windows program window (and its Wine session). */
@@ -338,177 +344,5 @@ public class AuroraWinePlugin extends Plugin {
         JSObject r = new JSObject();
         r.put("items", arr);
         call.resolve(r);
-    }
-
-    // ---------- desktop icons: Start Menu scan (.lnk) and icon extraction ----------
-
-    /** Case-insensitive walk of a Windows-style relative path below {@code base}; returns null when nothing matches. */
-    private static File resolveCi(File base, String rel) {
-        File cur = base;
-        for (String part : rel.split("[\\\\/]+")) {
-            if (part.isEmpty() || part.equals(".")) continue;
-            File direct = new File(cur, part);
-            if (direct.exists()) {
-                cur = direct;
-                continue;
-            }
-            File[] kids = cur.listFiles();
-            File hit = null;
-            if (kids != null) {
-                for (File k : kids) {
-                    if (k.getName().equalsIgnoreCase(part)) {
-                        hit = k;
-                        break;
-                    }
-                }
-            }
-            if (hit == null) return null;
-            cur = hit;
-        }
-        return cur;
-    }
-
-    /** "C:\\Program Files\\X\\x.exe" -> real file below the container (null if the drive is unknown or the file is missing). */
-    private static File dosToFile(Container c, String dos) {
-        if (dos == null) return null;
-        dos = dos.trim();
-        if (dos.length() < 3 || dos.charAt(1) != ':') return null;
-        String letter = dos.substring(0, 1).toUpperCase(Locale.ROOT);
-        File base = null;
-        if (letter.equals("C")) {
-            base = new File(c.getRootDir(), ".wine/drive_c");
-        } else {
-            for (Drive d : c.drivesIterator()) {
-                if (d.letter.equalsIgnoreCase(letter)) {
-                    base = new File(d.path);
-                    break;
-                }
-            }
-        }
-        if (base == null || !base.isDirectory()) return null;
-        return resolveCi(base, dos.substring(2));
-    }
-
-    private static boolean skipDirName(String n) {
-        n = n.toLowerCase(Locale.ROOT);
-        return n.equals("accessories") || n.equals("system tools") || n.equals("wine") || n.equals("startup");
-    }
-
-    private static boolean skipLinkName(String n) {
-        n = n.toLowerCase(Locale.ROOT);
-        return n.contains("uninstall") || n.contains("unins") || n.contains("remove ") || n.contains("readme")
-            || n.contains("manual") || n.contains("documentation") || n.contains("license") || n.contains("website");
-    }
-
-    private void scanDir(Container c, File dir, int depth, JSArray out, HashSet<String> seen) {
-        File[] kids = dir.listFiles();
-        if (kids == null || depth > 6) return;
-        for (File k : kids) {
-            String name = k.getName();
-            if (k.isDirectory()) {
-                if (depth == 0 && skipDirName(name)) continue;
-                scanDir(c, k, depth + 1, out, seen);
-                continue;
-            }
-            if (!name.toLowerCase(Locale.ROOT).endsWith(".lnk") || k.length() > 65536) continue;
-            String base = name.substring(0, name.length() - 4);
-            if (skipLinkName(base) || !seen.add(k.getAbsolutePath())) continue;
-            try {
-                ByteArrayOutputStream bo = new ByteArrayOutputStream();
-                FileInputStream in = new FileInputStream(k);
-                try {
-                    byte[] buf = new byte[4096];
-                    int n;
-                    while ((n = in.read(buf)) > 0) bo.write(buf, 0, n);
-                } finally {
-                    in.close();
-                }
-                AuroraLnk l = AuroraLnk.parse(bo.toByteArray());
-                if (l == null || l.target.isEmpty()) continue;
-                String lower = l.target.toLowerCase(Locale.ROOT);
-                if (!lower.endsWith(".exe") || lower.contains("\\windows\\") || lower.contains("unins")) continue;
-                File exe = dosToFile(c, l.target);
-                if (exe == null || !exe.isFile()) continue;
-                JSObject o = new JSObject();
-                o.put("lnk", k.getAbsolutePath());
-                o.put("name", base);
-                o.put("target", exe.getAbsolutePath());
-                o.put("args", l.args);
-                File wd = l.workDir.isEmpty() ? null : dosToFile(c, l.workDir);
-                o.put("cwd", wd != null && wd.isDirectory() ? wd.getAbsolutePath() : (exe.getParent() == null ? "" : exe.getParent()));
-                String ip = "";
-                if (!l.iconPath.isEmpty()) {
-                    File icf = dosToFile(c, l.iconPath);
-                    if (icf != null && icf.isFile()) ip = icf.getAbsolutePath();
-                }
-                o.put("iconPath", ip);
-                o.put("iconIndex", l.iconIndex);
-                o.put("mtime", k.lastModified());
-                out.put(o);
-            } catch (Exception ignored) {
-                // an unreadable shortcut is simply not listed
-            }
-        }
-    }
-
-    /** Lists the programs in the container's Start Menu folders: {containerId?} -> {items:[{lnk,name,target,args,cwd,iconPath,iconIndex,mtime}]}. */
-    @PluginMethod
-    public void scanStart(final PluginCall call) {
-        final Context ctx = getContext();
-        final int want = call.getInt("containerId", 0);
-        new Thread(() -> {
-            try {
-                if (!runtimeReady(ctx)) {
-                    JSObject r0 = new JSObject();
-                    r0.put("items", new JSArray());
-                    call.resolve(r0);
-                    return;
-                }
-                Container found = null;
-                for (Container x : new ContainerManager(ctx).getContainers()) {
-                    if (want <= 0 || x.id == want) {
-                        found = x;
-                        break;
-                    }
-                }
-                JSArray items = new JSArray();
-                if (found != null) {
-                    HashSet<String> seen = new HashSet<>();
-                    scanDir(found, found.getStartMenuDir(), 0, items, seen);
-                    scanDir(found, new File(found.getUserDir(), "AppData/Roaming/Microsoft/Windows/Start Menu"), 0, items, seen);
-                    scanDir(found, new File(found.getUserDir(), "Application Data/Microsoft/Windows/Start Menu"), 0, items, seen);
-                }
-                JSObject r = new JSObject();
-                r.put("items", items);
-                call.resolve(r);
-            } catch (Exception e) {
-                call.reject(e.getMessage() == null ? "Could not scan the Start Menu" : e.getMessage());
-            }
-        }, "aurora-wine-scan").start();
-    }
-
-    /** Extracts an icon as a PNG data URL: {path (exe/dll/ico), index?, fallback?} -> {png: "data:image/png;base64,..." or ""}. */
-    @PluginMethod
-    public void exeIcon(final PluginCall call) {
-        final String path = call.getString("path", "");
-        final String fallback = call.getString("fallback", "");
-        final int index = call.getInt("index", 0);
-        new Thread(() -> {
-            byte[] png = null;
-            try {
-                if (path != null && !path.isEmpty()) {
-                    File f = new File(path);
-                    if (path.toLowerCase(Locale.ROOT).endsWith(".ico")) png = AuroraPeIcon.fromIco(f);
-                    else png = AuroraPeIcon.extract(f, index);
-                    if (png == null && index != 0) png = AuroraPeIcon.extract(f, 0);
-                }
-                if (png == null && fallback != null && !fallback.isEmpty()) png = AuroraPeIcon.extract(new File(fallback), 0);
-            } catch (Exception ignored) {
-                png = null;
-            }
-            JSObject r = new JSObject();
-            r.put("png", png == null ? "" : "data:image/png;base64," + Base64.encodeToString(png, Base64.NO_WRAP));
-            call.resolve(r);
-        }, "aurora-wine-icon").start();
     }
 }

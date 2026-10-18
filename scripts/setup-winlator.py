@@ -77,35 +77,13 @@ for f in (main / 'cpp').rglob('*'):
             count += 1
 edit(main / 'java/com/winlator/core/AppUtils.java',
      lambda s: s.replace('/data/data/com.winlator/storage', '/data/data/%s/storage' % APP_ID), 'INTERNAL_STORAGE')
-
-# Make failed Box64/Wine process launches observable and prevent the X server
-# preloader from remaining on-screen forever when ProcessBuilder.start() fails.
-process_helper = main / 'java/com/winlator/core/ProcessHelper.java'
-def patch_process_helper(s):
-    old = '        catch (Exception e) {}\n        return pid;'
-    new = '''        catch (Exception e) {
-            android.util.Log.e("AuroraWine", "Failed to start guest process: " + command, e);
-            try {
-                java.io.File errorFile = new java.io.File("/data/data/%s/files/aurora-last-error.txt");
-                java.io.File parent = errorFile.getParentFile();
-                if (parent != null) parent.mkdirs();
-                java.io.PrintWriter writer = new java.io.PrintWriter(new java.io.FileWriter(errorFile, false));
-                writer.println("Failed to start guest process.");
-                writer.println("Command: " + command);
-                e.printStackTrace(writer);
-                writer.close();
-            } catch (Exception logError) {
-                android.util.Log.e("AuroraWine", "Could not save guest process error", logError);
-            }
-            if (terminationCallback != null) terminationCallback.call(-1);
-        }
-        return pid;'''
-    new = new % APP_ID
-    if old not in s:
-        raise SystemExit('Could not patch ProcessHelper.java (guest process failure logging): pattern not found')
-    return s.replace(old, new, 1)
-edit(process_helper, patch_process_helper, 'guest process failure logging')
 print('Patched %d native files for package %s' % (count, APP_ID))
+
+# box64 must be re-extracted whenever the binary is missing, not only when the recorded version changes
+edit(main / 'java/com/winlator/xenvironment/components/GuestProgramLauncherComponent.java',
+     lambda s: s.replace('if (!box64Version.equals(currentBox64Version)) {',
+                         'if (!box64Version.equals(currentBox64Version) || !new File(RootFS.find(context).getRootDir(), "/usr/local/bin/box64").isFile()) {'),
+     'box64 re-extract')
 
 # ---- 4. resources: merge without overwriting the Capacitor app's own ----
 dst_res = main / 'res'
@@ -191,8 +169,7 @@ gp = Path('android/gradle.properties')
 t = gp.read_text(encoding='utf-8') if gp.exists() else ''
 t = re.sub(r'(?m)^org\.gradle\.jvmargs=.*\n?', '', t)
 t = re.sub(r'(?m)^android\.nonFinalResIds=.*\n?', '', t)
-t = re.sub(r'(?m)^android\.nonTransitiveRClass=.*\n?', '', t)
-t = t.rstrip('\n') + '\norg.gradle.jvmargs=-Xmx4g -Dfile.encoding=UTF-8\nandroid.nonFinalResIds=false\nandroid.nonTransitiveRClass=false\n'
+t = t.rstrip('\n') + '\norg.gradle.jvmargs=-Xmx4g -Dfile.encoding=UTF-8\nandroid.nonFinalResIds=false\n'
 gp.write_text(t, encoding='utf-8')
 
 if not local:
