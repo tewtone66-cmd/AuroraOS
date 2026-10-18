@@ -9,9 +9,10 @@ if any anchor is missing or ambiguous nothing is written.
      so the program starts with the size of its Aurora window.
   4. XServerDisplayActivity (aurora-stage): an .exe outside the Wine C: drive (e.g. the phone's Download folder,
      names with spaces) is copied to C:\\aurora-run\\ and started from there. This avoids
-     "ShellExecuteEx failed" caused by paths Wine cannot resolve. If the exe lives in its own folder (not
-     Download), the files next to it are copied too (DLLs, data). Broken downloads (too small, no MZ header)
-     are reported in the error banner instead of failing silently.
+     "ShellExecuteEx failed" caused by paths Wine cannot resolve. Only loose .exe files that sit directly in a
+     Download folder are copied; installed programs and portable app folders are never touched. Broken downloads (too small, no MZ header)
+     are reported in the error banner instead of failing silently. The banner also names the program type
+     (x86/x64, Java, .NET) so a missing runtime is visible.
      The exact command given to Wine is also written to the banner ("aurora-v2 launch: ...").
 """
 import re
@@ -76,6 +77,27 @@ if STAGE not in new_act:
         java.nio.file.Files.copy(s.toPath(), d.toPath(), java.nio.file.StandardCopyOption.REPLACE_EXISTING);
     }
 
+    private void auroraKind(java.io.File f) {
+        try (java.io.RandomAccessFile r = new java.io.RandomAccessFile(f, "r")) {
+            byte[] h = new byte[1024 * 1024];
+            int n = r.read(h);
+            if (n < 256) return;
+            int pe = (h[0x3C] & 0xff) | ((h[0x3D] & 0xff) << 8) | ((h[0x3E] & 0xff) << 16);
+            if (pe <= 0 || pe + 160 >= n || h[pe] != 'P' || h[pe + 1] != 'E') return;
+            int machine = (h[pe + 4] & 0xff) | ((h[pe + 5] & 0xff) << 8);
+            String arch = machine == 0x8664 ? "x64" : machine == 0x14c ? "x86" : machine == 0xAA64 ? "ARM64" : "machine 0x" + Integer.toHexString(machine);
+            int magic = (h[pe + 24] & 0xff) | ((h[pe + 25] & 0xff) << 8);
+            int off = pe + 24 + (magic == 0x20b ? 112 : 96) + 14 * 8;
+            int clr = off + 4 < n ? ((h[off] & 0xff) | ((h[off + 1] & 0xff) << 8) | ((h[off + 2] & 0xff) << 16) | ((h[off + 3] & 0xff) << 24)) : 0;
+            String s = new String(h, 0, n, "ISO-8859-1");
+            String kind = "native Windows program";
+            if (s.contains("launch4j") || s.contains("Launch4j") || s.contains("javaw.exe") || s.contains("JAVA_HOME")) kind = "JAVA program: needs Java, which is not installed in the container";
+            else if (clr != 0) kind = ".NET program: needs .NET / Wine Mono, which is not installed in the container";
+            auroraNote("Program type: " + arch + ", " + kind);
+        }
+        catch (Exception ignored) {}
+    }
+
     private String auroraStage(String src, com.winlator.container.Container c) {
         try {
             java.io.File f = new java.io.File(src);
@@ -93,19 +115,12 @@ if STAGE not in new_act:
                     return null;
                 }
             }
+            auroraKind(f);
+            if (src.contains("/.wine/drive_c")) return null; // installed program: leave it exactly where it is
+            java.io.File parent = f.getParentFile();
+            if (parent == null || !parent.getName().toLowerCase().startsWith("download")) return null; // portable apps keep their own folder
             java.io.File dir = new java.io.File(c.getRootDir(), ".wine/drive_c/aurora-run");
             dir.mkdirs();
-            java.io.File parent = f.getParentFile();
-            if (parent != null && !parent.getName().toLowerCase().startsWith("download")) {
-                java.io.File[] sib = parent.listFiles();
-                if (sib != null && sib.length <= 300) {
-                    long total = 0;
-                    for (java.io.File s : sib) if (s.isFile()) total += s.length();
-                    if (total <= max) {
-                        for (java.io.File s : sib) if (s.isFile() && !s.equals(f)) auroraCopy(s, new java.io.File(dir, s.getName()));
-                    }
-                }
-            }
             java.io.File dst = new java.io.File(dir, f.getName().replaceAll("[^A-Za-z0-9._-]", "_"));
             auroraCopy(f, dst);
             return "C:\\aurora-run\\" + dst.getName();
