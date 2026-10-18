@@ -623,6 +623,44 @@ public class AuroraWinePlugin extends Plugin {
         }, "aurora-icon").start();
     }
 
+    /**
+     * Status lines the launcher writes into aurora-last-error.txt on EVERY run. They are information, not errors:
+     * if they were returned by getLastError the web page would show "Windows app error" after every program and skip
+     * the "installed program -> desktop icon" step. Real problems (Wine exit status, spawn failure, Java/.NET hints,
+     * broken downloads) are still returned.
+     */
+    private static final java.util.regex.Pattern INFO_LINE = java.util.regex.Pattern.compile(
+        "^(box64 interpreter (ok:|patched:|\\(already patched\\)).*"
+            + "|rootfs paths already patched.*"
+            + "|rootfs paths patched: .* errors 0( \\[.*)?"
+            + "|Program type: [^,]+, native Windows program"
+            + "|aurora-v2 launch: .*)$");
+
+    /** Keeps the complete launcher notes plus the end of the Wine output in Download/aurora-wine.log (best effort). */
+    private void saveRunLog(String raw) {
+        try {
+            File dl = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS);
+            if (dl == null || !(dl.isDirectory() || dl.mkdirs())) return;
+            StringBuilder sb = new StringBuilder();
+            sb.append(new java.util.Date()).append("  ").append(curPath).append('\n').append(raw.trim()).append('\n');
+            File g = new File(RootFS.find(getContext()).getRootDir(), "tmp/aurora-guest.log");
+            if (g.isFile() && g.length() > 0) {
+                int n = (int) Math.min(g.length(), 2000);
+                byte[] b = new byte[n];
+                try (java.io.RandomAccessFile rf = new java.io.RandomAccessFile(g, "r")) {
+                    rf.seek(g.length() - n);
+                    rf.readFully(b);
+                }
+                sb.append("--- guest output ---\n").append(new String(b, java.nio.charset.StandardCharsets.UTF_8)).append('\n');
+            }
+            sb.append('\n');
+            File log = new File(dl, "aurora-wine.log");
+            try (java.io.FileOutputStream o = new java.io.FileOutputStream(log, !(log.isFile() && log.length() > 300000))) {
+                o.write(sb.toString().getBytes(java.nio.charset.StandardCharsets.UTF_8));
+            }
+        } catch (Throwable ignored) { }
+    }
+
     /** Error text left by the launcher for the run that just ended ("" when there is none). */
     @PluginMethod
     public void getLastError(PluginCall call) {
@@ -633,12 +671,11 @@ public class AuroraWinePlugin extends Plugin {
             if (f.isFile() && f.lastModified() >= lastRunStart && f.length() > 0) {
                 byte[] b = java.nio.file.Files.readAllBytes(f.toPath());
                 String all = new String(b, java.nio.charset.StandardCharsets.UTF_8);
+                saveRunLog(all);
                 StringBuilder sb = new StringBuilder();
-                // the launcher also writes plain status lines ("... already patched", "... ok") into this file: not errors
                 for (String line : all.split("\\r?\\n")) {
                     String t = line.trim();
-                    if (t.isEmpty()) continue;
-                    if (t.matches("^(box64 interpreter (ok:|patched:|\\(already patched\\)).*|rootfs paths already patched.*|rootfs paths patched: .* errors 0( \\[.*)?)$")) continue;
+                    if (t.isEmpty() || INFO_LINE.matcher(t).matches()) continue;
                     sb.append(t).append('\n');
                 }
                 msg = sb.toString().trim();
