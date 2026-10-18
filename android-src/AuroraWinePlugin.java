@@ -632,7 +632,17 @@ public class AuroraWinePlugin extends Plugin {
             File f = new File(getContext().getFilesDir(), "aurora-last-error.txt");
             if (f.isFile() && f.lastModified() >= lastRunStart && f.length() > 0) {
                 byte[] b = java.nio.file.Files.readAllBytes(f.toPath());
-                msg = new String(b, 0, Math.min(b.length, 900), java.nio.charset.StandardCharsets.UTF_8).trim();
+                String all = new String(b, java.nio.charset.StandardCharsets.UTF_8);
+                StringBuilder sb = new StringBuilder();
+                // the launcher also writes plain status lines ("... already patched", "... ok") into this file: not errors
+                for (String line : all.split("\\r?\\n")) {
+                    String t = line.trim();
+                    if (t.isEmpty()) continue;
+                    if (t.matches("^(box64 interpreter (ok:|patched:|\\(already patched\\)).*|rootfs paths already patched.*|rootfs paths patched: .* errors 0( \\[.*)?)$")) continue;
+                    sb.append(t).append('\n');
+                }
+                msg = sb.toString().trim();
+                if (msg.length() > 900) msg = msg.substring(0, 900);
             }
         } catch (Exception ignored) { }
         r.put("error", msg);
