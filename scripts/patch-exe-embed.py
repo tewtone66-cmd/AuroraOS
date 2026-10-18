@@ -7,6 +7,9 @@ Only changes XServerDisplayActivity. Every anchor must occur exactly once, other
   3. State events for the Aurora window: preparing, launching, running, error (AuroraWinePlugin.exeState).
   4. In-window status: a small "Starting.../Preparing.../Launching" panel inside the program window (removed when
      Wine shows its first window or on error), because the program window covers the Aurora window body.
+  5. When Wine ends normally (e.g. an installer was closed) only this window is closed. Upstream exit() restarts
+     the whole app process (AppUtils.restartApplication -> Runtime.exit(0)), which would also close every Aurora
+     window and lose the "installed program" hand-over; the Aurora page gets the exeExited event instead.
 Without the aurora_rect extra every behaviour stays exactly as before (fallback).
 """
 import json
@@ -29,6 +32,10 @@ if MARK in xa:
 
 METHODS = """private android.view.View auroraStatusView; // aurora-embed
     private android.widget.TextView auroraStatusText;
+
+    private void auroraFinish() {
+        runOnUiThread(() -> { if (!isFinishing()) finish(); });
+    }
 
     private void auroraStatus(final String text) {
         if (!getIntent().hasExtra("aurora_rect")) return;
@@ -77,6 +84,8 @@ EDITS = [
      '%s.exeState("launching", ""); auroraStatus("Starting Wine..."); setupXEnvironment();' % P),
     ('auroraMapped = true;',
      'auroraMapped = true; %s.exeState("running", ""); auroraStatus(null);' % P),
+    ('else exit();',
+     'else if (getIntent().hasExtra("aurora_rect")) auroraFinish();\n                else exit();'),
     ('android.util.Log.e("AuroraWine", msg);',
      'android.util.Log.e("AuroraWine", msg); %s.exeState("error", msg); auroraStatus(null);' % P),
 ]
@@ -88,4 +97,4 @@ for old, _ in EDITS:
 for old, new in EDITS:
     xa = xa.replace(old, new)
 XA.write_text(xa, encoding='utf-8')
-print('EXE embed patch applied: window rect, in-window state events')
+print('EXE embed patch applied: window rect, in-window state events, close-only-this-window on normal exit')

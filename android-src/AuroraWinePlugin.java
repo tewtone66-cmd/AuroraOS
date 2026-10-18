@@ -24,10 +24,13 @@ import com.winlator.core.DefaultVersion;
 import com.winlator.core.FileUtils;
 import com.winlator.core.TarCompressorUtils;
 import com.winlator.core.WineInfo;
+import com.winlator.core.WineUtils;
 import com.winlator.xenvironment.RootFS;
 import com.winlator.xenvironment.RootFSInstaller;
 import java.io.File;
 import java.util.ArrayList;
+import java.util.List;
+import java.util.Map;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicLong;
@@ -36,7 +39,9 @@ import org.json.JSONObject;
 /**
  * Windows program runner built on the Winlator core (Wine + Box64/Box86), compiled into this app.
  * Part 2: install the runtime, create a container, run an .exe and report its state.
- * Methods: status, init, runExe, stopExe, listRunning, setExeRect, minimizeExe, restoreExe.
+ * Methods: status, init, runExe, stopExe, listRunning, setExeRect, minimizeExe, restoreExe,
+ *          installResult (what the last program installed), scanStart (all programs with a Start Menu/Desktop shortcut),
+ *          getLastError (error of the last run, "" when none).
  * Events: progress {step,pct}, exeStarted {id,path}, exeExited {id,path},
  *         exeState {id,path,state,msg} with state = preparing | launching | running | error.
  * Rect objects use CSS pixels of the Aurora page: {x, y, w, h, vw, vh} (vw/vh = window.innerWidth/innerHeight).
@@ -49,6 +54,8 @@ public class AuroraWinePlugin extends Plugin {
     private int curId = 0;
     private String curPath = "";
     private Activity curActivity = null;
+    private volatile String lastErrorMsg = "";
+    private static final String BEFORE_FILE = "aurora-install-before.txt";
 
     /** Called from the patched XServerDisplayActivity (aurora-embed). Safe from any thread. */
     public static void exeState(String state, String msg) {
@@ -60,6 +67,7 @@ public class AuroraWinePlugin extends Plugin {
         o.put("state", state);
         String m = msg == null ? "" : msg;
         o.put("msg", m.length() > 600 ? m.substring(0, 600) : m);
+        if ("error".equals(state)) p.lastErrorMsg = m;
         p.notifyListeners("exeState", o);
     }
 
@@ -360,6 +368,8 @@ public class AuroraWinePlugin extends Plugin {
         }
         curId = ++runSeq;
         curPath = path;
+        lastErrorMsg = "";
+        saveInstallSnapshot(ctx, containerId);
         final JSObject rectIn = call.getObject("rect");
         getActivity().runOnUiThread(() -> {
             try {
@@ -453,6 +463,132 @@ public class AuroraWinePlugin extends Plugin {
             a.finish();
             call.resolve();
         });
+    }
+
+
+    // ---------------------------------------------------------------- install detection
+
+    private Container containerById(Context ctx, int id) {
+        try {
+            return id > 0 ? new ContainerManager(ctx).getContainerById(id) : null;
+        } catch (Exception e) {
+            return null;
+        }
+    }
+
+    private static File driveCOf(Container c) {
+        return new File(c.getRootDir(), ".wine/drive_c");
+    }
+
+    private static AuroraInstallScan.PathMapper pathMapper(final Container c) {
+        return new AuroraInstallScan.PathMapper() {
+            @Override
+            public String toUnix(String dosPath) {
+                try {
+                    return WineUtils.dosToUnixPath(dosPath, c);
+                } catch (Exception e) {
+                    return "";
+                }
+            }
+        };
+    }
+
+    /** Remembers Program Files / Start Menu / Desktop before the program runs; installResult compares against it. */
+    private void saveInstallSnapshot(Context ctx, int containerId) {
+        File f = new File(ctx.getFilesDir(), BEFORE_FILE);
+        f.delete();
+        try {
+            Container c = containerById(ctx, containerId);
+            if (c == null || !driveCOf(c).isDirectory()) return;
+            Map<String, String> snap = AuroraInstallScan.snapshot(driveCOf(c));
+            snap.put("#cid", String.valueOf(containerId));
+            AuroraInstallScan.save(snap, f);
+        } catch (Throwable t) {
+            f.delete(); // no snapshot = no install detection for this run, the program still starts
+        }
+    }
+
+    private static JSArray itemsToJson(List<AuroraInstallScan.Item> items) {
+        JSArray arr = new JSArray();
+        for (AuroraInstallScan.Item it : items) {
+            JSObject o = new JSObject();
+            o.put("lnk", it.lnk);
+            o.put("name", it.name);
+            o.put("target", it.target);
+            o.put("args", it.args);
+            o.put("cwd", it.cwd);
+            o.put("iconPath", it.iconPath);
+            o.put("iconIndex", it.iconIndex);
+            o.put("startMenu", it.startMenu);
+            arr.put(o);
+        }
+        return arr;
+    }
+
+    /**
+     * What the program that just ran added to Program Files / Start Menu / Desktop: {ran, items[]}.
+     * ran=false when there is no snapshot (already consumed, or the container is gone). One-shot: it consumes the snapshot.
+     */
+    @PluginMethod
+    public void installResult(final PluginCall call) {
+        final Context ctx = getContext();
+        new Thread(() -> {
+            JSObject r = new JSObject();
+            try {
+                File f = new File(ctx.getFilesDir(), BEFORE_FILE);
+                Map<String, String> before = AuroraInstallScan.load(f);
+                r.put("ran", false);
+                r.put("items", new JSArray());
+                if (before != null) {
+                    f.delete();
+                    int cid = 0;
+                    try {
+                        cid = Integer.parseInt(before.remove("#cid"));
+                    } catch (RuntimeException e) {
+                        cid = 0;
+                    }
+                    Container c = containerById(ctx, cid);
+                    if (c != null) {
+                        List<AuroraInstallScan.Item> items = AuroraInstallScan.changedSince(driveCOf(c), before, pathMapper(c));
+                        r.put("ran", true);
+                        r.put("items", itemsToJson(items));
+                    }
+                }
+                call.resolve(r);
+            } catch (Throwable t) {
+                call.reject(t.getMessage() == null ? "Could not check the installation" : t.getMessage());
+            }
+        }, "aurora-install-result").start();
+    }
+
+    /** All programs that have a Start Menu or Desktop shortcut right now: {items[]}. Optional containerId. */
+    @PluginMethod
+    public void scanStart(final PluginCall call) {
+        final Context ctx = getContext();
+        final int want = call.getInt("containerId", 0);
+        new Thread(() -> {
+            try {
+                int cid = want;
+                if (cid <= 0) {
+                    ArrayList<Container> list = new ContainerManager(ctx).getContainers();
+                    cid = list.isEmpty() ? 0 : list.get(0).id;
+                }
+                Container c = containerById(ctx, cid);
+                JSObject r = new JSObject();
+                r.put("items", c == null ? new JSArray() : itemsToJson(AuroraInstallScan.allShortcuts(driveCOf(c), pathMapper(c))));
+                call.resolve(r);
+            } catch (Throwable t) {
+                call.reject(t.getMessage() == null ? "Could not read the Start Menu" : t.getMessage());
+            }
+        }, "aurora-scan-start").start();
+    }
+
+    /** Error of the last run ({error: ""} when it had none); cleared when the next program starts. */
+    @PluginMethod
+    public void getLastError(PluginCall call) {
+        JSObject r = new JSObject();
+        r.put("error", lastErrorMsg);
+        call.resolve(r);
     }
 
     @PluginMethod
