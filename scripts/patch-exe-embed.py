@@ -71,6 +71,10 @@ METHODS = """private android.view.View auroraStatusView; // aurora-embed
     }"""
 
 EDITS = [
+    ('FrameLayout.LayoutParams lp = new FrameLayout.LayoutParams(-1, -2);',
+     'FrameLayout.LayoutParams lp = new FrameLayout.LayoutParams(-1, -1);'),
+    ('t.setTextSize(13);',
+     't.setTextSize(12); t.setMovementMethod(new android.text.method.ScrollingMovementMethod()); t.setVerticalScrollBarEnabled(true);'),
     ('private String screenEffectProfile;',
      'private String screenEffectProfile;\n    ' + METHODS),
     ('setupUI();', 'setupUI(); auroraStatus("Starting...");'),

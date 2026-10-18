@@ -49,7 +49,7 @@ public final class AuroraElf {
         String pkg = ctx.getPackageName();
         String alias = "/data/data/" + pkg + "/.ld";
 
-        try (RandomAccessFile f = new RandomAccessFile(bin, "rw")) {
+        try (RandomAccessFile f = new RandomAccessFile(bin, "r")) { // read-only: a running box64 cannot be opened for writing (ETXTBSY)
             byte[] eh = new byte[64];
             f.readFully(eh);
             if (eh[0] != 0x7f || eh[1] != 'E' || eh[2] != 'L' || eh[3] != 'F') return "box64 is not an ELF file: " + bin;
@@ -102,8 +102,10 @@ public final class AuroraElf {
                 if (nb.length + 1 > size) return "box64 interpreter " + interp + " cannot be fixed: new path too long (" + target + ")";
                 byte[] out = new byte[(int) size];
                 System.arraycopy(nb, 0, out, 0, nb.length);
-                f.seek(off);
-                f.write(out);
+                try (RandomAccessFile w = new RandomAccessFile(bin, "rw")) {
+                    w.seek(off);
+                    w.write(out);
+                }
                 bin.setExecutable(true, false);
                 return "box64 interpreter patched: " + interp + " -> " + target;
             }
