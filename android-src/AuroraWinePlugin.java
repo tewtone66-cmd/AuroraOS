@@ -7,6 +7,8 @@ import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.os.Environment;
+import android.view.Gravity;
+import android.view.WindowManager;
 import androidx.preference.PreferenceManager;
 import com.getcapacitor.JSArray;
 import com.getcapacitor.JSObject;
@@ -34,19 +36,70 @@ import org.json.JSONObject;
 /**
  * Windows program runner built on the Winlator core (Wine + Box64/Box86), compiled into this app.
  * Part 2: install the runtime, create a container, run an .exe and report its state.
- * Methods: status, init, runExe, stopExe, listRunning.
- * Events: progress {step,pct}, exeStarted {id,path}, exeExited {id,path}.
+ * Methods: status, init, runExe, stopExe, listRunning, setExeRect, minimizeExe, restoreExe.
+ * Events: progress {step,pct}, exeStarted {id,path}, exeExited {id,path},
+ *         exeState {id,path,state,msg} with state = preparing | launching | running | error.
+ * Rect objects use CSS pixels of the Aurora page: {x, y, w, h, vw, vh} (vw/vh = window.innerWidth/innerHeight).
  */
 @CapacitorPlugin(name = "AuroraWine")
 public class AuroraWinePlugin extends Plugin {
+    private static volatile AuroraWinePlugin inst;
     private volatile boolean busy = false;
     private int runSeq = 0;
     private int curId = 0;
     private String curPath = "";
     private Activity curActivity = null;
 
+    /** Called from the patched XServerDisplayActivity (aurora-embed). Safe from any thread. */
+    public static void exeState(String state, String msg) {
+        AuroraWinePlugin p = inst;
+        if (p == null) return;
+        JSObject o = new JSObject();
+        o.put("id", p.curId);
+        o.put("path", p.curPath);
+        o.put("state", state);
+        String m = msg == null ? "" : msg;
+        o.put("msg", m.length() > 600 ? m.substring(0, 600) : m);
+        p.notifyListeners("exeState", o);
+    }
+
+    /** Puts the program window on a screen rectangle {x, y, w, h} (pixels); touches outside it reach Aurora OS. */
+    public static void applyRect(Activity a, int[] r) {
+        if (a == null || r == null || r.length < 4) return;
+        android.view.Window w = a.getWindow();
+        w.addFlags(WindowManager.LayoutParams.FLAG_NOT_TOUCH_MODAL | WindowManager.LayoutParams.FLAG_LAYOUT_NO_LIMITS);
+        WindowManager.LayoutParams lp = w.getAttributes();
+        lp.gravity = Gravity.TOP | Gravity.LEFT;
+        lp.x = r[0];
+        lp.y = r[1];
+        lp.width = r[2];
+        lp.height = r[3];
+        w.setAttributes(lp);
+    }
+
+    /** CSS-pixel rect of the Aurora page -> screen pixels. Must run on the UI thread. Returns null when unusable. */
+    private int[] rectToScreen(JSONObject o) {
+        if (o == null) return null;
+        try {
+            double vw = o.optDouble("vw", 0), vh = o.optDouble("vh", 0);
+            android.webkit.WebView wv = getBridge().getWebView();
+            if (vw <= 0 || vh <= 0 || wv == null || wv.getWidth() <= 0 || wv.getHeight() <= 0) return null;
+            int[] loc = new int[2];
+            wv.getLocationOnScreen(loc);
+            double sx = wv.getWidth() / vw, sy = wv.getHeight() / vh;
+            int w = (int) Math.round(o.optDouble("w", 0) * sx);
+            int h = (int) Math.round(o.optDouble("h", 0) * sy);
+            if (w < 64 || h < 64) return null;
+            return new int[]{loc[0] + (int) Math.round(o.optDouble("x", 0) * sx),
+                loc[1] + (int) Math.round(o.optDouble("y", 0) * sy), w, h};
+        } catch (Exception e) {
+            return null;
+        }
+    }
+
     @Override
     public void load() {
+        inst = this;
         Application app = (Application) getContext().getApplicationContext();
         app.registerActivityLifecycleCallbacks(new Application.ActivityLifecycleCallbacks() {
             @Override
@@ -260,7 +313,11 @@ public class AuroraWinePlugin extends Plugin {
         }, "aurora-wine-init").start();
     }
 
-    /** Runs a Windows program: {path, containerId?}. Resolves with {id} once the launch was requested. */
+    /**
+     * Runs a Windows program: {path, containerId?, rect?}. Resolves with {id} once the launch was requested.
+     * With rect {x,y,w,h,vw,vh} the program window is placed over that Aurora window area and the X screen gets its
+     * size; without rect the old full-screen behaviour is unchanged.
+     */
     @PluginMethod
     public void runExe(final PluginCall call) {
         final String path = call.getString("path");
@@ -303,17 +360,83 @@ public class AuroraWinePlugin extends Plugin {
         }
         curId = ++runSeq;
         curPath = path;
-        final Intent it = new Intent(ctx, XServerDisplayActivity.class);
-        it.putExtra("container_id", containerId);
-        it.putExtra("exec_path", path);
+        final JSObject rectIn = call.getObject("rect");
         getActivity().runOnUiThread(() -> {
             try {
+                Intent it = new Intent(ctx, XServerDisplayActivity.class);
+                it.putExtra("container_id", containerId);
+                it.putExtra("exec_path", path);
+                int[] r = rectToScreen(rectIn);
+                if (r != null) {
+                    it.putExtra("aurora_rect", r);
+                    it.putExtra("aurora_screen", Math.max(320, r[2] & ~1) + "x" + Math.max(240, r[3] & ~1));
+                }
                 getActivity().startActivity(it);
-                JSObject r = new JSObject();
-                r.put("id", curId);
-                call.resolve(r);
+                JSObject o = new JSObject();
+                o.put("id", curId);
+                call.resolve(o);
             } catch (Exception e) {
                 call.reject(e.getMessage() == null ? "Could not start the program" : e.getMessage());
+            }
+        });
+    }
+
+    /** Moves/resizes the running program window: {x,y,w,h,vw,vh}. The X screen keeps its size (the view scales). */
+    @PluginMethod
+    public void setExeRect(final PluginCall call) {
+        final Activity a = curActivity;
+        if (a == null) {
+            call.resolve();
+            return;
+        }
+        final JSObject data = call.getData();
+        getActivity().runOnUiThread(() -> {
+            int[] r = rectToScreen(data);
+            if (r != null) applyRect(a, r);
+            call.resolve();
+        });
+    }
+
+    /** Minimize: brings Aurora OS in front of the program window (the program keeps running). */
+    @PluginMethod
+    public void minimizeExe(final PluginCall call) {
+        if (curActivity == null) {
+            call.resolve();
+            return;
+        }
+        final Activity m = getActivity();
+        m.runOnUiThread(() -> {
+            try {
+                Intent it = new Intent(m, MainActivity.class);
+                it.addFlags(Intent.FLAG_ACTIVITY_REORDER_TO_FRONT);
+                m.startActivity(it);
+                call.resolve();
+            } catch (Exception e) {
+                call.reject(e.getMessage() == null ? "Could not minimize" : e.getMessage());
+            }
+        });
+    }
+
+    /** Restore: puts the program window back in front, optionally on a new rect {x,y,w,h,vw,vh}. */
+    @PluginMethod
+    public void restoreExe(final PluginCall call) {
+        final Activity a = curActivity;
+        if (a == null) {
+            call.resolve();
+            return;
+        }
+        final Activity m = getActivity();
+        final JSObject data = call.getData();
+        m.runOnUiThread(() -> {
+            try {
+                int[] r = rectToScreen(data);
+                if (r != null) applyRect(a, r);
+                Intent it = new Intent(m, XServerDisplayActivity.class);
+                it.addFlags(Intent.FLAG_ACTIVITY_REORDER_TO_FRONT);
+                m.startActivity(it);
+                call.resolve();
+            } catch (Exception e) {
+                call.reject(e.getMessage() == null ? "Could not restore" : e.getMessage());
             }
         });
     }
