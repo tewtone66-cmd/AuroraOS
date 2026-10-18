@@ -257,12 +257,10 @@ async function lnkBaseline(){if(!NW||ls('aur.lnkseen')!=null)return;try{const r=
 async function afterExe(path){if(!NW)return;ls('aur.pend','');try{
 /* installer finished: what it added to Program Files / Start Menu / Desktop (compared with the state before it started) */
 let ir=null;try{ir=await NW.installResult({})}catch(e){}
-if(ir&&ir.ran&&ir.items&&ir.items.length){const low0=String(path||'').toLowerCase(),seen0=seenLnk();let n0=0,pick=null;
-for(const i of ir.items){if(i.lnk)seen0.add(i.lnk);if(await addExe({p:i.target,t:i.name,a:i.args,w:i.cwd,l:i.lnk,ip:i.iconPath,ii:i.iconIndex},true,n0))n0++;
-if(!pick&&String(i.target).toLowerCase()!==low0)pick=EXES.find(x=>x.p===i.target&&(x.a||'')===(i.args||''))||null}
+if(ir&&ir.ran&&ir.items&&ir.items.length){const seen0=seenLnk();let n0=0;
+for(const i of ir.items){if(i.lnk)seen0.add(i.lnk);if(await addExe({p:i.target,t:i.name,a:i.args,w:i.cwd,l:i.lnk,ip:i.iconPath,ii:i.iconIndex},true,n0))n0++}
 ls('aur.lnkseen',JSON.stringify([...seen0]));
 if(n0)toast(n0===1?'Installed: '+EXES[EXES.length-1].t:n0+' programs installed and added to desktop');
-if(pick)setTimeout(()=>{if(!exeW)launchExe(pick)},1500);
 return}
 const r=await NW.scanStart({}),items=(r&&r.items)||[],seen=seenLnk(),fresh=items.filter(i=>!seen.has(i.lnk));
 items.forEach(i=>seen.add(i.lnk));ls('aur.lnkseen',JSON.stringify([...seen]));let n=0;
