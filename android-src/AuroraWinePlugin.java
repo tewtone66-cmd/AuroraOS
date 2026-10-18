@@ -7,6 +7,7 @@ import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.os.Environment;
+import android.util.Base64;
 import android.view.Gravity;
 import android.view.WindowManager;
 import androidx.preference.PreferenceManager;
@@ -41,7 +42,8 @@ import org.json.JSONObject;
  * Part 2: install the runtime, create a container, run an .exe and report its state.
  * Methods: status, init, runExe, stopExe, listRunning, setExeRect, minimizeExe, restoreExe,
  *          installResult (what the last program installed), scanStart (all programs with a Start Menu/Desktop shortcut),
- *          getLastError (error of the last run, "" when none).
+ *          getLastError (error of the last run, "" when none),
+ *          exeIcon (icon of an exe/dll/ico as a PNG data URL: {path, index, fallback} -> {png}).
  * Events: progress {step,pct}, exeStarted {id,path}, exeExited {id,path},
  *         exeState {id,path,state,msg} with state = preparing | launching | running | error.
  * Rect objects use CSS pixels of the Aurora page: {x, y, w, h, vw, vh} (vw/vh = window.innerWidth/innerHeight).
@@ -581,6 +583,44 @@ public class AuroraWinePlugin extends Plugin {
                 call.reject(t.getMessage() == null ? "Could not read the Start Menu" : t.getMessage());
             }
         }, "aurora-scan-start").start();
+    }
+
+    /** PNG of the icon in a PE file (index >= 0: n-th icon group, < 0: group id) or a .ico; null when there is none. */
+    private byte[] iconBytes(Context ctx, String path, int index) {
+        if (path == null || path.isEmpty()) return null;
+        String p = path;
+        if (p.length() > 2 && p.charAt(1) == ':' && (p.charAt(2) == '\\' || p.charAt(2) == '/')) {
+            ArrayList<Container> list = new ContainerManager(ctx).getContainers();
+            if (list.isEmpty()) return null;
+            p = pathMapper(list.get(0)).toUnix(p);
+        }
+        if (p == null || p.isEmpty()) return null;
+        File f = AuroraInstallScan.resolveCI(new File(p));
+        if (f == null || !f.isFile()) return null;
+        return f.getName().toLowerCase(java.util.Locale.ROOT).endsWith(".ico") ? AuroraPeIcon.fromIco(f) : AuroraPeIcon.extract(f, index);
+    }
+
+    /** Icon of a program: {path, index?, fallback?} -> {png: "data:image/png;base64,..."} ("" when it has none). */
+    @PluginMethod
+    public void exeIcon(final PluginCall call) {
+        final Context ctx = getContext();
+        final String path = call.getString("path");
+        final String fallback = call.getString("fallback");
+        final int index = call.getInt("index", 0);
+        new Thread(() -> {
+            String png = "";
+            try {
+                byte[] b = iconBytes(ctx, path, index);
+                if (b == null && fallback != null && !fallback.equals(path)) b = iconBytes(ctx, fallback, 0);
+                // the page keeps the icon in localStorage: skip unusually large ones
+                if (b != null && b.length > 0 && b.length <= 120000) png = "data:image/png;base64," + Base64.encodeToString(b, Base64.NO_WRAP);
+            } catch (Throwable t) {
+                png = "";
+            }
+            JSObject r = new JSObject();
+            r.put("png", png);
+            call.resolve(r);
+        }, "aurora-exe-icon").start();
     }
 
     /** Error of the last run ({error: ""} when it had none); cleared when the next program starts. */

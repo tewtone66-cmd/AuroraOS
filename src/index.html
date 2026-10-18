@@ -241,12 +241,16 @@ const exeTitle=p=>String(p||'').split('/').pop().replace(/\.(exe|lnk)$/i,'').sli
 async function exeIconOf(path,iconPath,index){if(!NW)return'';try{const r=await NW.exeIcon({path:iconPath||path,index:index|0,fallback:path});return(r&&r.png)||''}catch(e){return''}}
 async function addExe(o,quiet,ord){if(!o||!o.p)return false;
 if(EXES.some(x=>x.p===o.p&&(x.a||'')===(o.a||''))){if(!quiet)toast('Already on the desktop');return false}
-const e={id:'x'+Date.now().toString(36)+Math.random().toString(36).slice(2,6),t:(o.t||exeTitle(o.p)).slice(0,40),p:o.p,a:o.a||'',w:o.w||'',l:o.l||'',ic:''};
+const e={id:'x'+Date.now().toString(36)+Math.random().toString(36).slice(2,6),t:(o.t||exeTitle(o.p)).slice(0,40),p:o.p,a:o.a||'',w:o.w||'',l:o.l||'',ip:o.ip||'',ii:o.ii|0,ic:''};
 e.ic=await exeIconOf(o.p,o.ip,o.ii);EXES.push(e);DESK.push(['exe',e.t,e.id]);saveExes();buildIcons(true);
 const b=$('.di[data-e="'+e.id+'"]');if(b){b.style.setProperty('--i',ord|0);b.classList.remove('re')}
 if(!quiet)toast('Added to desktop: '+e.t);return true}
 function removeExe(id){const i=DESK.findIndex(d=>d[0]==='exe'&&d[2]===id);if(i>=0)DESK.splice(i,1);EXES=EXES.filter(e=>e.id!==id);saveExes();buildIcons(true);toast('Removed from desktop')}
-function launchExe(e){if(!e)return;return window.aurora.openExe(e.l||e.p,{alt:e.l?e.p:'',args:e.a,cwd:e.w})}
+/* a shortcut with arguments or its own working folder runs through its .lnk, otherwise the exe is started directly; each is the fallback of the other */
+function launchExe(e){if(!e)return;const dir=String(e.p||'').replace(/\/[^\/]*$/,''),useL=!!e.l&&(!!e.a||(!!e.w&&e.w.replace(/\/+$/,'')!==dir));
+return window.aurora.openExe(useL?e.l:e.p,{alt:useL?e.p:(e.l||''),args:e.a,cwd:e.w})}
+/* programs added before icons worked (or whose icon failed once) get their icon now; the result is kept */
+async function fillExeIcons(){if(!NW)return;let ch=false;for(const e of EXES){if(e.ic||e.noic)continue;const ic=await exeIconOf(e.p,e.ip||'',e.ii|0);if(ic)e.ic=ic;else e.noic=1;ch=true}if(ch){saveExes();buildIcons(false)}}
 const seenLnk=()=>new Set(jl('aur.lnkseen',[]));
 async function lnkBaseline(){if(!NW||ls('aur.lnkseen')!=null)return;try{const r=await NW.scanStart({});ls('aur.lnkseen',JSON.stringify(((r&&r.items)||[]).map(i=>i.lnk)))}catch(e){if(isJsErr(e))reportErr(e,'baseline')}}
 /* after a Windows program closes: new Start Menu shortcuts (installer) become icons; a portable exe is added by itself */
@@ -719,5 +723,5 @@ function appWin(w,arg){
 }
 }
 
-[()=>applyTheme(),()=>applyWall(),()=>applyMouse(),()=>buildUI(),()=>listen('dlprogress',dlEv),()=>{wineEvents();const pd=ls('aur.pend');if(pd)setTimeout(()=>afterExe(pd),1500)},()=>clock(),()=>setInterval(clock,20000),()=>vmSet(ls('aur.vm')==='1'),()=>{const mq=window.matchMedia&&window.matchMedia('(prefers-color-scheme:dark)');if(mq){if(typeof mq.addEventListener==='function')mq.addEventListener('change',applyTheme);else if(typeof mq.addListener==='function')mq.addListener(applyTheme)}}].forEach(f=>{try{f()}catch(e){console.error(e);window.dispatchEvent(new ErrorEvent('error',{message:String(e&&e.message||e)+' in '+f.toString().slice(0,40),lineno:0,colno:0}))}});
+[()=>applyTheme(),()=>applyWall(),()=>applyMouse(),()=>buildUI(),()=>listen('dlprogress',dlEv),()=>{wineEvents();const pd=ls('aur.pend');if(pd)setTimeout(()=>afterExe(pd),1500);setTimeout(fillExeIcons,2500)},()=>clock(),()=>setInterval(clock,20000),()=>vmSet(ls('aur.vm')==='1'),()=>{const mq=window.matchMedia&&window.matchMedia('(prefers-color-scheme:dark)');if(mq){if(typeof mq.addEventListener==='function')mq.addEventListener('change',applyTheme);else if(typeof mq.addListener==='function')mq.addListener(applyTheme)}}].forEach(f=>{try{f()}catch(e){console.error(e);window.dispatchEvent(new ErrorEvent('error',{message:String(e&&e.message||e)+' in '+f.toString().slice(0,40),lineno:0,colno:0}))}});
 </script></body></html>
