@@ -144,8 +144,13 @@ public final class AuroraElf {
             Os.symlink(rootDir.getPath(), link.getPath());
         }
 
+        // XServerDisplayActivity re-extracts rootfs_patches.tzst (original, unpatched files) whenever the app version
+        // differs from the one stored in the container, so the marker is tied to the app's versionCode.
+        String version = "v1:" + appVersion(ctx);
         File marker = new File(rootDir, MARKER);
-        if (marker.isFile()) return "rootfs paths already patched (" + nb.toString().replaceAll("/+$", "") + ")";
+        if (marker.isFile() && version.equals(readText(marker))) {
+            return "rootfs paths already patched (" + nb.toString().replaceAll("/+$", "") + ")";
+        }
 
         int[] stat = new int[4]; // files scanned, files patched, occurrences, errors
         StringBuilder errs = new StringBuilder();
@@ -154,10 +159,27 @@ public final class AuroraElf {
             + stat[2] + " occurrences, errors " + stat[3] + (errs.length() > 0 ? " [" + errs + "]" : "");
         if (stat[3] == 0) {
             try (FileOutputStream o = new FileOutputStream(marker)) {
-                o.write(summary.getBytes(StandardCharsets.UTF_8));
+                o.write(version.getBytes(StandardCharsets.UTF_8));
             }
         }
         return summary;
+    }
+
+    @SuppressWarnings("deprecation")
+    private static int appVersion(Context ctx) {
+        try {
+            return ctx.getPackageManager().getPackageInfo(ctx.getPackageName(), 0).versionCode;
+        } catch (Throwable t) {
+            return 0;
+        }
+    }
+
+    private static String readText(File f) {
+        try {
+            return new String(Files.readAllBytes(f.toPath()), StandardCharsets.UTF_8).trim();
+        } catch (Throwable t) {
+            return "";
+        }
     }
 
     private static void walk(File dir, boolean top, byte[] oldB, byte[] newB, int[] stat, StringBuilder errs) {
@@ -238,6 +260,17 @@ public final class AuroraElf {
             boolean append = f.isFile() && System.currentTimeMillis() - f.lastModified() < 120000;
             try (FileOutputStream o = new FileOutputStream(f, append)) {
                 o.write((msg + "\n").getBytes(StandardCharsets.UTF_8));
+            }
+        } catch (Throwable ignored) { }
+        // copy that survives the app: Download/aurora-wine.log (best effort; needs the storage permission the app already asks for)
+        try {
+            File dl = android.os.Environment.getExternalStoragePublicDirectory(android.os.Environment.DIRECTORY_DOWNLOADS);
+            if (dl != null && (dl.isDirectory() || dl.mkdirs())) {
+                File log = new File(dl, "aurora-wine.log");
+                boolean big = log.isFile() && log.length() > 200000;
+                try (FileOutputStream o = new FileOutputStream(log, !big)) {
+                    o.write((new java.util.Date() + "\n" + msg + "\n\n").getBytes(StandardCharsets.UTF_8));
+                }
             }
         } catch (Throwable ignored) { }
     }
