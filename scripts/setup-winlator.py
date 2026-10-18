@@ -100,6 +100,24 @@ edit(main / 'java/com/winlator/xenvironment/components/GuestProgramLauncherCompo
                          'if (!box64Version.equals(currentBox64Version) || !new File(RootFS.find(context).getRootDir(), "/usr/local/bin/box64").isFile()) {'),
      'box64 re-extract')
 
+
+# box64 is a glibc binary whose ELF interpreter points into /data/data/com.winlator/...; with another app id execve()
+# fails with error=2 although the file exists. AuroraElf (android-src/AuroraElf.java) repairs PT_INTERP when the
+# interpreter is missing. It runs right before every launch, i.e. after any (re-)extraction of box64.
+def patch_launcher_interp(s):
+    anchor = 'String command = rootDir+"/usr/local/bin/box64 "+guestExecutable;'
+    if 'aurora-elf' in s:
+        return s
+    if s.count(anchor) != 1:
+        raise SystemExit('GuestProgramLauncherComponent: box64 command line found %d times (need exactly 1)' % s.count(anchor))
+    call = ('%s.AuroraElf.fixInterpreter(environment.getContext(), new File(rootDir, "usr/local/bin/box64")); // aurora-elf\n        '
+            % APP_ID)
+    return s.replace(anchor, call + anchor)
+
+
+edit(main / 'java/com/winlator/xenvironment/components/GuestProgramLauncherComponent.java',
+     patch_launcher_interp, 'box64 interpreter fix')
+
 # ---- 4. resources: merge without overwriting the Capacitor app's own ----
 dst_res = main / 'res'
 merged = skipped = 0
