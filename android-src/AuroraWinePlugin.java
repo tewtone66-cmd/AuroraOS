@@ -21,6 +21,7 @@ import com.winlator.container.Container;
 import com.winlator.container.ContainerManager;
 import com.winlator.core.AppUtils;
 import com.winlator.core.DefaultVersion;
+import com.winlator.core.EnvVars;
 import com.winlator.core.FileUtils;
 import com.winlator.core.TarCompressorUtils;
 import com.winlator.core.WineInfo;
@@ -50,6 +51,8 @@ public class AuroraWinePlugin extends Plugin {
     private String curPath = "";
     private Activity curActivity = null;
     private volatile long lastRunStart = 0;
+    /** One-line result of the last Java install attempt; written to Download/aurora-wine.log (not an app error). */
+    private volatile String javaNote = "";
 
     /** Called from the patched XServerDisplayActivity (aurora-embed). Safe from any thread. */
     public static void exeState(String state, String msg) {
@@ -177,6 +180,175 @@ public class AuroraWinePlugin extends Plugin {
         bin.setExecutable(true, false);
         PreferenceManager.getDefaultSharedPreferences(ctx).edit()
             .putString("current_box64_version", DefaultVersion.BOX64).apply();
+    }
+
+    // ---------------------------------------------------------------- Java for Windows programs (C:\Java)
+
+    private static final String JAVA_ZIP = "aurora-java.zip";
+
+    /**
+     * When Download/aurora-java.zip exists and C:\Java does not exist in the container's Wine prefix, unpacks the zip
+     * into drive_c/Java (one common top-level folder inside the zip is dropped, so Java/bin/javaw.exe is direct).
+     * The zip is unpacked into a temporary folder first and renamed at the end, so a half-finished unpack never
+     * looks like an installed Java. Never throws: a failure is only noted in aurora-wine.log, ordinary programs
+     * keep starting.
+     */
+    private void ensureJava(Context ctx, int containerId) {
+        javaNote = "";
+        File tmp = null;
+        try {
+            File dl = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS);
+            File zip = dl == null ? null : new File(dl, JAVA_ZIP);
+            if (zip == null || !zip.isFile() || zip.length() == 0) return;
+            Container c = new ContainerManager(ctx).getContainerById(containerId);
+            if (c == null || c.getRootDir() == null) return;
+            File driveC = new File(c.getRootDir(), ".wine/drive_c");
+            if (!driveC.isDirectory()) {
+                javaNote = "java: skipped, drive_c not found in the container";
+                return;
+            }
+            if (resolveCI(driveC, "Java") != null) return;
+            exeState("preparing", "Installing Java (first run)...");
+            tmp = new File(driveC, ".aurora-java-tmp");
+            if (tmp.exists()) FileUtils.delete(tmp);
+            int n = unzipJava(zip, tmp);
+            File javaw = resolveCI(tmp, "bin/javaw.exe");
+            if (javaw == null || !javaw.isFile()) throw new Exception(JAVA_ZIP + " has no bin/javaw.exe");
+            if (!tmp.renameTo(new File(driveC, "Java"))) throw new Exception("could not rename the temporary folder to C:\\Java");
+            tmp = null;
+            javaNote = "java: installed C:\\Java from " + JAVA_ZIP + " (" + n + " files)";
+        } catch (Throwable e) {
+            javaNote = "java: install FAILED: " + e;
+            if (tmp != null) FileUtils.delete(tmp);
+        }
+    }
+
+    /** Zip entry name with '/' separators, without leading or trailing slashes ("" for nothing). */
+    private static String zipName(String raw) {
+        String s = raw.replace('\\', '/');
+        while (s.startsWith("/")) s = s.substring(1);
+        while (s.endsWith("/")) s = s.substring(0, s.length() - 1);
+        return s;
+    }
+
+    /**
+     * Unpacks zip into the new folder dest. A single common top-level folder is dropped. Entries that would land
+     * outside dest (zip-slip: "..", absolute paths) abort the unpack. Returns the number of files written.
+     */
+    private static int unzipJava(File zip, File dest) throws Exception {
+        if (!dest.mkdirs()) throw new Exception("could not create " + dest.getPath());
+        final String destCanon = dest.getCanonicalPath() + File.separator;
+        try (java.util.zip.ZipFile zf = new java.util.zip.ZipFile(zip)) {
+            String top = null;
+            boolean strip = true, nested = false, any = false;
+            java.util.Enumeration<? extends java.util.zip.ZipEntry> en = zf.entries();
+            while (en.hasMoreElements()) {
+                java.util.zip.ZipEntry e = en.nextElement();
+                String nm = zipName(e.getName());
+                if (nm.isEmpty()) continue;
+                any = true;
+                int i = nm.indexOf('/');
+                if (i < 0 && !e.isDirectory()) {
+                    strip = false;
+                    break;
+                }
+                String first = i < 0 ? nm : nm.substring(0, i);
+                if (top == null) top = first;
+                else if (!top.equals(first)) {
+                    strip = false;
+                    break;
+                }
+                if (i >= 0) nested = true;
+            }
+            if (!any) throw new Exception("the zip is empty");
+            strip = strip && nested;
+
+            int files = 0;
+            byte[] buf = new byte[65536];
+            en = zf.entries();
+            while (en.hasMoreElements()) {
+                java.util.zip.ZipEntry e = en.nextElement();
+                String nm = zipName(e.getName());
+                if (nm.isEmpty()) continue;
+                if (strip) {
+                    int i = nm.indexOf('/');
+                    if (i < 0) continue;
+                    nm = nm.substring(i + 1);
+                    if (nm.isEmpty()) continue;
+                }
+                File out = new File(dest, nm);
+                if (("/" + nm + "/").contains("/../") || !(out.getCanonicalPath() + File.separator).startsWith(destCanon)) {
+                    throw new Exception("unsafe path in zip: " + e.getName());
+                }
+                if (e.isDirectory()) {
+                    if (!out.isDirectory() && !out.mkdirs()) throw new Exception("could not create " + out.getPath());
+                    continue;
+                }
+                File parent = out.getParentFile();
+                if (parent != null && !parent.isDirectory() && !parent.mkdirs()) throw new Exception("could not create " + parent.getPath());
+                try (java.io.InputStream in = zf.getInputStream(e); java.io.FileOutputStream fo = new java.io.FileOutputStream(out)) {
+                    int r;
+                    while ((r = in.read(buf)) > 0) fo.write(buf, 0, r);
+                }
+                out.setExecutable(true, false);
+                long t = e.getTime();
+                if (t > 0) out.setLastModified(t);
+                files++;
+            }
+            return files;
+        }
+    }
+
+    private static final String JAVA_HOME_WIN = "C:\\Java";
+    private static final String JAVA_BIN_WIN = "C:\\Java\\bin";
+
+    /** True when the ';'-separated Windows path list already has dir (case-insensitive, trailing '\' ignored). */
+    private static boolean hasPathEntry(String list, String dir) {
+        if (list == null) return false;
+        for (String part : list.split(";")) {
+            String p = part.trim();
+            while (p.endsWith("\\")) p = p.substring(0, p.length() - 1);
+            if (p.equalsIgnoreCase(dir)) return true;
+        }
+        return false;
+    }
+
+    /**
+     * Once C:\Java\bin\javaw.exe exists, makes the container's saved envVars (key "envVars" in its .container file,
+     * which XServerDisplayActivity reads at every start and hands to the Wine process) contain JAVA_HOME=C:\Java and
+     * C:\Java\bin in WINEPATH. Wine prepends WINEPATH to the Windows PATH; PATH itself must not be set there, because
+     * the container envVars are applied after the launcher's own Linux PATH and would replace it. Runs for existing
+     * containers too and only writes the file when something changes. Never throws.
+     */
+    private void ensureJavaEnv(Context ctx, int containerId) {
+        try {
+            Container c = new ContainerManager(ctx).getContainerById(containerId);
+            if (c == null || c.getRootDir() == null) return;
+            File javaw = resolveCI(new File(c.getRootDir(), ".wine/drive_c"), "Java/bin/javaw.exe");
+            if (javaw == null || !javaw.isFile()) return;
+            EnvVars env = new EnvVars(c.getEnvVars());
+            boolean changed = false;
+            if (!JAVA_HOME_WIN.equals(env.get("JAVA_HOME"))) {
+                env.put("JAVA_HOME", JAVA_HOME_WIN);
+                changed = true;
+            }
+            String wp = env.get("WINEPATH");
+            if (!hasPathEntry(wp, JAVA_BIN_WIN)) {
+                env.put("WINEPATH", wp.isEmpty() ? JAVA_BIN_WIN : JAVA_BIN_WIN + ";" + wp);
+                changed = true;
+            }
+            if (!changed) return;
+            c.setEnvVars(env.toString());
+            c.saveData();
+            addJavaNote("java env: container " + containerId + " now has JAVA_HOME=" + JAVA_HOME_WIN + " and WINEPATH=" + env.get("WINEPATH"));
+        } catch (Throwable e) {
+            addJavaNote("java env: update FAILED: " + e);
+        }
+    }
+
+    private void addJavaNote(String line) {
+        String n = javaNote;
+        javaNote = n.isEmpty() ? line : n + "\n" + line;
     }
 
     /** Same cleanup Winlator does before unpacking a new rootfs (keeps user data in home and installed wine builds). */
@@ -365,6 +537,13 @@ public class AuroraWinePlugin extends Plugin {
         try {
             new File(ctx.getFilesDir(), "aurora-last-error.txt").delete();
         } catch (Exception ignored) { }
+        busy = true;
+        try {
+            ensureJava(ctx, containerId);
+            ensureJavaEnv(ctx, containerId);
+        } finally {
+            busy = false;
+        }
         final JSObject rectIn = call.getObject("rect");
         getActivity().runOnUiThread(() -> {
             try {
@@ -643,6 +822,7 @@ public class AuroraWinePlugin extends Plugin {
             if (dl == null || !(dl.isDirectory() || dl.mkdirs())) return;
             StringBuilder sb = new StringBuilder();
             sb.append(new java.util.Date()).append("  ").append(curPath).append('\n').append(raw.trim()).append('\n');
+            if (!javaNote.isEmpty()) sb.append(javaNote).append('\n');
             File g = new File(RootFS.find(getContext()).getRootDir(), "tmp/aurora-guest.log");
             if (g.isFile() && g.length() > 0) {
                 int n = (int) Math.min(g.length(), 2000);
