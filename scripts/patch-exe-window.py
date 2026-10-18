@@ -12,6 +12,7 @@ if any anchor is missing or ambiguous nothing is written.
      "ShellExecuteEx failed" caused by paths Wine cannot resolve. If the exe lives in its own folder (not
      Download), the files next to it are copied too (DLLs, data). Broken downloads (too small, no MZ header)
      are reported in the error banner instead of failing silently.
+     The exact command given to Wine is also written to the banner ("aurora-v2 launch: ...").
 """
 import re
 from pathlib import Path
@@ -64,8 +65,8 @@ if STAGE not in new_act:
     if new_act.count(FIELD) != 1:
         raise SystemExit('XServerDisplayActivity: screenEffectProfile field found %d times (need exactly 1)' % new_act.count(FIELD))
     METHOD = r'''private void auroraNote(String msg) { // aurora-stage
-        try (java.io.FileOutputStream o = new java.io.FileOutputStream(new java.io.File(getFilesDir(), "aurora-last-error.txt"))) {
-            o.write(msg.getBytes("UTF-8"));
+        try (java.io.FileOutputStream o = new java.io.FileOutputStream(new java.io.File(getFilesDir(), "aurora-last-error.txt"), true)) {
+            o.write((msg + "\n").getBytes("UTF-8"));
         }
         catch (Exception ignored) {}
     }
@@ -115,6 +116,10 @@ if STAGE not in new_act:
         }
     }'''
     new_act = new_act.replace(FIELD, FIELD + '\n    ' + METHOD)
+    RET = r'return "C:\\windows\\winhandler.exe "+cmdArgs;'
+    if new_act.count(RET) != 1:
+        raise SystemExit('XServerDisplayActivity: winhandler return found %d times (need exactly 1)' % new_act.count(RET))
+    new_act = new_act.replace(RET, r'auroraNote("aurora-v2 launch: C:\\windows\\winhandler.exe "+cmdArgs); // ' + STAGE + '\n        ' + RET)
     new_act = new_act.replace(CALL,
         'execPath = auroraStage(intent.getStringExtra("exec_path"), container); // ' + STAGE + '\n'
         '                if (execPath == null) ' + CALL)
