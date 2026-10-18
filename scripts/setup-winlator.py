@@ -77,6 +77,21 @@ for f in (main / 'cpp').rglob('*'):
             count += 1
 edit(main / 'java/com/winlator/core/AppUtils.java',
      lambda s: s.replace('/data/data/com.winlator/storage', '/data/data/%s/storage' % APP_ID), 'INTERNAL_STORAGE')
+
+# Make failed Box64/Wine process launches observable and prevent the X server
+# preloader from remaining on-screen forever when ProcessBuilder.start() fails.
+process_helper = main / 'java/com/winlator/core/ProcessHelper.java'
+def patch_process_helper(s):
+    old = '        catch (Exception e) {}\n        return pid;'
+    new = '''        catch (Exception e) {
+            android.util.Log.e("AuroraWine", "Failed to start guest process: " + command, e);
+            if (terminationCallback != null) terminationCallback.call(-1);
+        }
+        return pid;'''
+    if old not in s:
+        raise SystemExit('Could not patch ProcessHelper.java (guest process failure logging): pattern not found')
+    return s.replace(old, new, 1)
+edit(process_helper, patch_process_helper, 'guest process failure logging')
 print('Patched %d native files for package %s' % (count, APP_ID))
 
 # box64 must be re-extracted whenever the binary is missing, not only when the recorded version changes
