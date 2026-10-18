@@ -7,7 +7,6 @@ import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.os.Environment;
-import android.util.Base64;
 import android.view.Gravity;
 import android.view.WindowManager;
 import androidx.preference.PreferenceManager;
@@ -25,13 +24,10 @@ import com.winlator.core.DefaultVersion;
 import com.winlator.core.FileUtils;
 import com.winlator.core.TarCompressorUtils;
 import com.winlator.core.WineInfo;
-import com.winlator.core.WineUtils;
 import com.winlator.xenvironment.RootFS;
 import com.winlator.xenvironment.RootFSInstaller;
 import java.io.File;
 import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicLong;
@@ -40,10 +36,7 @@ import org.json.JSONObject;
 /**
  * Windows program runner built on the Winlator core (Wine + Box64/Box86), compiled into this app.
  * Part 2: install the runtime, create a container, run an .exe and report its state.
- * Methods: status, init, runExe, stopExe, listRunning, setExeRect, minimizeExe, restoreExe,
- *          installResult (what the last program installed), scanStart (all programs with a Start Menu/Desktop shortcut),
- *          getLastError (error of the last run, "" when none),
- *          exeIcon (icon of an exe/dll/ico as a PNG data URL: {path, index, fallback} -> {png}).
+ * Methods: status, init, runExe, stopExe, listRunning, setExeRect, minimizeExe, restoreExe.
  * Events: progress {step,pct}, exeStarted {id,path}, exeExited {id,path},
  *         exeState {id,path,state,msg} with state = preparing | launching | running | error.
  * Rect objects use CSS pixels of the Aurora page: {x, y, w, h, vw, vh} (vw/vh = window.innerWidth/innerHeight).
@@ -56,8 +49,7 @@ public class AuroraWinePlugin extends Plugin {
     private int curId = 0;
     private String curPath = "";
     private Activity curActivity = null;
-    private volatile String lastErrorMsg = "";
-    private static final String BEFORE_FILE = "aurora-install-before.txt";
+    private volatile long lastRunStart = 0;
 
     /** Called from the patched XServerDisplayActivity (aurora-embed). Safe from any thread. */
     public static void exeState(String state, String msg) {
@@ -69,7 +61,6 @@ public class AuroraWinePlugin extends Plugin {
         o.put("state", state);
         String m = msg == null ? "" : msg;
         o.put("msg", m.length() > 600 ? m.substring(0, 600) : m);
-        if ("error".equals(state)) p.lastErrorMsg = m;
         p.notifyListeners("exeState", o);
     }
 
@@ -370,8 +361,10 @@ public class AuroraWinePlugin extends Plugin {
         }
         curId = ++runSeq;
         curPath = path;
-        lastErrorMsg = "";
-        saveInstallSnapshot(ctx, containerId);
+        lastRunStart = System.currentTimeMillis();
+        try {
+            new File(ctx.getFilesDir(), "aurora-last-error.txt").delete();
+        } catch (Exception ignored) { }
         final JSObject rectIn = call.getObject("rect");
         getActivity().runOnUiThread(() -> {
             try {
@@ -453,6 +446,199 @@ public class AuroraWinePlugin extends Plugin {
         });
     }
 
+    // ---------------------------------------------------------------- installed programs (Start Menu / Program Files)
+
+    private File prefixDir(Context ctx) {
+        return new File(RootFS.find(ctx).getRootDir(), RootFS.WINEPREFIX);
+    }
+
+    /** Case-insensitive lookup of "a/b/c" below base (Wine paths are case-insensitive, Android's are not). */
+    private static File resolveCI(File base, String rel) {
+        File cur = base;
+        for (String part : rel.split("/")) {
+            if (part.isEmpty() || part.equals(".")) continue;
+            File next = new File(cur, part);
+            if (!next.exists()) {
+                next = null;
+                File[] list = cur.listFiles();
+                if (list != null) {
+                    for (File c : list) {
+                        if (c.getName().equalsIgnoreCase(part)) {
+                            next = c;
+                            break;
+                        }
+                    }
+                }
+                if (next == null) return null;
+            }
+            cur = next;
+        }
+        return cur;
+    }
+
+    /** "C:\Program Files\X\x.exe" -> the real file inside the Wine prefix, or null. */
+    private File winToFile(Context ctx, String w) {
+        if (w == null) return null;
+        w = w.trim();
+        if (w.length() < 3 || w.charAt(1) != ':') return null;
+        char d = Character.toLowerCase(w.charAt(0));
+        if (d < 'a' || d > 'z') return null;
+        String rest = w.substring(2).replace('\\', '/');
+        File pre = prefixDir(ctx);
+        File base = d == 'c' ? new File(pre, "drive_c") : new File(pre, "dosdevices/" + d + ":");
+        if (!base.exists()) return null;
+        return resolveCI(base, rest);
+    }
+
+    private static boolean isJunkExe(String name) {
+        return name.toLowerCase().matches(".*(unins|uninst|uninstall|setup|install|redist|dxsetup|crashhandler|crashreport|updater).*");
+    }
+
+    private void collectLnk(Context ctx, File dir, int depth, JSArray items, java.util.HashSet<String> seen) {
+        File[] list = dir.listFiles();
+        if (list == null || depth > 6) return;
+        for (File f : list) {
+            if (f.isDirectory()) {
+                collectLnk(ctx, f, depth + 1, items, seen);
+                continue;
+            }
+            String n = f.getName();
+            if (!n.toLowerCase().endsWith(".lnk") || f.length() > 262144 || !seen.add(f.getPath())) continue;
+            try {
+                AuroraLnk l = AuroraLnk.parse(java.nio.file.Files.readAllBytes(f.toPath()));
+                if (l == null || l.target.isEmpty()) continue;
+                if (!l.target.toLowerCase().endsWith(".exe") || l.target.toLowerCase().startsWith("c:\\windows")) continue;
+                File t = winToFile(ctx, l.target);
+                String name = n.substring(0, n.length() - 4);
+                if (t == null || !t.isFile() || isJunkExe(t.getName()) || isJunkExe(name)) continue;
+                File ic = l.iconPath.isEmpty() ? null : winToFile(ctx, l.iconPath);
+                File wd = l.workDir.isEmpty() ? null : winToFile(ctx, l.workDir);
+                JSObject o = new JSObject();
+                o.put("lnk", f.getPath());
+                o.put("target", t.getPath());
+                o.put("name", name);
+                o.put("args", l.args);
+                o.put("cwd", wd == null ? "" : wd.getPath());
+                o.put("iconPath", ic == null ? "" : ic.getPath());
+                o.put("iconIndex", l.iconIndex);
+                items.put(o);
+            } catch (Exception ignored) { }
+        }
+    }
+
+    /** Largest plausible program .exe in the folder or one level below it (installers/uninstallers skipped). */
+    private static File mainExe(File dir) {
+        File best = null;
+        File[] list = dir.listFiles();
+        if (list == null) return null;
+        for (File f : list) {
+            File[] cand = f.isDirectory() ? f.listFiles() : new File[]{f};
+            if (cand == null) continue;
+            for (File c : cand) {
+                String n = c.getName();
+                if (c.isFile() && n.toLowerCase().endsWith(".exe") && !isJunkExe(n) && (best == null || c.length() > best.length())) best = c;
+            }
+        }
+        return best;
+    }
+
+    /**
+     * Snapshot of what an installer can leave behind: Start Menu / Desktop shortcuts (.lnk with an .exe target) and the
+     * top-level folders of Program Files. Returns {items:[{lnk,target,name,args,cwd,iconPath,iconIndex}],
+     * dirs:[{k,name,dir,exe}]}. Called before and after a program runs; the web side compares the two.
+     */
+    @PluginMethod
+    public void scanStart(final PluginCall call) {
+        final Context ctx = getContext();
+        new Thread(() -> {
+            try {
+                File drive = new File(prefixDir(ctx), "drive_c");
+                java.util.ArrayList<File> roots = new java.util.ArrayList<>();
+                roots.add(new File(drive, "ProgramData/Microsoft/Windows/Start Menu"));
+                File[] users = new File(drive, "users").listFiles();
+                if (users != null) {
+                    for (File u : users) {
+                        roots.add(new File(u, "AppData/Roaming/Microsoft/Windows/Start Menu"));
+                        roots.add(new File(u, "Desktop"));
+                    }
+                }
+                JSArray items = new JSArray();
+                java.util.HashSet<String> seen = new java.util.HashSet<>();
+                for (File r : roots) collectLnk(ctx, r, 0, items, seen);
+
+                final java.util.Set<String> skip = new java.util.HashSet<>(java.util.Arrays.asList(
+                    "common files", "internet explorer", "windows media player", "windows nt", "windows photo viewer",
+                    "windows mail", "windowspowershell", "windows defender", "uninstall information", "reference assemblies"));
+                JSArray dirs = new JSArray();
+                String[] pfs = {"Program Files", "Program Files (x86)"};
+                for (String pf : pfs) {
+                    File[] ds = new File(drive, pf).listFiles();
+                    if (ds == null) continue;
+                    for (File d : ds) {
+                        if (!d.isDirectory() || skip.contains(d.getName().toLowerCase())) continue;
+                        File exe = mainExe(d);
+                        JSObject o = new JSObject();
+                        o.put("k", pf + "/" + d.getName());
+                        o.put("name", d.getName());
+                        o.put("dir", d.getPath());
+                        o.put("exe", exe == null ? "" : exe.getPath());
+                        dirs.put(o);
+                    }
+                }
+                JSObject res = new JSObject();
+                res.put("items", items);
+                res.put("dirs", dirs);
+                call.resolve(res);
+            } catch (Exception e) {
+                call.reject(e.getMessage() == null ? "Could not read the Start Menu" : e.getMessage());
+            }
+        }, "aurora-scan").start();
+    }
+
+    private byte[] iconFor(Context ctx, String p, int idx) {
+        if (p == null || p.isEmpty()) return null;
+        File f = new File(p);
+        if (!f.isFile()) {
+            File w = winToFile(ctx, p);
+            if (w != null) f = w;
+        }
+        if (!f.isFile()) return null;
+        if (f.getName().toLowerCase().endsWith(".ico")) return AuroraPeIcon.fromIco(f);
+        return AuroraPeIcon.extract(f, idx);
+    }
+
+    /** {path, index?, fallback?} -> {png: "data:image/png;base64,..."} (empty string when no icon was found). */
+    @PluginMethod
+    public void exeIcon(final PluginCall call) {
+        final Context ctx = getContext();
+        final String path = call.getString("path");
+        final String fb = call.getString("fallback");
+        final int idx = call.getInt("index", 0);
+        new Thread(() -> {
+            byte[] png = iconFor(ctx, path, idx);
+            if (png == null && fb != null && !fb.equals(path)) png = iconFor(ctx, fb, 0);
+            JSObject r = new JSObject();
+            r.put("png", png == null ? "" : "data:image/png;base64," + android.util.Base64.encodeToString(png, android.util.Base64.NO_WRAP));
+            call.resolve(r);
+        }, "aurora-icon").start();
+    }
+
+    /** Error text left by the launcher for the run that just ended ("" when there is none). */
+    @PluginMethod
+    public void getLastError(PluginCall call) {
+        JSObject r = new JSObject();
+        String msg = "";
+        try {
+            File f = new File(getContext().getFilesDir(), "aurora-last-error.txt");
+            if (f.isFile() && f.lastModified() >= lastRunStart && f.length() > 0) {
+                byte[] b = java.nio.file.Files.readAllBytes(f.toPath());
+                msg = new String(b, 0, Math.min(b.length, 900), java.nio.charset.StandardCharsets.UTF_8).trim();
+            }
+        } catch (Exception ignored) { }
+        r.put("error", msg);
+        call.resolve(r);
+    }
+
     /** Closes the running Windows program window (and its Wine session). */
     @PluginMethod
     public void stopExe(final PluginCall call) {
@@ -465,170 +651,6 @@ public class AuroraWinePlugin extends Plugin {
             a.finish();
             call.resolve();
         });
-    }
-
-
-    // ---------------------------------------------------------------- install detection
-
-    private Container containerById(Context ctx, int id) {
-        try {
-            return id > 0 ? new ContainerManager(ctx).getContainerById(id) : null;
-        } catch (Exception e) {
-            return null;
-        }
-    }
-
-    private static File driveCOf(Container c) {
-        return new File(c.getRootDir(), ".wine/drive_c");
-    }
-
-    private static AuroraInstallScan.PathMapper pathMapper(final Container c) {
-        return new AuroraInstallScan.PathMapper() {
-            @Override
-            public String toUnix(String dosPath) {
-                try {
-                    return WineUtils.dosToUnixPath(dosPath, c);
-                } catch (Exception e) {
-                    return "";
-                }
-            }
-        };
-    }
-
-    /** Remembers Program Files / Start Menu / Desktop before the program runs; installResult compares against it. */
-    private void saveInstallSnapshot(Context ctx, int containerId) {
-        File f = new File(ctx.getFilesDir(), BEFORE_FILE);
-        f.delete();
-        try {
-            Container c = containerById(ctx, containerId);
-            if (c == null || !driveCOf(c).isDirectory()) return;
-            Map<String, String> snap = AuroraInstallScan.snapshot(driveCOf(c));
-            snap.put("#cid", String.valueOf(containerId));
-            AuroraInstallScan.save(snap, f);
-        } catch (Throwable t) {
-            f.delete(); // no snapshot = no install detection for this run, the program still starts
-        }
-    }
-
-    private static JSArray itemsToJson(List<AuroraInstallScan.Item> items) {
-        JSArray arr = new JSArray();
-        for (AuroraInstallScan.Item it : items) {
-            JSObject o = new JSObject();
-            o.put("lnk", it.lnk);
-            o.put("name", it.name);
-            o.put("target", it.target);
-            o.put("args", it.args);
-            o.put("cwd", it.cwd);
-            o.put("iconPath", it.iconPath);
-            o.put("iconIndex", it.iconIndex);
-            o.put("startMenu", it.startMenu);
-            arr.put(o);
-        }
-        return arr;
-    }
-
-    /**
-     * What the program that just ran added to Program Files / Start Menu / Desktop: {ran, items[]}.
-     * ran=false when there is no snapshot (already consumed, or the container is gone). One-shot: it consumes the snapshot.
-     */
-    @PluginMethod
-    public void installResult(final PluginCall call) {
-        final Context ctx = getContext();
-        new Thread(() -> {
-            JSObject r = new JSObject();
-            try {
-                File f = new File(ctx.getFilesDir(), BEFORE_FILE);
-                Map<String, String> before = AuroraInstallScan.load(f);
-                r.put("ran", false);
-                r.put("items", new JSArray());
-                if (before != null) {
-                    f.delete();
-                    int cid = 0;
-                    try {
-                        cid = Integer.parseInt(before.remove("#cid"));
-                    } catch (RuntimeException e) {
-                        cid = 0;
-                    }
-                    Container c = containerById(ctx, cid);
-                    if (c != null) {
-                        List<AuroraInstallScan.Item> items = AuroraInstallScan.changedSince(driveCOf(c), before, pathMapper(c));
-                        r.put("ran", true);
-                        r.put("items", itemsToJson(items));
-                    }
-                }
-                call.resolve(r);
-            } catch (Throwable t) {
-                call.reject(t.getMessage() == null ? "Could not check the installation" : t.getMessage());
-            }
-        }, "aurora-install-result").start();
-    }
-
-    /** All programs that have a Start Menu or Desktop shortcut right now: {items[]}. Optional containerId. */
-    @PluginMethod
-    public void scanStart(final PluginCall call) {
-        final Context ctx = getContext();
-        final int want = call.getInt("containerId", 0);
-        new Thread(() -> {
-            try {
-                int cid = want;
-                if (cid <= 0) {
-                    ArrayList<Container> list = new ContainerManager(ctx).getContainers();
-                    cid = list.isEmpty() ? 0 : list.get(0).id;
-                }
-                Container c = containerById(ctx, cid);
-                JSObject r = new JSObject();
-                r.put("items", c == null ? new JSArray() : itemsToJson(AuroraInstallScan.allShortcuts(driveCOf(c), pathMapper(c))));
-                call.resolve(r);
-            } catch (Throwable t) {
-                call.reject(t.getMessage() == null ? "Could not read the Start Menu" : t.getMessage());
-            }
-        }, "aurora-scan-start").start();
-    }
-
-    /** PNG of the icon in a PE file (index >= 0: n-th icon group, < 0: group id) or a .ico; null when there is none. */
-    private byte[] iconBytes(Context ctx, String path, int index) {
-        if (path == null || path.isEmpty()) return null;
-        String p = path;
-        if (p.length() > 2 && p.charAt(1) == ':' && (p.charAt(2) == '\\' || p.charAt(2) == '/')) {
-            ArrayList<Container> list = new ContainerManager(ctx).getContainers();
-            if (list.isEmpty()) return null;
-            p = pathMapper(list.get(0)).toUnix(p);
-        }
-        if (p == null || p.isEmpty()) return null;
-        File f = AuroraInstallScan.resolveCI(new File(p));
-        if (f == null || !f.isFile()) return null;
-        return f.getName().toLowerCase(java.util.Locale.ROOT).endsWith(".ico") ? AuroraPeIcon.fromIco(f) : AuroraPeIcon.extract(f, index);
-    }
-
-    /** Icon of a program: {path, index?, fallback?} -> {png: "data:image/png;base64,..."} ("" when it has none). */
-    @PluginMethod
-    public void exeIcon(final PluginCall call) {
-        final Context ctx = getContext();
-        final String path = call.getString("path");
-        final String fallback = call.getString("fallback");
-        final int index = call.getInt("index", 0);
-        new Thread(() -> {
-            String png = "";
-            try {
-                byte[] b = iconBytes(ctx, path, index);
-                if (b == null && fallback != null && !fallback.equals(path)) b = iconBytes(ctx, fallback, 0);
-                // the page keeps the icon in localStorage: skip unusually large ones
-                if (b != null && b.length > 0 && b.length <= 120000) png = "data:image/png;base64," + Base64.encodeToString(b, Base64.NO_WRAP);
-            } catch (Throwable t) {
-                png = "";
-            }
-            JSObject r = new JSObject();
-            r.put("png", png);
-            call.resolve(r);
-        }, "aurora-exe-icon").start();
-    }
-
-    /** Error of the last run ({error: ""} when it had none); cleared when the next program starts. */
-    @PluginMethod
-    public void getLastError(PluginCall call) {
-        JSObject r = new JSObject();
-        r.put("error", lastErrorMsg);
-        call.resolve(r);
     }
 
     @PluginMethod

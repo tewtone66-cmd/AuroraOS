@@ -241,37 +241,27 @@ const exeTitle=p=>String(p||'').split('/').pop().replace(/\.(exe|lnk)$/i,'').sli
 async function exeIconOf(path,iconPath,index){if(!NW)return'';try{const r=await NW.exeIcon({path:iconPath||path,index:index|0,fallback:path});return(r&&r.png)||''}catch(e){return''}}
 async function addExe(o,quiet,ord){if(!o||!o.p)return false;
 if(EXES.some(x=>x.p===o.p&&(x.a||'')===(o.a||''))){if(!quiet)toast('Already on the desktop');return false}
-const e={id:'x'+Date.now().toString(36)+Math.random().toString(36).slice(2,6),t:(o.t||exeTitle(o.p)).slice(0,40),p:o.p,a:o.a||'',w:o.w||'',l:o.l||'',ip:o.ip||'',ii:o.ii|0,ic:''};
+const e={id:'x'+Date.now().toString(36)+Math.random().toString(36).slice(2,6),t:(o.t||exeTitle(o.p)).slice(0,40),p:o.p,a:o.a||'',w:o.w||'',l:o.l||'',ic:''};
 e.ic=await exeIconOf(o.p,o.ip,o.ii);EXES.push(e);DESK.push(['exe',e.t,e.id]);saveExes();buildIcons(true);
 const b=$('.di[data-e="'+e.id+'"]');if(b){b.style.setProperty('--i',ord|0);b.classList.remove('re')}
 if(!quiet)toast('Added to desktop: '+e.t);return true}
 function removeExe(id){const i=DESK.findIndex(d=>d[0]==='exe'&&d[2]===id);if(i>=0)DESK.splice(i,1);EXES=EXES.filter(e=>e.id!==id);saveExes();buildIcons(true);toast('Removed from desktop')}
-/* a shortcut with arguments or its own working folder runs through its .lnk, otherwise the exe is started directly; each is the fallback of the other */
-function launchExe(e){if(!e)return;const dir=String(e.p||'').replace(/\/[^\/]*$/,''),useL=!!e.l&&(!!e.a||(!!e.w&&e.w.replace(/\/+$/,'')!==dir));
-return window.aurora.openExe(useL?e.l:e.p,{alt:useL?e.p:(e.l||''),args:e.a,cwd:e.w})}
-/* programs added before icons worked (or whose icon failed once) get their icon now; the result is kept */
-async function fillExeIcons(){if(!NW)return;let ch=false;for(const e of EXES){if(e.ic||e.noic)continue;const ic=await exeIconOf(e.p,e.ip||'',e.ii|0);if(ic)e.ic=ic;else e.noic=1;ch=true}if(ch){saveExes();buildIcons(false)}}
+function launchExe(e){if(!e)return;return window.aurora.openExe(e.p,{alt:e.l||'',args:e.a,cwd:e.w})}
 const seenLnk=()=>new Set(jl('aur.lnkseen',[]));
-async function lnkBaseline(){if(!NW||ls('aur.lnkseen')!=null)return;try{const r=await NW.scanStart({});ls('aur.lnkseen',JSON.stringify(((r&&r.items)||[]).map(i=>i.lnk)))}catch(e){if(isJsErr(e))reportErr(e,'baseline')}}
+async function lnkBaseline(){if(!NW||(ls('aur.lnkseen')!=null&&ls('aur.pfseen')!=null))return;try{const r=await NW.scanStart({});if(ls('aur.lnkseen')==null)ls('aur.lnkseen',JSON.stringify(((r&&r.items)||[]).map(i=>i.lnk)));if(ls('aur.pfseen')==null)ls('aur.pfseen',JSON.stringify(((r&&r.dirs)||[]).map(d=>d.k)))}catch(e){if(isJsErr(e))reportErr(e,'baseline')}}
 /* after a Windows program closes: new Start Menu shortcuts (installer) become icons; a portable exe is added by itself */
-async function afterExe(path){if(!NW)return;ls('aur.pend','');try{
-/* installer finished: what it added to Program Files / Start Menu / Desktop (compared with the state before it started) */
-let ir=null;try{ir=await NW.installResult({})}catch(e){}
-if(ir&&ir.ran&&ir.items&&ir.items.length){const low0=String(path||'').toLowerCase(),seen0=seenLnk();let n0=0,pick=null;
-for(const i of ir.items){if(i.lnk)seen0.add(i.lnk);if(await addExe({p:i.target,t:i.name,a:i.args,w:i.cwd,l:i.lnk,ip:i.iconPath,ii:i.iconIndex},true,n0))n0++;
-if(!pick&&String(i.target).toLowerCase()!==low0)pick=EXES.find(x=>x.p===i.target&&(x.a||'')===(i.args||''))||null}
-ls('aur.lnkseen',JSON.stringify([...seen0]));
-if(n0)toast(n0===1?'Installed: '+EXES[EXES.length-1].t:n0+' programs installed and added to desktop');
-if(pick)setTimeout(()=>{if(!exeW)launchExe(pick)},1500);
-return}
-const r=await NW.scanStart({}),items=(r&&r.items)||[],seen=seenLnk(),fresh=items.filter(i=>!seen.has(i.lnk));
-items.forEach(i=>seen.add(i.lnk));ls('aur.lnkseen',JSON.stringify([...seen]));let n=0;
-for(const i of fresh)if(await addExe({p:i.target,t:i.name,a:i.args,w:i.cwd,l:i.lnk,ip:i.iconPath,ii:i.iconIndex},true,n))n++;
-if(n){toast(n===1?'Added to desktop: '+EXES[EXES.length-1].t:n+' programs added to desktop');return}
+async function afterExe(path){if(!NW)return;ls('aur.pend','');try{const r=await NW.scanStart({}),items=(r&&r.items)||[],dirs=(r&&r.dirs)||[],seen=seenLnk(),hadPf=ls('aur.pfseen')!=null,pf=new Set(jl('aur.pfseen',[])),fresh=items.filter(i=>!seen.has(i.lnk)),freshDirs=hadPf?dirs.filter(d=>!pf.has(d.k)):[];
+items.forEach(i=>seen.add(i.lnk));ls('aur.lnkseen',JSON.stringify([...seen]));dirs.forEach(d=>pf.add(d.k));ls('aur.pfseen',JSON.stringify([...pf]));
+const known=EXES.some(x=>x.p===path||x.l===path);
+const cand=fresh.map(i=>({p:i.target,t:i.name,a:i.args,w:i.cwd,l:i.lnk,ip:i.iconPath,ii:i.iconIndex}));
+for(const d of freshDirs)if(d.exe&&!cand.some(c=>String(c.p).toLowerCase().indexOf(String(d.dir).toLowerCase()+'/')===0))cand.push({p:d.exe,t:d.name});
+let n=0,first=null;
+for(const c of cand)if(await addExe(c,true,n)){n++;if(!first)first=EXES[EXES.length-1]}
+if(n){toast(n===1?'Added to desktop: '+first.t:n+' programs added to desktop');if(!known&&first)setTimeout(()=>launchExe(first),500);return}
 const low=String(path||'').toLowerCase();
 if(path&&/\.exe$/.test(low)&&!/\/\.wine\/drive_c\//.test(low)&&!/(setup|install|unins|update|redist)/.test(low.split('/').pop())&&!EXES.some(x=>x.p===path||x.l===path))await addExe({p:path},false,0)}catch(e){reportErr(e,'after-exe','Could not read the Start Menu')}}
 function buildUI(){buildIcons();const ic=$('#icons');
-Object.keys(A).filter(id=>id!=='dl').forEach((id,ix)=>{const p=h('button','',`<div class="t">${tile(id)}</div><span>${A[id].n}</span>`);p.style.setProperty('--i',ix);p.onclick=()=>openApp(id);$('#pins').appendChild(p)});dockUpdate();
+Object.keys(A).filter(id=>id!=='dl'&&id!=='exew').forEach((id,ix)=>{const p=h('button','',`<div class="t">${tile(id)}</div><span>${A[id].n}</span>`);p.style.setProperty('--i',ix);p.onclick=()=>openApp(id);$('#pins').appendChild(p)});dockUpdate();
 $('#startBtn').innerHTML=`<div class="ico" style="--g:${A.about.g}">${STAR}</div>`;
 $('#startBtn').onclick=e=>{e.stopPropagation();const o=!$('#start').classList.contains('show');closeMenus();if(o){$('#start').classList.add('show');menuOpen=true;sync()}};
 $('#power').onclick=()=>{Object.keys(W).forEach(k=>closeW(k,true));closeMenus()};$('#mbtn').onclick=()=>vmSet(!VM.on);
@@ -723,5 +713,5 @@ function appWin(w,arg){
 }
 }
 
-[()=>applyTheme(),()=>applyWall(),()=>applyMouse(),()=>buildUI(),()=>listen('dlprogress',dlEv),()=>{wineEvents();const pd=ls('aur.pend');if(pd)setTimeout(()=>afterExe(pd),1500);setTimeout(fillExeIcons,2500)},()=>clock(),()=>setInterval(clock,20000),()=>vmSet(ls('aur.vm')==='1'),()=>{const mq=window.matchMedia&&window.matchMedia('(prefers-color-scheme:dark)');if(mq){if(typeof mq.addEventListener==='function')mq.addEventListener('change',applyTheme);else if(typeof mq.addListener==='function')mq.addListener(applyTheme)}}].forEach(f=>{try{f()}catch(e){console.error(e);window.dispatchEvent(new ErrorEvent('error',{message:String(e&&e.message||e)+' in '+f.toString().slice(0,40),lineno:0,colno:0}))}});
+[()=>applyTheme(),()=>applyWall(),()=>applyMouse(),()=>buildUI(),()=>listen('dlprogress',dlEv),()=>{wineEvents();const pd=ls('aur.pend');if(pd)setTimeout(()=>afterExe(pd),1500)},()=>clock(),()=>setInterval(clock,20000),()=>vmSet(ls('aur.vm')==='1'),()=>{const mq=window.matchMedia&&window.matchMedia('(prefers-color-scheme:dark)');if(mq){if(typeof mq.addEventListener==='function')mq.addEventListener('change',applyTheme);else if(typeof mq.addListener==='function')mq.addListener(applyTheme)}}].forEach(f=>{try{f()}catch(e){console.error(e);window.dispatchEvent(new ErrorEvent('error',{message:String(e&&e.message||e)+' in '+f.toString().slice(0,40),lineno:0,colno:0}))}});
 </script></body></html>
