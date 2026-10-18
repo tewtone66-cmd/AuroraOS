@@ -536,23 +536,48 @@ function mkFloppy(name,bytes){
 /* ---------- download window (Windows-style green progress bar) ---------- */
 window.aurora=window.aurora||{};
 let wineBusy=false;
+let exeW=null;
+const exeRect=w=>{const r=w.body.getBoundingClientRect();return{x:r.left,y:r.top,w:r.width,h:r.height,vw:innerWidth,vh:innerHeight}};
+function appExe(w,arg){w.path=(arg&&arg.path)||'';w.setTitle(String(w.path).split('/').pop()||'Program');
+if(!$('#exestyle')){const st=h('style');st.id='exestyle';st.textContent='@keyframes exspin{to{transform:rotate(360deg)}}';document.head.appendChild(st)}
+const u=h('div','exes','<div class="exsp" style="width:30px;height:30px;border:3px solid #ffffff33;border-top-color:#60a5fa;border-radius:50%;animation:exspin 1s linear infinite"></div><div class="ext" style="font-size:14px;white-space:pre-wrap;max-width:92%;word-break:break-word"></div><button class="ib pri exb" style="display:none">Close</button>');
+u.style.cssText='position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:12px;background:#111827;color:#fff;text-align:center;padding:16px;overflow:auto;box-sizing:border-box';
+w.body.appendChild(u);
+$('.exb',u).onclick=()=>closeW(w.id);
+w.exeStatus=(t,err)=>{$('.ext',u).textContent=t;$('.exsp',u).style.display=err?'none':'';$('.exb',u).style.display=err?'':'none';u.style.display='flex'};
+w.exeHide=()=>{u.style.display='none'};
+w.exeStatus('Starting…');
+let last='',t1=0,wasMin=false;
+const push=fin=>{if(!w.owns||!W[w.id]||w.el.classList.contains('min')||w.el.classList.contains('minning'))return;let r;try{r=exeRect(w)}catch(e){return}const k=[r.x|0,r.y|0,r.w|0,r.h|0].join();if(k===last&&!fin)return;last=k;NW.setExeRect(r).catch(()=>{})};
+w.sched=()=>{if(!t1)t1=setTimeout(()=>{t1=0;push()},60);clearTimeout(w.tf);w.tf=setTimeout(()=>push(true),420)};
+const mo=new MutationObserver(()=>{const m=w.el.classList.contains('min')||w.el.classList.contains('minning');if(m!==wasMin){wasMin=m;if(w.owns){if(m)NW.minimizeExe().catch(()=>{});else setTimeout(()=>{if(W[w.id]&&w.owns)NW.restoreExe(exeRect(w)).catch(()=>{})},380)}}w.sched()});
+mo.observe(w.el,{attributes:true,attributeFilter:['style','class']});
+const ro=new ResizeObserver(()=>w.sched());ro.observe(w.body);
+w.onclose=()=>{mo.disconnect();ro.disconnect();clearTimeout(t1);clearTimeout(w.tf);if(w.owns){w.owns=false;NW.stopExe().catch(()=>{})}if(exeW===w)exeW=null}}
 /* JavaScript bugs go to the red bar; errors reported by the Java layer / Wine engine stay separate (toast) */
 const isJsErr=e=>e instanceof TypeError||e instanceof ReferenceError||e instanceof SyntaxError||e instanceof RangeError;
 const reportErr=(e,where,def)=>{const msg=(e&&(e.message||String(e)))||def||'Something went wrong';if(isJsErr(e))aurBar('Aurora error ('+where+'): '+msg);toast('Error ('+where+'): '+msg,5000);};
 window.aurora.openExe=async(p,o)=>{
 if(!NW)return openApp('win',{exe:p});
 if(wineBusy)return toast('Windows runtime is still being prepared');
-wineBusy=true;
-try{const st=await NW.status();if(!st.installed||!st.containers){toast('Preparing Windows runtime…');await NW.init()}
+if(exeW&&W[exeW.id]){showW(exeW);return toast('A Windows program is already running')}
+wineBusy=true;let ew=null;
+try{ew=exeW=openApp('exew',{path:p});ew.t0=Date.now();ew.exeStatus('Preparing Windows runtime…');
+const st=await NW.status();if(!st.installed||!st.containers){await NW.init()}
 await lnkBaseline();
-let run=p;try{await NW.runExe({path:p})}catch(e){if(o&&o.alt&&/not found/i.test((e&&e.message)||'')){run=o.alt;await NW.runExe({path:run})}else throw e}
-ls('aur.pend',run)}
-catch(e){reportErr(e,'openExe','Could not start the program')}
+const wt=480-(Date.now()-ew.t0);if(wt>0)await new Promise(r=>setTimeout(r,wt));
+if(!W[ew.id])return;
+ew.exeStatus('Starting…');
+const go=f=>{let r=null;try{r=exeRect(ew)}catch(e){}return NW.runExe(r?{path:f,rect:r}:{path:f})};
+let run=p;try{await go(p)}catch(e){if(o&&o.alt&&/not found/i.test((e&&e.message)||'')){run=o.alt;await go(run)}else throw e}
+ew.owns=true;ew.sched();ls('aur.pend',run)}
+catch(e){if(ew&&W[ew.id]){ew.err=(e&&e.message)||'Could not start the program';ew.exeStatus(ew.err,true)}if(ew&&exeW===ew&&!ew.owns)exeW=null;reportErr(e,'openExe','Could not start the program')}
 finally{wineBusy=false}};
 function wineEvents(){if(!NW)return;const lw=(n,f)=>{try{return Promise.resolve(NW.addListener(n,f))}catch(e){return Promise.resolve({remove(){}})}};
-lw('progress',e=>toast(e.step==='container'?'Creating Windows container…':'Installing Windows runtime… '+(e.pct|0)+'%'));
+lw('progress',e=>{const t=e.step==='container'?'Creating Windows container…':'Installing Windows runtime… '+(e.pct|0)+'%';toast(t);if(exeW&&W[exeW.id]&&!exeW.owns)exeW.exeStatus(t)});
+lw('exeState',e=>{const w=exeW;if(!w||!W[w.id])return;const k=e&&e.state;if(k==='preparing')w.exeStatus('Preparing system files…');else if(k==='launching')w.exeStatus('Starting Wine…');else if(k==='running')w.exeHide();else if(k==='error'){w.err=(e.msg)||'Unknown error';w.exeStatus(w.err,true)}});
 lw('exeStarted',e=>toast('Started '+String(e.path||'').split('/').pop()));
-lw('exeExited',async e=>{const name=String(e.path||'').split('/').pop();try{const r=await NW.getLastError();if(r&&r.error){toast('Windows app error: '+r.error,5000);return}}catch(err){}toast('Windows app closed: '+name+' (no detailed error was reported by Wine/Box64)',5000);afterExe(e.path)})}
+lw('exeExited',async e=>{const name=String(e.path||'').split('/').pop();const ew=exeW;if(ew&&W[ew.id]){ew.owns=false;if(ew.err)ew.exeStatus(ew.err,true);else closeW(ew.id)}exeW=null;try{const r=await NW.getLastError();if(r&&r.error){toast('Windows app error: '+r.error,5000);return}}catch(err){}toast('Windows app closed: '+name+' (no detailed error was reported by Wine/Box64)',5000);afterExe(e.path)})}
 const DL={};
 const dirOf=p=>p.replace(/\/[^/]*$/,'')||'/';
 function dlOpen(d){const p=d.path;if(!p)return;const k=kind({name:d.name});
@@ -584,6 +609,7 @@ A.dl={n:'Download',g:'linear-gradient(145deg,#4ade80,#16a34a)',w:440,h:210,f:app
 if(typeof A!=='undefined'){
 IC.win=P('<path d="M3 5l8-1.2V11H3zM13 3.6L21 2.5V11h-8zM3 13h8v7.2L3 19zM13 13h8v8.5L13 20.4z"/>');
 A.win={n:'Windows PC',g:'linear-gradient(145deg,#60a5fa,#1d4ed8)',w:760,h:520,f:appWin};
+IC.exew=IC.win;A.exew={n:'Windows program',g:'linear-gradient(145deg,#475569,#1e293b)',w:760,h:520,f:appExe,multi:1};
 function appWin(w,arg){
   const B=w.body,V={emu:null,exe:(arg&&arg.exe)||null,held:false,running:false};
   B.innerHTML=`<div class="vmw"><div class="vmt"><button class="ib" data-k="go">Start</button><button class="ib" data-k="kb">Keyboard</button><button class="ib" data-k="ent">Enter</button><button class="ib" data-k="esc">Esc</button><button class="ib" data-k="hold">Hold click</button><button class="ib" data-k="rc">Right click</button></div><div class="vsc"><div></div><canvas style="display:none"></canvas><div class="vsu"></div></div></div>`;
