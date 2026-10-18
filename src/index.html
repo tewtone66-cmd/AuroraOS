@@ -552,7 +552,7 @@ finally{wineBusy=false}};
 function wineEvents(){if(!NW)return;const lw=(n,f)=>{try{return Promise.resolve(NW.addListener(n,f))}catch(e){return Promise.resolve({remove(){}})}};
 lw('progress',e=>toast(e.step==='container'?'Creating Windows container…':'Installing Windows runtime… '+(e.pct|0)+'%'));
 lw('exeStarted',e=>toast('Started '+String(e.path||'').split('/').pop()));
-lw('exeExited',e=>{toast('Closed '+String(e.path||'').split('/').pop());afterExe(e.path)})}
+lw('exeExited',async e=>{const name=String(e.path||'').split('/').pop();try{const r=await NW.getLastError();if(r&&r.error){toast('Windows app error: '+r.error,5000);return}}catch(err){}toast('Windows app closed: '+name+' (no detailed error was reported by Wine/Box64)',5000);afterExe(e.path)})}
 const DL={};
 const dirOf=p=>p.replace(/\/[^/]*$/,'')||'/';
 function dlOpen(d){const p=d.path;if(!p)return;const k=kind({name:d.name});
