@@ -346,6 +346,56 @@ public class AuroraWinePlugin extends Plugin {
         }
     }
 
+    // ---------------------------------------------------------------- optional Wine debug output (diagnostics only)
+
+    private static final String DEBUG_FLAG = "aurora-debug.txt";
+    private static final String DEBUG_DEFAULT = "+err,+loaddll,+process,+seh";
+
+    private static File debugFlagFile() {
+        File dl = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS);
+        return dl == null ? null : new File(dl, DEBUG_FLAG);
+    }
+
+    /** WINEDEBUG value wanted by Download/aurora-debug.txt: "" = file absent (debug off); an empty file = default channels. */
+    private String wantedWineDebug() {
+        File flag = debugFlagFile();
+        if (flag == null || !flag.isFile()) return "";
+        try {
+            String s = new String(java.nio.file.Files.readAllBytes(flag.toPath()), java.nio.charset.StandardCharsets.UTF_8).trim();
+            int nl = s.indexOf('\n');
+            if (nl >= 0) s = s.substring(0, nl);
+            s = s.trim().replaceAll("\\s+", ",").replaceAll("^,+|,+$", "");
+            if (s.isEmpty()) return DEBUG_DEFAULT;
+            if (s.matches("[A-Za-z0-9+,_\\-]+")) return s;
+            addJavaNote("wine debug: invalid text in " + DEBUG_FLAG + ", using " + DEBUG_DEFAULT);
+        } catch (Exception e) {
+            addJavaNote("wine debug: could not read " + DEBUG_FLAG + ": " + e);
+        }
+        return DEBUG_DEFAULT;
+    }
+
+    /**
+     * Download/aurora-debug.txt present -> the container's envVars get WINEDEBUG (the file's first line, or default
+     * channels when the file is empty); file absent -> WINEDEBUG is removed again. Container envVars are applied after
+     * Winlator's own WINEDEBUG=-all, so they win. Without the file nothing changes. Never throws.
+     */
+    private void ensureWineDebug(Context ctx, int containerId) {
+        try {
+            Container c = new ContainerManager(ctx).getContainerById(containerId);
+            if (c == null || c.getRootDir() == null) return;
+            String want = wantedWineDebug();
+            EnvVars env = new EnvVars(c.getEnvVars());
+            if (want.equals(env.get("WINEDEBUG"))) return;
+            if (want.isEmpty()) env.remove("WINEDEBUG");
+            else env.put("WINEDEBUG", want);
+            c.setEnvVars(env.toString());
+            c.saveData();
+            addJavaNote("wine debug: WINEDEBUG=" + (want.isEmpty() ? "(off)" : want));
+        } catch (Throwable e) {
+            addJavaNote("wine debug: update FAILED: " + e);
+        }
+    }
+
     private void addJavaNote(String line) {
         String n = javaNote;
         javaNote = n.isEmpty() ? line : n + "\n" + line;
@@ -541,6 +591,7 @@ public class AuroraWinePlugin extends Plugin {
         try {
             ensureJava(ctx, containerId);
             ensureJavaEnv(ctx, containerId);
+            ensureWineDebug(ctx, containerId);
         } finally {
             busy = false;
         }
@@ -832,6 +883,22 @@ public class AuroraWinePlugin extends Plugin {
                     rf.readFully(b);
                 }
                 sb.append("--- guest output ---\n").append(new String(b, java.nio.charset.StandardCharsets.UTF_8)).append('\n');
+            }
+            File flag = debugFlagFile();
+            if (flag != null && flag.isFile() && g.isFile() && g.length() > 0) {
+                // debug mode: the last 200 KB of this run's guest output, overwritten on every run
+                long glen = g.length();
+                int dn = (int) Math.min(glen, 200000);
+                byte[] db = new byte[dn];
+                try (java.io.RandomAccessFile rf = new java.io.RandomAccessFile(g, "r")) {
+                    rf.seek(glen - dn);
+                    rf.readFully(db);
+                }
+                try (java.io.FileOutputStream dout = new java.io.FileOutputStream(new File(dl, "aurora-wine-debug.log"))) {
+                    dout.write((new java.util.Date() + "  " + curPath + "  (last " + dn + " of " + glen + " bytes)\n")
+                        .getBytes(java.nio.charset.StandardCharsets.UTF_8));
+                    dout.write(db);
+                }
             }
             sb.append('\n');
             File log = new File(dl, "aurora-wine.log");
