@@ -337,6 +337,10 @@ public class AuroraWinePlugin extends Plugin {
                 env.put("WINEPATH", wp.isEmpty() ? JAVA_BIN_WIN : JAVA_BIN_WIN + ";" + wp);
                 changed = true;
             }
+            if (!"-Dsun.java2d.d3d=false".equals(env.get("JAVA_TOOL_OPTIONS"))) {
+                env.put("JAVA_TOOL_OPTIONS", "-Dsun.java2d.d3d=false");
+                changed = true;
+            }
             if (!changed) return;
             c.setEnvVars(env.toString());
             c.saveData();
