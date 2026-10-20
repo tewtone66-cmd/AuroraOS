@@ -400,6 +400,20 @@ public class AuroraWinePlugin extends Plugin {
         }
     }
 
+    /** DXVK needs Vulkan, which this device lacks (DXVK throws and Wine crashes). Use Wine's own d3d instead. Never throws. */
+    private void ensureWineD3D(Context ctx, int containerId) {
+        try {
+            Container c = new ContainerManager(ctx).getContainerById(containerId);
+            if (c == null || c.getRootDir() == null) return;
+            if ("wined3d".equals(c.getDXWrapper())) return;
+            c.setDXWrapper("wined3d");
+            c.saveData();
+            addJavaNote("dxwrapper: container " + containerId + " switched to wined3d");
+        } catch (Throwable e) {
+            addJavaNote("dxwrapper: update FAILED: " + e);
+        }
+    }
+
     private void addJavaNote(String line) {
         String n = javaNote;
         javaNote = n.isEmpty() ? line : n + "\n" + line;
@@ -596,6 +610,7 @@ public class AuroraWinePlugin extends Plugin {
             ensureJava(ctx, containerId);
             ensureJavaEnv(ctx, containerId);
             ensureWineDebug(ctx, containerId);
+            ensureWineD3D(ctx, containerId);
         } finally {
             busy = false;
         }
