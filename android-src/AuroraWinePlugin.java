@@ -885,6 +885,40 @@ public class AuroraWinePlugin extends Plugin {
             + "|Program type: [^,]+, native Windows program"
             + "|aurora-v2 launch: .*)$");
 
+    /** Copies .log/.txt files written during this run (users folder of the prefix) to Download/aurora-app-logs, plus _files.txt. Never throws. */
+    private void copyAppLogs(File dl) {
+        try {
+            File base = new File(prefixDir(getContext()), "drive_c/users");
+            File out = new File(dl, "aurora-app-logs");
+            if (!(out.isDirectory() || out.mkdirs())) return;
+            StringBuilder list = new StringBuilder();
+            walkLogs(base, base, out, lastRunStart - 5000, 0, list, new int[]{0});
+            try (java.io.FileOutputStream fo = new java.io.FileOutputStream(new File(out, "_files.txt"))) {
+                fo.write(list.toString().getBytes(java.nio.charset.StandardCharsets.UTF_8));
+            }
+        } catch (Throwable ignored) { }
+    }
+
+    private static void walkLogs(File base, File dir, File out, long since, int depth, StringBuilder list, int[] n) throws Exception {
+        File[] fs = dir.listFiles();
+        if (fs == null || depth > 7) return;
+        for (File f : fs) {
+            if (f.isDirectory()) {
+                walkLogs(base, f, out, since, depth + 1, list, n);
+                continue;
+            }
+            if (f.lastModified() < since) continue;
+            String rel = base.toURI().relativize(f.toURI()).getPath();
+            list.append(rel).append("  ").append(f.length()).append('\n');
+            String nm = f.getName().toLowerCase();
+            if (n[0] < 30 && f.length() > 0 && f.length() < 3000000 && (nm.endsWith(".log") || nm.endsWith(".txt"))) {
+                n[0]++;
+                java.nio.file.Files.copy(f.toPath(), new File(out, rel.replace('/', '_')).toPath(),
+                    java.nio.file.StandardCopyOption.REPLACE_EXISTING);
+            }
+        }
+    }
+
     /** Keeps the complete launcher notes plus the end of the Wine output in Download/aurora-wine.log (best effort). */
     private void saveRunLog(String raw) {
         try {
@@ -919,6 +953,7 @@ public class AuroraWinePlugin extends Plugin {
                     dout.write(db);
                 }
             }
+            copyAppLogs(dl);
             sb.append('\n');
             File log = new File(dl, "aurora-wine.log");
             try (java.io.FileOutputStream o = new java.io.FileOutputStream(log, !(log.isFile() && log.length() > 300000))) {
