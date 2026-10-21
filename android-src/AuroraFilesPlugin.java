@@ -72,10 +72,24 @@ public class AuroraFilesPlugin extends Plugin {
     }
 
     // ---------- helpers ----------
+    private boolean vdInit = false;
+
     private List<File> rootFiles() {
         List<File> r = new ArrayList<>();
         File internal = Environment.getExternalStorageDirectory();
         r.add(internal);
+        for (String dn : new String[] { "D", "E" }) {
+            File vd = new File(internal, "AuroraOS/" + dn);
+            if (!vdInit && hasAccess()) {
+                String[] subs = dn.equals("D")
+                    ? new String[] { "Documents", "Downloads", "Pictures", "Music", "Videos", "Projects" }
+                    : new String[] { "Apps", "Games", "Backup", "Archives", "Shared" };
+                vd.mkdirs();
+                for (String sname : subs) new File(vd, sname).mkdirs();
+            }
+            r.add(vd);
+        }
+        if (hasAccess()) vdInit = true;
         try {
             File[] dirs = getContext().getExternalFilesDirs(null);
             if (dirs != null) {
@@ -147,7 +161,8 @@ public class AuroraFilesPlugin extends Plugin {
             JSObject o = new JSObject();
             o.put("path", r.getAbsolutePath());
             o.put("internal", i == 0);
-            o.put("name", i == 0 ? "Internal storage" : "SD card " + i);
+            String rp0 = r.getAbsolutePath();
+            o.put("name", i == 0 ? "Internal storage" : rp0.endsWith("/AuroraOS/D") ? "Data" : rp0.endsWith("/AuroraOS/E") ? "Storage" : "SD card");
             try {
                 StatFs s = new StatFs(r.getAbsolutePath());
                 o.put("total", s.getTotalBytes());
@@ -272,7 +287,7 @@ public class AuroraFilesPlugin extends Plugin {
             try (InputStream in = new FileInputStream(s); OutputStream out = new FileOutputStream(d)) {
                 byte[] buf = new byte[65536];
                 int n;
-                while ((n = in.read(buf)) > 0) out.write(buf, 0, n);
+                while ((n = in.read(buf)) > 0) { out.write(buf, 0, n); pDone += n; prog(pDone, pTotal, s.getName()); if (cancel) throw new Exception("Cancelled"); }
             }
         }
     }
@@ -284,6 +299,8 @@ public class AuroraFilesPlugin extends Plugin {
             File dest = guard(call.getString("dest", ""));
             boolean move = Boolean.TRUE.equals(call.getBoolean("move", false));
             int done = 0;
+            cancel = false; pDone = 0; pTotal = 0;
+            for (String p0 : strings(call, "paths")) { try { pTotal += sizeOf(guard(p0)); } catch (Exception ignored) { } }
             for (String p : strings(call, "paths")) {
                 File s = guard(p);
                 if (!s.exists()) continue;
@@ -303,6 +320,7 @@ public class AuroraFilesPlugin extends Plugin {
                 done++;
             }
             JSObject o = new JSObject();
+            prog(pTotal, pTotal, "");
             o.put("count", done);
             call.resolve(o);
         } catch (Exception e) { call.reject(e.getMessage() == null ? "Paste failed" : e.getMessage(), e); }
@@ -351,6 +369,208 @@ public class AuroraFilesPlugin extends Plugin {
             call.reject("No app can open this file", e);
         } catch (Exception e) {
             call.reject("Could not open file", e);
+        }
+    }
+
+    // ---------- v3-p05: progress, search, zip ----------
+    private volatile boolean cancel = false;
+    private long pDone = 0, pTotal = 0, lastP = 0;
+
+    private void prog(long done, long total, String name) {
+        long n = System.currentTimeMillis();
+        if (n - lastP < 80 && done < total) return;
+        lastP = n;
+        JSObject o = new JSObject();
+        o.put("done", done);
+        o.put("total", total);
+        o.put("name", name == null ? "" : name);
+        notifyListeners("fprog", o);
+    }
+
+    private long sizeOf(File f) {
+        if (!f.isDirectory()) return f.length();
+        long s = 0;
+        File[] kids = f.listFiles();
+        if (kids != null) for (File k : kids) s += sizeOf(k);
+        return s;
+    }
+
+    @PluginMethod
+    public void cancel(PluginCall call) { cancel = true; call.resolve(); }
+
+    /** Recursive name search; path "" = all drives. "*.ext" matches by extension. */
+    @PluginMethod
+    public void search(PluginCall call) {
+        try {
+            if (!hasAccess()) { call.reject("Storage access is not allowed yet"); return; }
+            String q = call.getString("q", "").trim().toLowerCase();
+            if (q.isEmpty()) { call.reject("Type something to search"); return; }
+            Integer mx = call.getInt("max", 300);
+            int max = mx == null ? 300 : mx;
+            String p = call.getString("path", "");
+            List<File> starts = new ArrayList<>();
+            if (p == null || p.isEmpty()) {
+                List<File> rs = rootFiles();
+                String first = rs.get(0).getAbsolutePath();
+                for (int i = 0; i < rs.size(); i++) {
+                    String rp = rs.get(i).getAbsolutePath();
+                    if (i == 0 || !rp.startsWith(first + "/")) starts.add(rs.get(i));
+                }
+            } else starts.add(guard(p));
+            boolean ext = q.startsWith("*.");
+            String qe = ext ? q.substring(1) : q;
+            long deadline = System.currentTimeMillis() + 7000;
+            JSArray items = new JSArray();
+            int found = 0;
+            java.util.ArrayDeque<File> dq = new java.util.ArrayDeque<>(starts);
+            boolean partial = false;
+            while (!dq.isEmpty()) {
+                if (System.currentTimeMillis() > deadline || found >= max) { partial = true; break; }
+                File d = dq.poll();
+                File[] kids = d.listFiles();
+                if (kids == null) continue;
+                for (File k : kids) {
+                    String nm = k.getName().toLowerCase();
+                    if (ext ? nm.endsWith(qe) : nm.contains(qe)) {
+                        if (found < max) { items.put(describe(k)); found++; }
+                    }
+                    if (k.isDirectory()) dq.add(k);
+                }
+            }
+            JSObject out = new JSObject();
+            out.put("items", items);
+            out.put("partial", partial);
+            call.resolve(out);
+        } catch (Exception e) { call.reject(e.getMessage() == null ? "Search failed" : e.getMessage(), e); }
+    }
+
+    @PluginMethod
+    public void zipList(PluginCall call) {
+        try {
+            File f = guard(call.getString("path", ""));
+            JSArray items = new JSArray();
+            try (java.util.zip.ZipFile z = new java.util.zip.ZipFile(f)) {
+                java.util.Enumeration<? extends java.util.zip.ZipEntry> en = z.entries();
+                while (en.hasMoreElements()) {
+                    java.util.zip.ZipEntry e = en.nextElement();
+                    JSObject o = new JSObject();
+                    String n = e.getName();
+                    o.put("name", n);
+                    o.put("dir", e.isDirectory());
+                    o.put("size", e.getSize());
+                    o.put("time", e.getTime());
+                    items.put(o);
+                }
+            }
+            JSObject out = new JSObject();
+            out.put("items", items);
+            call.resolve(out);
+        } catch (Exception e) { call.reject("Could not read this archive", e); }
+    }
+
+    /** Extracts all (or the named entries / folders) into dest. unique=true -> never reuse an existing folder. */
+    @PluginMethod
+    public void zipExtract(PluginCall call) {
+        try {
+            File f = guard(call.getString("path", ""));
+            File dest = guard(call.getString("dest", ""));
+            if (Boolean.TRUE.equals(call.getBoolean("unique", false))) {
+                File d0 = dest;
+                for (int n = 2; dest.exists() && n < 1000; n++) dest = new File(d0.getParentFile(), d0.getName() + " (" + n + ")");
+            }
+            if (!dest.isDirectory() && !dest.mkdirs()) { call.reject("Could not create the destination folder"); return; }
+            List<String> only = strings(call, "entries");
+            String base = dest.getCanonicalPath();
+            cancel = false;
+            long total = 0, done = 0, cnt = 0;
+            try (java.util.zip.ZipFile z = new java.util.zip.ZipFile(f)) {
+                java.util.Enumeration<? extends java.util.zip.ZipEntry> en = z.entries();
+                while (en.hasMoreElements()) { java.util.zip.ZipEntry e = en.nextElement(); if (!e.isDirectory() && e.getSize() > 0) total += e.getSize(); }
+                en = z.entries();
+                while (en.hasMoreElements()) {
+                    java.util.zip.ZipEntry e = en.nextElement();
+                    String n = e.getName();
+                    if (!only.isEmpty()) {
+                        boolean ok = false;
+                        for (String s : only) if (n.equals(s) || n.startsWith(s.endsWith("/") ? s : s + "/")) ok = true;
+                        if (!ok) continue;
+                    }
+                    File t = new File(dest, n).getCanonicalFile();
+                    if (!t.getPath().equals(base) && !t.getPath().startsWith(base + "/")) continue; // zip-slip guard
+                    if (e.isDirectory()) { t.mkdirs(); continue; }
+                    File par = t.getParentFile();
+                    if (par != null) par.mkdirs();
+                    try (InputStream in = z.getInputStream(e); OutputStream out = new FileOutputStream(t)) {
+                        byte[] buf = new byte[65536];
+                        int r;
+                        while ((r = in.read(buf)) > 0) {
+                            out.write(buf, 0, r);
+                            done += r;
+                            prog(done, total, t.getName());
+                            if (cancel) throw new Exception("Cancelled");
+                        }
+                    }
+                    cnt++;
+                }
+            }
+            prog(total, total, "");
+            JSObject o = new JSObject();
+            o.put("count", cnt);
+            o.put("dest", dest.getAbsolutePath());
+            call.resolve(o);
+        } catch (Exception e) { call.reject(e.getMessage() == null ? "Extract failed" : e.getMessage(), e); }
+    }
+
+    private void zipAdd(java.util.zip.ZipOutputStream zo, File f, String prefix) throws Exception {
+        if (cancel) throw new Exception("Cancelled");
+        String name = prefix + f.getName();
+        if (f.isDirectory()) {
+            zo.putNextEntry(new java.util.zip.ZipEntry(name + "/"));
+            zo.closeEntry();
+            File[] kids = f.listFiles();
+            if (kids != null) for (File k : kids) zipAdd(zo, k, name + "/");
+        } else {
+            zo.putNextEntry(new java.util.zip.ZipEntry(name));
+            try (InputStream in = new FileInputStream(f)) {
+                byte[] buf = new byte[65536];
+                int r;
+                while ((r = in.read(buf)) > 0) {
+                    zo.write(buf, 0, r);
+                    pDone += r;
+                    prog(pDone, pTotal, f.getName());
+                    if (cancel) throw new Exception("Cancelled");
+                }
+            }
+            zo.closeEntry();
+        }
+    }
+
+    @PluginMethod
+    public void zipCreate(PluginCall call) {
+        File out = null;
+        try {
+            File dest = guard(call.getString("dest", ""));
+            String name = call.getString("name", "Archive.zip");
+            if (name.contains("/") || name.isEmpty()) { call.reject("Invalid name"); return; }
+            out = unique(dest, name);
+            cancel = false;
+            pDone = 0;
+            pTotal = 0;
+            List<File> src = new ArrayList<>();
+            for (String p : strings(call, "paths")) { File s = guard(p); src.add(s); pTotal += sizeOf(s); }
+            try (java.util.zip.ZipOutputStream zo = new java.util.zip.ZipOutputStream(new FileOutputStream(out))) {
+                for (File s : src) {
+                    if (s.getCanonicalPath().equals(out.getCanonicalPath())) continue;
+                    zipAdd(zo, s, "");
+                }
+            }
+            prog(pTotal, pTotal, "");
+            JSObject o = new JSObject();
+            o.put("path", out.getAbsolutePath());
+            call.resolve(o);
+        } catch (Exception e) {
+            if (out != null) out.delete();
+            call.reject(e.getMessage() == null ? "Compress failed" : e.getMessage(), e);
         }
     }
 

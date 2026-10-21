@@ -11,3 +11,8 @@
 - بومی: android-src/*.java (AuroraBrowserPlugin، AuroraWinePlugin، AuroraFilesPlugin...)
 
 - v3-p02: لوگو/آیکن‌ها در assets/*.svg (+ scripts/make-icons.mjs)؛ آیکن اپ‌ها: IC/A.g؛ بکگراندها: WALL (SVG data-URI)؛ لودینگ: #boot (ابتدای body)؛ خاموشی: #shut + دکمه‌ی #off
+
+- v3-p05: بازنویسی مدیا و فایل‌منیجر؛ Photos/Media: CSS `.stage img/video` با object-fit:contain (نسبت ۹:۱۶ و ...)
+  appCode (ادیتور کد + hl/hlx هایلایت)، appZip (آرشیو)، appMusic + MU (پلیر جدا) + #np/#npc (نشانگر کنار داک)
+  فایل‌منیجر: E.sr (نتایج سرچ سراسری، NF.search)، پیشرفت کپی/انتقال (.fpg، رویداد fprog)، نمای d/l/i
+  بومی: AuroraFilesPlugin → search، zipList/zipExtract/zipCreate، cancel، درایوهای مجازی D/E (AuroraOS/D و /E)
