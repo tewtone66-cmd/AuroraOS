@@ -204,6 +204,60 @@ body.fs #dock{transform:translate(-50%,170%);opacity:0;pointer-events:none}
 .win.max .tbar .fsd{display:block;color:var(--acc)}
 body.fs.peek .win.max .tbar .fsd{background:var(--hov)}
 body.fs.peek #dock{visibility:visible;opacity:1;transform:translateX(-50%);pointer-events:auto;transition:transform .38s cubic-bezier(.3,.9,.3,1),opacity .25s,visibility 0s}
+/* ---- v3-p07: calculator, terminal, task manager ---- */
+.cc{position:relative;display:flex;flex-direction:column;height:100%;padding:6px 10px 10px;gap:6px;overflow:hidden;user-select:none}
+.cch{display:flex;justify-content:flex-end;height:30px}
+.cch button{position:relative;z-index:3;border:0;background:none;color:var(--mut);width:34px;height:30px;border-radius:8px;display:grid;place-items:center;cursor:pointer;transition:background-color .2s,color .2s,transform .12s}
+.cch button:hover{background:var(--hov);color:var(--acc)}.cch button:active{transform:scale(.88)}
+.cch svg{width:18px;height:18px;fill:none;stroke:currentColor;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}
+.ccd{text-align:right;padding:0 6px;min-height:76px;display:flex;flex-direction:column;justify-content:flex-end;overflow:hidden;direction:ltr}
+.ccx{min-height:16px;color:var(--mut);font-size:13px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.ccr{font-weight:300;font-size:44px;line-height:1.15;white-space:nowrap;transition:font-size .15s;font-variant-numeric:tabular-nums}
+.ccr.pop{animation:ccpop .24s cubic-bezier(.2,.9,.3,1.3)}.ccx.sl{animation:ccsl .25s ease-out}
+@keyframes ccpop{from{transform:translateY(9px) scale(.94);opacity:.3}to{transform:none;opacity:1}}
+@keyframes ccsl{from{transform:translateY(10px);opacity:0}to{transform:none;opacity:1}}
+.ccg{flex:1;min-height:0;display:grid;grid-template-columns:repeat(4,1fr);grid-template-rows:repeat(6,1fr);gap:5px}
+.ccg button{position:relative;overflow:hidden;border:0;border-radius:10px;background:var(--surf2);color:inherit;font-size:17px;cursor:pointer;transition:transform .1s,background-color .2s,color .2s,filter .15s}
+.ccg button.n{font-weight:600}.ccg button.f{background:var(--surf);box-shadow:inset 0 0 0 1px var(--line);color:var(--mut)}
+.ccg button.o{background:var(--selbg);color:var(--acc);font-size:21px}.ccg button.o.act{background:var(--acc);color:var(--accT)}
+.ccg button.e{background:var(--acc);color:var(--accT);font-size:22px}
+.ccg button:hover,.ccg button.vh{filter:brightness(1.1)}.ccg button:active{transform:scale(.93)}
+.ccg button.kp{animation:cckp .2s}@keyframes cckp{50%{transform:scale(.9);filter:brightness(1.3)}}
+.ccg .rp{position:absolute;border-radius:50%;background:currentColor;opacity:.28;transform:scale(0);animation:ccrp .5s ease-out forwards;pointer-events:none}
+@keyframes ccrp{to{transform:scale(1);opacity:0}}
+.cchis{position:absolute;left:0;right:0;top:38px;bottom:0;z-index:2;background:var(--surf);border-top:1px solid var(--line);display:flex;flex-direction:column;padding:8px 10px;transform:translateY(-104%);opacity:0;transition:transform .34s cubic-bezier(.3,.9,.3,1),opacity .25s}
+.cc.hs .cchis{transform:none;opacity:1}
+.cchh{display:flex;justify-content:space-between;align-items:center;padding:2px 4px 6px}
+.cchh button{border:0;background:var(--surf2);color:inherit;border-radius:6px;padding:4px 10px;font-size:12px;cursor:pointer}
+.ccl{flex:1;overflow:auto;display:flex;flex-direction:column;gap:4px}.ccl p{color:var(--mut);font-size:13px;margin:8px 4px}
+.ccl button{border:0;background:var(--surf2);color:inherit;border-radius:8px;padding:6px 10px;text-align:right;direction:ltr;cursor:pointer;display:flex;flex-direction:column;align-items:flex-end;animation:ccsl .25s ease-out;transition:background-color .2s}
+.ccl button:hover{background:var(--hov)}.ccl small{color:var(--mut);font-size:12px}.ccl b{font-size:20px;font-weight:400}
+.tm{display:flex;flex-direction:column;height:100%;background:#0c0c0c;color:#ccc;font:13px/1.35 Consolas,"Courier New",ui-monospace,monospace;cursor:text}
+.tmo{flex:1;overflow:auto;padding:6px 8px;white-space:pre-wrap;word-break:break-all;user-select:text;direction:ltr;text-align:left}
+.tmo .e{color:#f87171}.tmo .d{color:#6ea8ff}
+.tml{display:flex;padding:0 8px 6px;direction:ltr;align-items:center}
+.tml span{white-space:pre;flex:none;max-width:65%;overflow:hidden;text-overflow:ellipsis}
+.tml input{flex:1;min-width:0;background:none;border:0;outline:0;color:inherit;font:inherit;padding:0 0 0 2px;caret-color:#ccc}
+.tk{display:flex;flex-direction:column;height:100%}
+.tkt{display:flex;gap:4px;padding:6px 8px 0;border-bottom:1px solid var(--line)}
+.tkt button{position:relative;border:0;background:none;color:var(--mut);padding:8px 14px;border-radius:8px 8px 0 0;font-size:13px;cursor:pointer;transition:color .2s,background-color .2s}
+.tkt button:hover{background:var(--hov)}.tkt button.on{color:var(--acc);font-weight:600}
+.tkt button.on:after{content:"";position:absolute;left:10px;right:10px;bottom:-1px;height:2px;border-radius:2px;background:var(--acc);animation:tkin .25s}
+@keyframes tkin{from{transform:scaleX(0)}to{transform:none}}
+.tkp,.tkf{flex:1;min-height:0;overflow:auto;padding:8px 10px;animation:fade .2s}
+.tk[data-tab=p] .tkf,.tk[data-tab=f] .tkp{display:none}
+.tks{display:flex;gap:16px;flex-wrap:wrap;font-size:12px;color:var(--mut);padding:2px 4px 8px}.tks b{color:var(--acc)}
+.tkr{display:grid;grid-template-columns:1fr 88px 84px;align-items:center;gap:8px;padding:6px 8px;border-radius:8px;font-size:13px;transition:background-color .2s}
+.tkr:not(.hd):hover{background:var(--hov)}.tkr.hd{color:var(--mut);font-size:12px}
+.tkr .nm{display:flex;align-items:center;gap:8px;min-width:0}.tkr .nm span{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.tkr .tt{width:20px;height:20px;flex:none;display:block}.tkr .tt .ico{width:20px;height:20px;border-radius:5px}
+.tkr button{border:1px solid var(--line);background:var(--surf2);color:inherit;border-radius:6px;padding:4px 8px;font-size:12px;cursor:pointer;transition:transform .1s,background-color .2s}
+.tkr button:hover{background:var(--hov)}.tkr button:active{transform:scale(.94)}
+.tkc{background:var(--surf2);border-radius:12px;padding:10px 12px;margin-bottom:10px}
+.tkh{display:flex;justify-content:space-between;align-items:baseline}.tkh em{font-style:normal;font-size:22px;font-weight:300}
+.tkc canvas{display:block;width:100%;height:72px;margin:6px 0;border-radius:6px;background:var(--surf)}
+.tkd{font-size:12px;color:var(--mut);line-height:1.6}
+
 /* ---- v3-p02: boot + shutdown screens, wallpapers, app icons ---- */
 #desk{background-position:center;transition:opacity .8s ease,transform .9s cubic-bezier(.2,.9,.3,1)}
 .walls button{background-size:cover!important;background-position:center!important}
@@ -303,12 +357,16 @@ files:{n:'File Explorer',g:'linear-gradient(160deg,#ffd166,#f08a24)',w:860,h:500
 notes:{n:'Notepad',g:'linear-gradient(160deg,#ffe27a,#e0a100)',w:520,h:380,f:appNotes,multi:1},
 photos:{n:'Photos',g:'linear-gradient(160deg,#f9a8d4,#a855f7)',w:720,h:460,f:appPhotos},
 media:{n:'Media Player',g:'linear-gradient(160deg,#ff8a7a,#e11d6a)',w:620,h:400,f:appMedia},
-calc:{n:'Calculator',g:'linear-gradient(160deg,#5eead4,#0d9488)',w:300,h:430,f:appCalc},
+calc:{n:'Calculator',g:'linear-gradient(160deg,#5eead4,#0d9488)',w:320,h:520,f:appCalc},
 set:{n:'Settings',g:'linear-gradient(160deg,#a9b8cc,#4b5d78)',w:800,h:540,f:appSet},
 trash:{n:'Recycle Bin',g:'linear-gradient(160deg,#9fb4c7,#51697f)',w:640,h:420,f:appTrash},
 code:{n:'Code Editor',g:'linear-gradient(160deg,#6ee7a8,#0f766e)',w:760,h:480,f:appCode,multi:1},
 music:{n:'Music',g:'linear-gradient(160deg,#ff7ab8,#7c3aed)',w:660,h:410,f:appMusic},
-zip:{n:'Archive',g:'linear-gradient(160deg,#fcd34d,#d97706)',w:600,h:420,f:appZip,multi:1}};
+zip:{n:'Archive',g:'linear-gradient(160deg,#fcd34d,#d97706)',w:600,h:420,f:appZip,multi:1},
+term:{n:'Terminal',g:'linear-gradient(160deg,#4b5563,#111827)',w:640,h:400,f:appTerm,multi:1},
+taskmgr:{n:'Task Manager',g:'linear-gradient(160deg,#60a5fa,#2563eb)',w:560,h:440,f:appTask}};
+IC.term=P('<g stroke="none"><path d="M6.5 8.6l3.6 3.4-3.6 3.4-1-1.1 2.3-2.3-2.3-2.3zM11.5 15h6v1.4h-6z" fill="#fff"/></g>');
+IC.taskmgr=P('<g stroke="none"><path d="M5 19v-9h3v9zM10.5 19V5h3v14zM16 19v-6h3v6z" fill="#fff"/></g>');
 IC.code=P('<g stroke="none"><path d="M9 7 4 12l5 5 1.4-1.4L6.8 12l3.6-3.6zM15 7l-1.4 1.4 3.6 3.6-3.6 3.6L15 17l5-5z" fill="#fff"/></g>');
 IC.music=P('<g stroke="none"><path d="M9 4v11.3a3 3 0 1 0 2 2.7V8h6V4z" fill="#fff"/></g>');
 IC.zip=P('<g stroke="none"><path d="M5 3h9l5 5v13H5z" fill="#fff"/><path d="M11 3.5h2v2h-2zM11 7.5h2v2h-2zM11 11.5h2v2h-2z" fill="#d97706"/><path d="M10.5 14.5h3v3a1.5 1.5 0 0 1-3 0z" fill="#d97706"/></g>');
@@ -774,14 +832,238 @@ B.addEventListener('click',e=>{const a=e.target.closest('[data-a]');if(a){const 
 const d=e.target.closest('.pl div');if(d){MU.i=+d.dataset.i;muLoad();$('.pl',B).classList.remove('on')}});
 w.open=a=>{if(a&&a.path)muPlay(a.list&&a.list.length?a.list:[a.path],a.path);else muUI(true)};w.onclose=()=>{muStop();MU.w=null};w.open(arg)}
 /* ---------- Calculator ---------- */
-function appCalc(w){let acc=null,op=null,fresh=true,res='0',ex='';const K=['C','⌫','%','÷','7','8','9','×','4','5','6','−','1','2','3','+','±','0','.','='],fm=n=>isFinite(n)?String(+n.toPrecision(12)):'Error',cl=(a,o,b)=>o==='+'?a+b:o==='−'?a-b:o==='×'?a*b:o==='÷'?(b?a/b:NaN):b;
-w.body.innerHTML=`<div class="calc"><div class="scr"><small></small><span>0</span></div>${K.map(k=>`<button class="${'÷×−+'.includes(k)?'op':k==='='?'eq':''}">${k}</button>`).join('')}</div>`;
-const sm=$('small',w.body),sp=$('.scr span',w.body),show=()=>{sm.textContent=ex;sp.textContent=res;sp.style.fontSize=res.length>10?'24px':'36px'};
-w.body.onclick=e=>{const b=e.target.closest('button');if(!b)return;const k=b.textContent,v=parseFloat(res);
-if(k==='C'){acc=op=null;fresh=true;res='0';ex=''}else if(k==='⌫'){if(!fresh)res=res.length>1?res.slice(0,-1):'0'}else if(k==='±'){res=res==='0'?res:res[0]==='-'?res.slice(1):'-'+res}else if(k==='%'){res=fm(v/100);fresh=true}
-else if('÷×−+'.includes(k)){if(acc===null||!op)acc=v;else if(!fresh)acc=cl(acc,op,v);op=k;ex=fm(acc)+' '+k;res=fm(acc);fresh=true}
-else if(k==='='){if(op!==null&&acc!==null){const r=cl(acc,op,v);ex=fm(acc)+' '+op+' '+fm(v)+' =';res=fm(r);acc=op=null;fresh=true}}
-else{if(fresh){res=k==='.'?'0.':k;fresh=false}else if(k==='.'&&res.includes('.')){}else res=res==='0'&&k!=='.'?k:res+k}show()}}
+/* ---------- Calculator (v3-p07) ---------- */
+function appCalc(w){
+const B=w.body;
+let cur='0',acc=null,op=null,ex='',fresh=true,err=null,rep=null,his=[],hot=false,uv=false;
+B.innerHTML=`<div class="cc"><div class="cch"><button data-k="hist" aria-label="History"><svg viewBox="0 0 24 24"><path d="M3 12a9 9 0 1 0 3-6.7M3 4v5h5M12 7.5V12l3 2"/></svg></button></div><div class="ccd"><small class="ccx"></small><span class="ccr">0</span></div><div class="ccg">${[['%','f'],['CE','f'],['C','f'],['⌫','f'],['1/x','f'],['x²','f'],['√x','f'],['÷','o'],['7','n'],['8','n'],['9','n'],['×','o'],['4','n'],['5','n'],['6','n'],['−','o'],['1','n'],['2','n'],['3','n'],['+','o'],['±','n'],['0','n'],['.','n'],['=','e']].map(([k,c])=>`<button class="${c}" data-k="${k}">${k}</button>`).join('')}</div><div class="cchis"><div class="cchh"><b>History</b><button data-k="hclr">Clear</button></div><div class="ccl"></div></div></div>`;
+const cc=$('.cc',B),xe=$('.ccx',B),re=$('.ccr',B),hl=$('.ccl',B);
+const pulse=(e,c)=>{e.classList.remove(c);void e.offsetWidth;e.classList.add(c)};
+const fm=n=>String(+n.toPrecision(15));
+const grp=s=>{if(/e/i.test(s))return s;const neg=s[0]==='-'?'-':'',t=neg?s.slice(1):s,i=t.indexOf('.'),ip=i<0?t:t.slice(0,i);return neg+ip.replace(/\B(?=(\d{3})+(?!\d))/g,',')+(i<0?'':t.slice(i))};
+const cl=(a,o,b)=>o==='+'?a+b:o==='−'?a-b:o==='×'?a*b:b===0?NaN:a/b;
+const show=anim=>{const t=err||grp(cur);re.textContent=t;re.style.fontSize=(t.length<=10?44:t.length<=13?34:t.length<=17?26:20)+'px';xe.textContent=ex;if(anim){pulse(re,'pop');if(ex)pulse(xe,'sl')}$$('.ccg .o',B).forEach(b=>b.classList.toggle('act',hot&&b.dataset.k===op))};
+const drawH=()=>{hl.innerHTML=his.length?his.map((x,i)=>`<button data-h="${i}"><small>${esc(x.e)}</small><b>${esc(x.r)}</b></button>`).join(''):'<p>There is no history yet</p>'};
+const setErr=m=>{err=m;acc=op=null;ex='';fresh=true;rep=null;hot=false;show(1)};
+const press=k=>{
+if(err){err=null;cur='0';acc=op=null;ex='';fresh=true;rep=null}
+const v=parseFloat(cur),u=uv;uv=false;hot=false;
+if(/^[0-9.]$/.test(k)){
+if(fresh){cur=k==='.'?'0.':k;fresh=false;if(!op)ex=''}
+else if(k==='.'){if(!cur.includes('.'))cur+='.'}
+else if(cur.replace('-','').replace('.','').length<16)cur=cur==='0'?k:cur==='-0'?'-'+k:cur+k;
+show();return}
+if(k==='C'){acc=op=null;cur='0';ex='';fresh=true;rep=null}
+else if(k==='CE'){cur='0';fresh=true}
+else if(k==='⌫'){if(!fresh)cur=cur.length>1&&!(cur.length===2&&cur[0]==='-')?cur.slice(0,-1):'0'}
+else if(k==='±'){cur=cur==='0'?cur:cur[0]==='-'?cur.slice(1):'-'+cur}
+else if(k==='%'){const r=acc!==null&&op?acc*v/100:0;cur=fm(r);fresh=true;uv=true;ex=acc!==null&&op?fm(acc)+' '+op+' '+cur:''}
+else if(k==='1/x'||k==='x²'||k==='√x'){
+if(k==='1/x'&&v===0)return setErr('Cannot divide by zero');
+if(k==='√x'&&v<0)return setErr('Invalid input');
+const r=k==='1/x'?1/v:k==='x²'?v*v:Math.sqrt(v);
+if(!isFinite(r))return setErr('Overflow');
+const inner=(k==='1/x'?'1/(':k==='x²'?'sqr(':'√(')+fm(v)+')';
+ex=op&&acc!==null?fm(acc)+' '+op+' '+inner:inner;cur=fm(r);fresh=true;uv=true;show(1);return}
+else if('÷×−+'.includes(k)){
+if(op&&acc!==null&&(!fresh||u)){const r=cl(acc,op,v);if(!isFinite(r))return setErr(op==='÷'?'Cannot divide by zero':'Overflow');acc=r;cur=fm(r)}
+else if(!(op&&fresh))acc=v;
+op=k;hot=true;ex=fm(acc)+' '+k;fresh=true;rep=null;show(1);return}
+else if(k==='='){
+let a,o,b;
+if(op&&acc!==null){a=acc;o=op;b=v;rep={o,b}}
+else if(rep){a=v;o=rep.o;b=rep.b}
+else{ex=fm(v)+' =';fresh=true;show(1);return}
+const r=cl(a,o,b);
+if(!isFinite(r))return setErr(o==='÷'?(a===0&&b===0?'Result is undefined':'Cannot divide by zero'):'Overflow');
+const e=fm(a)+' '+o+' '+fm(b)+' =';ex=e;cur=fm(r);acc=null;op=null;fresh=true;his.unshift({e,r:cur});if(his.length>40)his.pop();drawH();show(1);return}
+show()};
+const flash=k=>{const b=$$('.ccg button',B).find(x=>x.dataset.k===k);if(b)pulse(b,'kp')};
+const KM={'+':'+','-':'−','*':'×','/':'÷','x':'×','X':'×','%':'%','Enter':'=','=':'=','Backspace':'⌫','Escape':'C','Delete':'CE',',':'.','.':'.'};
+const kd=e=>{if(topId!==w.id||menuOpen||e.ctrlKey||e.metaKey||e.altKey||/^(INPUT|TEXTAREA)$/.test((e.target||{}).tagName||''))return;const k=/^[0-9]$/.test(e.key)?e.key:KM[e.key];if(!k)return;e.preventDefault();press(k);flash(k)};
+document.addEventListener('keydown',kd);w.onclose=()=>document.removeEventListener('keydown',kd);
+B.onpointerdown=e=>{const b=e.target.closest('.ccg button');if(!b)return;const s=Math.max(b.offsetWidth,b.offsetHeight)*1.6,p=h('i','rp');p.style.cssText=`width:${s}px;height:${s}px;left:${b.offsetWidth/2-s/2}px;top:${b.offsetHeight/2-s/2}px`;b.appendChild(p);setTimeout(()=>p.remove(),520)};
+B.onclick=e=>{const b=e.target.closest('button');if(!b)return;const k=b.dataset.k,hi=b.dataset.h;
+if(hi!==undefined){const x=his[+hi];if(x){cur=x.r;fresh=true;acc=op=null;ex='';hot=false;cc.classList.remove('hs');show(1)}return}
+if(k==='hist'){cc.classList.toggle('hs');return}
+if(k==='hclr'){his=[];drawH();return}
+if(k)press(k)};
+drawH();show();
+}
+/* ---------- Terminal (v3-p07) ---------- */
+function appTerm(w){
+const B=w.body;let root='/storage/emulated/0',cwd=root,busy=false,hist=[],hi=0;
+B.innerHTML='<div class="tm"><div class="tmo"></div><div class="tml"><span></span><input spellcheck="false" autocapitalize="off" autocomplete="off" autocorrect="off" enterkeyhint="send"></div></div>';
+const tm=$('.tm',B),out=$('.tmo',B),inp=$('input',B),pr=$('.tml span',B);
+const win=p=>p===root?'C:\\':p.startsWith(root+'/')?'C:'+p.slice(root.length).replace(/\//g,'\\'):p.replace(/\//g,'\\');
+const put=(s,c)=>{out.appendChild(h('div',c||'',s===''?'&#8203;':s));while(out.childElementCount>1500)out.firstChild.remove();out.scrollTop=out.scrollHeight};
+const T=s=>put(esc(s)),E=s=>put(esc(s),'e');
+const prompt=()=>{pr.textContent=win(cwd)+'>'};
+const NOPATH='The system cannot find the path specified.',FL=/^(\/[a-z]|-[a-z]+)$/i;
+const ready=(async()=>{try{const r=await NF.roots();root=cwd=((r.roots||[])[0]||{}).path||root}catch(e){}prompt();try{const s=await NF.status();if(!s.granted)E('Storage access is not allowed. Open Settings > Storage and allow access to files.')}catch(e){}})();
+const ls=async d=>{const r=await NF.list({path:d});return(r.items||[]).slice().sort((a,b)=>(b.isDirectory?1:0)-(a.isDirectory?1:0)||a.name.localeCompare(b.name,undefined,{sensitivity:'base'}))};
+const dirIt=p=>({path:p,name:p.split('/').pop(),isDirectory:true});
+const join=(a,b)=>(a==='/'?'':a)+'/'+b;
+const num=n=>String(n).replace(/\B(?=(\d{3})+(?!\d))/g,',');
+const pad2=n=>String(n).padStart(2,'0');
+const dt=it=>{const t=it.lastModified||it.modified||it.mtime||it.date;if(!t)return'';const d=new Date(+t);return isNaN(d)?'':d.getFullYear()+'-'+pad2(d.getMonth()+1)+'-'+pad2(d.getDate())+' '+pad2(d.getHours())+':'+pad2(d.getMinutes())};
+const sz=it=>it.size!=null?+it.size:it.length!=null?+it.length:0;
+const prot=it=>it.path===root||it.name==='.AuroraTrash'||!it.path.startsWith(root+'/');
+async function rp(arg){
+let p=String(arg==null?'.':arg).trim().replace(/\\/g,'/'),b=cwd;
+const dm=/^([a-z]):/i.exec(p);
+if(dm){if(dm[1].toUpperCase()!=='C')throw new Error('The system cannot find the drive specified.');p=p.slice(2);if(p[0]==='/')b=root}
+else if(p[0]==='/'){if(p===root||p.startsWith(root+'/'))p=p.slice(root.length);b=root}
+const segs=p.split('/').filter(s=>s&&s!=='.');let it=dirIt(b);
+for(let i=0;i<segs.length;i++){const s=segs[i],last=i===segs.length-1;
+if(s==='..'){if(b!==root&&b!=='/')b=b.slice(0,b.lastIndexOf('/'))||'/';it=dirIt(b);continue}
+const items=await ls(b),f=items.find(x=>x.name===s)||items.find(x=>x.name.toLowerCase()===s.toLowerCase());
+if(f){if(!last&&!f.isDirectory)throw new Error(NOPATH);b=f.path;it=f}
+else if(last)return{path:join(b,s),it:null,parent:b,name:s};
+else throw new Error(NOPATH)}
+return{path:b,it,parent:b.slice(0,b.lastIndexOf('/'))||'/',name:it.name}}
+async function tg(arg){
+if(/[*?]/.test(arg)){const s=arg.replace(/\\/g,'/'),i=s.lastIndexOf('/'),d=await rp(i<0?'.':s.slice(0,i)||'/'),pat=s.slice(i+1);
+if(!d.it||!d.it.isDirectory)throw new Error(NOPATH);
+const re=new RegExp('^'+pat.replace(/[.+^${}()|[\]\\]/g,'\\$&').replace(/\*/g,'.*').replace(/\?/g,'.')+'$','i');
+return(await ls(d.path)).filter(x=>re.test(x.name))}
+const r=await rp(arg);if(!r.it)throw new Error('The system cannot find the file specified.');return[r.it]}
+async function rmv(items){if(!items.length)return;
+if(typeof trashFiles==='function'){await trashFiles(items);T('        '+items.length+' item(s) moved to the Recycle Bin.')}
+else{await NF.remove({paths:items.map(i=>i.path)});T('        '+items.length+' item(s) deleted permanently.')}}
+async function cmdDir(a,long){
+const arg=a.find(x=>!FL.test(x));let items,base;
+if(arg){
+if(/[*?]/.test(arg)){items=await tg(arg);base=items[0]?items[0].path.slice(0,items[0].path.lastIndexOf('/')):cwd}
+else{const r=await rp(arg);if(!r.it)throw new Error('File Not Found');if(r.it.isDirectory){base=r.path;items=await ls(base)}else{items=[r.it];base=r.parent}}
+}else{base=cwd;items=await ls(cwd)}
+if(!items.length&&arg&&/[*?]/.test(arg)){E('File Not Found');return}
+if(!long){if(items.length)put(items.map(i=>i.isDirectory?'<span class="d">'+esc(i.name)+'</span>':esc(i.name)).join('  '));return}
+T('');T(' Directory of '+win(base));T('');
+let fc=0,dc=0,tot=0;
+for(const it of items){const d=it.isDirectory;if(d)dc++;else{fc++;tot+=sz(it)}
+put(esc((dt(it)||'').padEnd(16))+'  '+esc(d?'<DIR>'.padEnd(14):num(sz(it)).padStart(14))+'  '+(d?'<span class="d">'+esc(it.name)+'</span>':esc(it.name)))}
+T(String(fc).padStart(15)+' File(s) '+num(tot).padStart(14)+' bytes');T(String(dc).padStart(15)+' Dir(s)')}
+async function cmdCd(a){const arg=a.filter(x=>x.toLowerCase()!=='/d').join(' ');if(!arg)return T(win(cwd));
+const r=await rp(arg);if(!r.it)throw new Error(NOPATH);if(!r.it.isDirectory)throw new Error('The directory name is invalid.');cwd=r.path;prompt()}
+async function cmdMk(a){const args=a.filter(x=>!FL.test(x));if(!args.length)throw new Error('The syntax of the command is incorrect.');
+for(const x of args){const r=await rp(x);if(r.it){E('A subdirectory or file '+x+' already exists.');continue}await NF.mkdir({path:r.parent,name:r.name})}}
+async function cmdType(a){if(!a.length)throw new Error('The syntax of the command is incorrect.');
+for(const x of a){for(const it of await tg(x)){if(it.isDirectory){E(it.name+': Access is denied.');continue}
+const r=await NF.readText({path:it.path});let t=r.text||'';if(t.length>200000)t=t.slice(0,200000)+'\n[... truncated at 200000 characters]';put(esc(t))}}}
+async function cmdCp(a,mv){const args=a.filter(x=>!FL.test(x));if(args.length<2)throw new Error('The syntax of the command is incorrect.');
+const d=await rp(args.pop()),src=[];for(const x of args)src.push(...await tg(x));
+if(!src.length)throw new Error('The system cannot find the file specified.');
+const par=s=>s.path.slice(0,s.path.lastIndexOf('/'))||'/';
+if(d.it&&d.it.isDirectory){
+if(src.some(s=>par(s)===d.path))throw new Error('The file cannot be copied onto itself.');
+const paths=src.filter(s=>s.path!==d.path&&!d.path.startsWith(s.path+'/')).map(s=>s.path);
+if(!paths.length)throw new Error('Cannot copy a folder into itself.');
+await NF.paste({paths,dest:d.path,move:!!mv});T('        '+paths.length+' item(s) '+(mv?'moved':'copied')+'.');return}
+if(mv&&src.length===1&&!d.it&&d.parent===par(src[0])){await NF.rename({path:src[0].path,name:d.name});T('        1 item(s) moved.');return}
+throw new Error(mv?'Moving to a new name in another folder is not supported. Give an existing destination folder.':'Copying under a new name is not supported. Give an existing destination folder.')}
+async function cmdRen(a){const args=a.filter(x=>!FL.test(x));if(args.length!==2)throw new Error('The syntax of the command is incorrect.');
+const r=await rp(args[0]);if(!r.it)throw new Error('The system cannot find the file specified.');
+if(/[\/\\]/.test(args[1]))throw new Error('The syntax of the command is incorrect.');
+if(prot(r.it))throw new Error('Access is denied.');
+if((await ls(r.parent)).some(x=>x.name.toLowerCase()===args[1].toLowerCase()&&x.path!==r.it.path))throw new Error('A duplicate file name exists, or the file cannot be found.');
+await NF.rename({path:r.it.path,name:args[1]})}
+async function cmdDel(c,a){const fl=a.filter(x=>FL.test(x)).join('').toLowerCase(),args=a.filter(x=>!FL.test(x)),rec=c==='rm'&&/r/.test(fl);
+if(!args.length)throw new Error('The syntax of the command is incorrect.');
+const items=[];for(const x of args)items.push(...await tg(x));
+if(!items.length)throw new Error('Could Not Find '+args[0]);
+const ok=[];for(const it of items){if(prot(it)){E(it.name+': Access is denied.');continue}
+if(it.isDirectory&&!rec){E(it.name+' is a folder. Use rmdir to remove folders.');continue}ok.push(it)}
+await rmv(ok)}
+async function cmdRd(a){const fl=a.filter(x=>FL.test(x)).join('').toLowerCase(),args=a.filter(x=>!FL.test(x)),rec=/[sr]/.test(fl);
+if(!args.length)throw new Error('The syntax of the command is incorrect.');
+for(const x of args){for(const it of await tg(x)){
+if(!it.isDirectory){E('The directory name is invalid.');continue}
+if(prot(it)){E('Access is denied.');continue}
+if(!rec&&(await ls(it.path)).length){E('The directory is not empty.');continue}
+await rmv([it])}}}
+async function cmdEcho(line){
+const raw=line.replace(/^echo\s?/i,'');if(!raw.trim())return T('ECHO is on.');
+const m=/^(.*?)\s*(>>?)\s*([^>]+)$/.exec(raw);if(!m)return T(raw);
+const f=await rp(m[3].trim().replace(/^"|"$/g,''));if(f.it&&f.it.isDirectory)throw new Error('Access is denied.');
+let old='';if(m[2]==='>>'&&f.it){try{old=(await NF.readText({path:f.path})).text||''}catch(e){}if(old&&!old.endsWith('\n'))old+='\n'}
+await NF.writeText({path:f.path,text:old+m[1]+'\n'})}
+const HELP=['Aurora terminal. Commands work on the Aurora file system (C:\\ = internal storage).','','DIR [path|pattern]    Detailed list of a folder   (LS: names only)','CD [path]             Show or change folder (.. goes up)','MKDIR path            Create a folder (MD)','TYPE file             Show a text file (CAT)','COPY src dest-folder  Copy (CP); wildcards * and ? work','MOVE src dest         Move to a folder, or rename in the same folder (MV)','REN file newname      Rename (RENAME)','DEL file              Delete files to the Recycle Bin (RM)','RMDIR [/s] folder     Remove a folder (RD)','ECHO text [> file]    Print text, or write it to a file (>> appends)','CLS                   Clear the screen (CLEAR)','VER  DATE  TIME  PWD  EXIT','','Real Windows programs (.exe) cannot be started from here.'];
+const run=async line=>{const raw=line.trim();if(!raw)return;
+const toks=[];raw.replace(/"([^"]*)"|(\S+)/g,(m,q,s)=>toks.push(q!==undefined?q:s));
+const c=toks[0].toLowerCase(),a=toks.slice(1);
+try{await ready;
+if(/^[a-z]:$/i.test(c)){if(c.toLowerCase()!=='c:')E('The system cannot find the drive specified.');return}
+switch(c){
+case'help':case'?':HELP.forEach(T);break;
+case'cls':case'clear':out.innerHTML='';break;
+case'ver':T('');T('Aurora OS [Version 3.0.0 alpha]');T('');break;
+case'date':{const d=new Date();T('The current date is: '+['Sun','Mon','Tue','Wed','Thu','Fri','Sat'][d.getDay()]+' '+pad2(d.getMonth()+1)+'/'+pad2(d.getDate())+'/'+d.getFullYear());break}
+case'time':{const d=new Date();T('The current time is: '+pad2(d.getHours())+':'+pad2(d.getMinutes())+':'+pad2(d.getSeconds())+'.'+pad2(Math.floor(d.getMilliseconds()/10)));break}
+case'pwd':T(win(cwd));break;
+case'dir':await cmdDir(a,1);break;
+case'ls':await cmdDir(a,0);break;
+case'cd':case'chdir':await cmdCd(a);break;
+case'mkdir':case'md':await cmdMk(a);break;
+case'type':case'cat':await cmdType(a);break;
+case'copy':case'cp':case'xcopy':await cmdCp(a,false);break;
+case'move':case'mv':await cmdCp(a,true);break;
+case'ren':case'rename':await cmdRen(a);break;
+case'del':case'erase':case'rm':await cmdDel(c,a);break;
+case'rmdir':case'rd':await cmdRd(a);break;
+case'echo.':T('');break;
+case'echo':await cmdEcho(raw);break;
+case'exit':closeW(w.id,true);break;
+default:E("'"+toks[0]+"' is not recognized as an internal or external command,\noperable program or batch file.")}
+}catch(e){E((e&&e.message)||String(e))}};
+inp.onkeydown=async e=>{
+if(e.key==='Enter'||e.keyCode===13){e.preventDefault();if(busy)return;const line=inp.value;inp.value='';put(esc(win(cwd)+'>'+line));
+if(line.trim()){hist.push(line);if(hist.length>100)hist.shift()}hi=hist.length;busy=true;await run(line);busy=false;prompt();out.scrollTop=out.scrollHeight}
+else if(e.key==='ArrowUp'){e.preventDefault();if(hi>0){hi--;inp.value=hist[hi]}}
+else if(e.key==='ArrowDown'){e.preventDefault();if(hi<hist.length-1){hi++;inp.value=hist[hi]}else{hi=hist.length;inp.value=''}}};
+tm.onclick=()=>{if(!String(getSelection()))inp.focus()};
+T('Aurora OS [Version 3.0.0 alpha]');T('Commands run on the Aurora file system (C:\\ = internal storage). Type HELP.');T('');
+prompt();setTimeout(()=>inp.focus(),380);
+}
+/* ---------- Task Manager (v3-p07) ---------- */
+function appTask(w){
+const B=w.body,N=60,GB=1073741824;
+let tab='p',cpu=[],mem=[],last=null,inf=null,ok=null,sig='';
+const fb=n=>n>=GB?(n/GB).toFixed(1)+' GB':Math.round(n/1048576)+' MB';
+B.innerHTML='<div class="tk" data-tab="p"><div class="tkt"><button data-t="p" class="on">Processes</button><button data-t="f">Performance</button></div><div class="tkp"><div class="tks"></div><div class="tkl"></div></div><div class="tkf"><div class="tkc"><div class="tkh"><b class="mt">Memory</b><em class="mv">–</em></div><canvas class="gm"></canvas><div class="tkd md"></div></div><div class="tkc"><div class="tkh"><b>CPU</b><em class="cv">–</em></div><canvas class="gc"></canvas><div class="tkd cd"></div></div></div></div>';
+const tk=$('.tk',B);
+const draw=(cv,arr,col)=>{const W2=cv.clientWidth|0,H2=cv.clientHeight|0;if(!W2||!H2)return;if(cv.width!==W2)cv.width=W2;if(cv.height!==H2)cv.height=H2;
+const g=cv.getContext('2d');g.clearRect(0,0,W2,H2);g.strokeStyle='rgba(128,128,128,.25)';g.lineWidth=1;
+for(let i=1;i<4;i++){g.beginPath();g.moveTo(0,H2*i/4);g.lineTo(W2,H2*i/4);g.stroke()}
+if(!arr.length)return;const st=W2/(N-1),x0=W2-(arr.length-1)*st;
+g.beginPath();arr.forEach((v,i)=>{const x=x0+i*st,y=H2-1-(H2-2)*Math.min(100,Math.max(0,v))/100;i?g.lineTo(x,y):g.moveTo(x,y)});
+g.lineWidth=2;g.strokeStyle=col;g.stroke();g.lineTo(W2,H2);g.lineTo(x0,H2);g.closePath();g.globalAlpha=.18;g.fillStyle=col;g.fill();g.globalAlpha=1};
+const renderL=()=>{const ks=Object.keys(W);
+$('.tkl',B).innerHTML='<div class="tkr hd"><span>Name</span><span>Status</span><span></span></div>'+ks.map(k=>{const x=W[k],mn=x.el.classList.contains('min'),t=$('.tbar span',x.el).textContent;
+return`<div class="tkr" data-k="${esc(k)}"><span class="nm"><i class="tt">${tile(x.app)}</i><span>${esc(t)}</span></span><span class="st">${mn?'Minimized':k===topId?'Focused':'Running'}</span><button data-end="${esc(k)}">End task</button></div>`}).join('')};
+const upd=()=>{const cv=cpu.length?cpu[cpu.length-1]:null,mv=mem.length?mem[mem.length-1]:null,ks=Object.keys(W);
+$('.tks',B).innerHTML=`<span>CPU <b>${cv==null?'–':cv.toFixed(0)+'%'}</b></span><span>Memory <b>${mv==null?'–':mv.toFixed(0)+'%'}</b></span><span><b>${ks.length}</b> windows</span>`;
+const s=ks.map(k=>k+(W[k].el.classList.contains('min')?1:0)+(k===topId?1:0)+$('.tbar span',W[k].el).textContent).join('|');if(s!==sig){sig=s;renderL()}
+if(tab!=='f')return;
+$('.mv',B).textContent=mv==null?'–':mv.toFixed(0)+'%';$('.cv',B).textContent=cv==null?'–':cv.toFixed(0)+'%';
+$('.mt',B).textContent=ok?'Memory':'JS heap';
+$('.md',B).innerHTML=ok&&inf?`In use: ${fb(inf.total-inf.avail)} of ${fb(inf.total)}<br>Available: ${fb(inf.avail)}<br>Aurora app: ${fb(inf.appPss)}${inf.low?'<br><b>Low memory</b>':''}`:inf?`JS heap: ${fb(inf.js)} of ${fb(inf.jsl)}<br>Full memory info needs the updated app build.`:'Not available';
+$('.cd',B).innerHTML=ok&&inf?`Aurora app: ${cv==null?'–':cv.toFixed(1)+'%'} of ${inf.cores} cores<br>Whole-system CPU usage cannot be read by apps on Android 8 and newer, so this is Aurora's own usage.`:'Not available. It needs the updated app build.';
+const ac=getComputedStyle(B).getPropertyValue('--acc').trim()||'#14b8a6';draw($('.gm',B),mem,ac);draw($('.gc',B),cpu,ac)};
+const tick=async()=>{let m=null,c=null;
+try{const r=await NF.sysInfo(),t=performance.now();ok=true;inf=r;if(last)c=Math.min(100,Math.max(0,(r.cpuMs-last.c)/((t-last.t)*(r.cores||1))*100));last={c:r.cpuMs,t};m=(r.total-r.avail)/r.total*100}
+catch(e){ok=false;const pm=performance.memory;if(pm){inf={js:pm.usedJSHeapSize,jsl:pm.jsHeapSizeLimit};m=pm.usedJSHeapSize/pm.jsHeapSizeLimit*100}}
+if(m!=null){mem.push(m);if(mem.length>N)mem.shift()}
+if(c!=null){cpu.push(c);if(cpu.length>N)cpu.shift()}
+upd()};
+B.onclick=e=>{const t=e.target.closest('[data-t]');
+if(t){tab=t.dataset.t;tk.dataset.tab=tab;$$('.tkt button',B).forEach(b=>b.classList.toggle('on',b===t));upd();return}
+const en=e.target.closest('[data-end]');if(en){closeW(en.dataset.end);return}
+const r=e.target.closest('.tkr[data-k]');if(r&&W[r.dataset.k])showW(W[r.dataset.k])};
+const iv=setInterval(tick,1000);w.onclose=()=>clearInterval(iv);tick();
+}
+document.addEventListener('keydown',e=>{if(e.ctrlKey&&e.shiftKey&&e.key==='Escape'){e.preventDefault();openApp('taskmgr')}});
+
 /* ---------- Settings ---------- */
 function appSet(w,arg){const B=w.body;let pg=arg||'about',q='';
 const NAV=[['System',[['about','About'],['display','Display & size'],['storage','Storage'],['update','Update']]],['Personalization',[['bg','Background'],['color','Colors'],['task','Taskbar']]],['Devices',[['mouse','Mouse']]],['Apps',[['browser','Browser']]]];

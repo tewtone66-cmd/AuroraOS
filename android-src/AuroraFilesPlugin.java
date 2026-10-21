@@ -33,6 +33,28 @@ import java.util.List;
 @CapacitorPlugin(name = "AuroraFiles")
 public class AuroraFilesPlugin extends Plugin {
 
+    /** v3-p07: memory and CPU numbers for Task Manager. */
+    @PluginMethod
+    public void sysInfo(PluginCall call) {
+        try {
+            android.app.ActivityManager am = (android.app.ActivityManager) getContext().getSystemService(Context.ACTIVITY_SERVICE);
+            android.app.ActivityManager.MemoryInfo mi = new android.app.ActivityManager.MemoryInfo();
+            am.getMemoryInfo(mi);
+            android.os.Debug.MemoryInfo dm = new android.os.Debug.MemoryInfo();
+            android.os.Debug.getMemoryInfo(dm);
+            JSObject r = new JSObject();
+            r.put("total", mi.totalMem);
+            r.put("avail", mi.availMem);
+            r.put("low", mi.lowMemory);
+            r.put("appPss", dm.getTotalPss() * 1024L);
+            r.put("cpuMs", android.os.Process.getElapsedCpuTime());
+            r.put("cores", Runtime.getRuntime().availableProcessors());
+            call.resolve(r);
+        } catch (Exception e) {
+            call.reject("sysInfo failed: " + e.getMessage());
+        }
+    }
+
     // ---------- permission ----------
     private boolean hasAccess() {
         if (Build.VERSION.SDK_INT >= 30) return Environment.isExternalStorageManager();

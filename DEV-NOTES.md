@@ -19,3 +19,5 @@
 
 - v3-p06: مرورگر: مقیاس صفحه دیگه با setInitialScale نیست؛ جاوا (AuroraBrowserPlugin: cssWidth/vpScript/applyZoom) عرض viewport رو = عرض پنجره / (PAGE_K × زوم) اجبار می‌کنه (PAGE_K=1.4 ثابت کلاس جاوا). زوم: اسلایدر `.bz` + چیپ `.bzc` کنار آدرس + Ctrl +/-/0 (ZL پله‌ها)
   فول‌اسکرین: آیکن‌های SVG نوار عنوان (WI)، دکمه‌ی `.fsd` برای نمایش موقت داک (fsPeek، کلاس body.peek، ۴.۵ثانیه)
+
+- v3-p07: ماشین‌حساب از نو (appCalc: تاریخچه، ripple، کیبورد، CSS `.cc*`)؛ ترمینال appTerm (دستورات روی NF، مسیر C:\ = ریشه‌ی NF.roots()[0])؛ تسک‌منیجر appTask (`taskmgr`، Ctrl+Shift+Esc، گراف CPU/RAM)؛ بومی: AuroraFilesPlugin.sysInfo (رم سیستم، PSS، زمان CPU پروسه)
