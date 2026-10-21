@@ -24,4 +24,5 @@ for (const d of fs.readdirSync(res)) {
 const adaptive = '<?xml version="1.0" encoding="utf-8"?>\n<adaptive-icon xmlns:android="http://schemas.android.com/apk/res/android">\n  <background android:drawable="@drawable/aurora_ic_bg"/>\n  <foreground android:drawable="@drawable/aurora_ic_fg"/>\n</adaptive-icon>\n';
 out(`${res}/mipmap-anydpi-v26/ic_launcher.xml`, adaptive);
 out(`${res}/mipmap-anydpi-v26/ic_launcher_round.xml`, adaptive);
+fs.writeFileSync('assets/aurora-logo.png', await png('assets/aurora-logo.svg', 1024));
 console.log('Aurora icons + splash written');

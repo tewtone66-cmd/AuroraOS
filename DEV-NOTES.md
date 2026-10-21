@@ -9,3 +9,5 @@
 - مرورگر ~345-394 | فایل‌ها ~395-463 | Notepad ~464 | Photos ~484 | Media ~497 | Calc ~504
 - تنظیمات: appSet(514) (کلیک دکمه‌ها خط ~516-518؛ مقیاس data-ui) | About(520) | exe/wine ~522-616
 - بومی: android-src/*.java (AuroraBrowserPlugin، AuroraWinePlugin، AuroraFilesPlugin...)
+
+- v3-p02: لوگو/آیکن‌ها در assets/*.svg (+ scripts/make-icons.mjs)؛ آیکن اپ‌ها: IC/A.g؛ بکگراندها: WALL (SVG data-URI)؛ لودینگ: #boot (ابتدای body)؛ خاموشی: #shut + دکمه‌ی #off
