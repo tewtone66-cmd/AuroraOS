@@ -136,6 +136,14 @@ body.fs #dock{transform:translate(-50%,170%);opacity:0;pointer-events:none}
 .vmw{display:flex;flex-direction:column;height:100%;background:#000;color:#fff}.vmt{display:flex;gap:2px;padding:4px 8px;background:var(--surf2);color:var(--txt);flex:none;overflow-x:auto;scrollbar-width:none;touch-action:pan-x}.vsc{flex:1;min-height:0;position:relative;touch-action:none;background:#000;overflow:hidden;user-select:none}.vsc canvas{width:100%!important;height:100%!important;object-fit:contain;display:block}.vsu{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:10px;text-align:center;padding:20px;background:var(--surf);color:var(--txt);z-index:2}.vsu p{margin:0;max-width:420px;color:var(--mut);line-height:1.5;word-break:break-word}.vsu input{width:min(92%,420px);height:34px;border:1px solid var(--line);border-radius:6px;padding:0 10px;background:var(--surf2);user-select:text;-webkit-user-select:text;outline:none}
 .vsu{overflow:auto}.vsu>:first-child{margin-top:auto}.vsu>:last-child{margin-bottom:auto}.vsu .vwl{padding:8px 16px}
 @media (prefers-reduced-motion:reduce){*{animation:none!important}}
+
+/* ---- v3-p01: smoother window motion (transform/opacity only) + fullscreen fix ---- */
+@keyframes winIn{from{transform:translateY(14px) scale(.94);opacity:0}to{transform:none;opacity:1}}
+@keyframes winOut{from{transform:none;opacity:1}to{transform:translateY(10px) scale(.95);opacity:0}}
+.win.opening{animation:winIn .28s cubic-bezier(.22,.8,.25,1) backwards;will-change:transform,opacity}
+.win.closing{animation:winOut .26s cubic-bezier(.4,0,.8,.4) .06s forwards;will-change:transform,opacity}
+.win.max{position:fixed!important;min-width:0;min-height:0}
+.win.max .tbar{height:calc(32px + env(safe-area-inset-top,0px));padding-top:env(safe-area-inset-top,0px);padding-right:env(safe-area-inset-right,0px)}
 </style></head><body>
 <svg width="0" height="0" style="position:absolute"><defs><linearGradient id="gs" x1="0" y1="0" x2="1" y2="1"><stop stop-color="#8f9bff"/><stop offset="1" stop-color="#c26bff"/></linearGradient></defs></svg>
 <div id="desk"><div id="icons"></div></div>
@@ -153,8 +161,9 @@ window.addEventListener('unhandledrejection',function(e){var r=e.reason;aurBar('
 const $=(s,r=document)=>r.querySelector(s),$$=(s,r=document)=>[...r.querySelectorAll(s)];
 const ls=(k,v)=>{try{if(v===undefined)return localStorage.getItem(k);localStorage.setItem(k,v)}catch(e){return null}};
 const jl=(k,d)=>{try{const v=JSON.parse(ls(k));return v==null?d:v}catch(e){return d}};
+window.AuroraBusy=window.AuroraBusy||(()=>{let n=0,tm=0;const emit=()=>{try{document.body&&document.body.classList.toggle('busy',n>0);dispatchEvent(new CustomEvent('aurora-busy',{detail:{busy:n>0}}))}catch(e){}};return{start(){n++;emit();clearTimeout(tm);tm=setTimeout(()=>{n=0;emit()},4000)},stop(){n=Math.max(0,n-1);emit()},get busy(){return n>0}}})();
 const setViewport=u=>{const m=document.querySelector('meta[name=viewport]');m&&m.setAttribute('content','width='+Math.round(1280/u)+',user-scalable=no,viewport-fit=cover')};
-try{const u=+ls('aur.ui');if(u>=.7&&u<=1.5&&u!==1)setViewport(u)}catch(e){}
+try{let u=+ls('aur.ui');if(!(u>=.5&&u<=1.5))u=.8;if(u!==1)setViewport(u)}catch(e){}
 const h=(t,c,x)=>{const e=document.createElement(t);if(c)e.className=c;if(x!=null)e.innerHTML=x;return e};
 const esc=s=>String(s).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
 const P=d=>`<svg viewBox="0 0 24 24">${d}</svg>`;
@@ -180,7 +189,7 @@ const stile=s=>{const hs=hostOf(s.u),c=[...hs].reduce((a,x)=>(a*31+x.charCodeAt(
 const WALL=['linear-gradient(135deg,#0b1d3a,#473c91 55%,#c26bff)','linear-gradient(135deg,#0f2027,#2c5364)','linear-gradient(135deg,#1d2b64,#f8cdda)','linear-gradient(135deg,#134e5e,#71b280)','linear-gradient(135deg,#42275a,#734b6d)','linear-gradient(135deg,#232526,#414345)'];
 const ACC=['#4f7cff','#8b5cf6','#ec4899','#f59e0b','#10b981','#ef4444'];
 const SE={google:['Google','https://www.google.com/search?q='],bing:['Bing','https://www.bing.com/search?q='],ddg:['DuckDuckGo','https://duckduckgo.com/?q=']};
-const S={wall:+ls('aur.wall')||0,theme:ls('aur.theme')||'auto',acc:ls('aur.acc')||ACC[0],sp:+ls('aur.sp')||1.8,se:SE[ls('aur.se')]?ls('aur.se'):'google',ms:(v=>v>=.5&&v<=3?v:1)(+ls('aur.ms')),ui:(v=>v>=.7&&v<=1.5?v:1)(+ls('aur.ui')),hd:(v=>[600,1000,2000].includes(v)?v:1000)(+ls('aur.hd')),sc:(v=>v>0?v:1.5)(+ls('aur.sc'))};
+const S={wall:+ls('aur.wall')||0,theme:ls('aur.theme')||'auto',acc:ls('aur.acc')||ACC[0],sp:+ls('aur.sp')||1.8,se:SE[ls('aur.se')]?ls('aur.se'):'google',ms:(v=>v>=.5&&v<=3?v:1)(+ls('aur.ms')),ui:(v=>v>=.5&&v<=1.5?v:.8)(+ls('aur.ui')),hd:(v=>[600,1000,2000].includes(v)?v:1000)(+ls('aur.hd')),sc:(v=>v>0?v:1.5)(+ls('aur.sc'))};
 const plug=n=>{const C=window.Capacitor;if(!C||!C.isNativePlatform||!C.isNativePlatform())return null;let p=null;try{if(typeof C.registerPlugin==='function')p=C.registerPlugin(n)}catch(e){}
 if(!p&&C.Plugins)p=C.Plugins[n]||null;if(!p){const call=(m,o)=>C.nativePromise?C.nativePromise(n,m,o||{}):Promise.reject(new Error('Capacitor bridge missing'));const ls={};p=new Proxy({},{get:(t,k)=>k==='addListener'?((ev,cb)=>{let id=null;const pr=C.nativeCallback?new Promise(r=>{id=C.nativeCallback(n,'addListener',{eventName:ev},cb);r({remove:()=>C.nativeCallback&&C.nativeCallback(n,'removeListener',{eventName:ev,callbackId:id})})}):Promise.resolve({remove(){}});return pr}):k==='then'?undefined:(o=>call(k,o))})}
 return p};
@@ -206,7 +215,7 @@ function openApp(id,arg){closeMenus();const a=A[id];let w=null;
 if(a.multi){if(arg&&arg.path)w=wins(id).find(x=>x.path===arg.path)}else w=wins(id)[0];
 if(w){showW(w);if(!a.multi&&arg!==undefined&&w.open)w.open(arg);return w}
 const key=a.multi?id+'#'+(++uid):id,el=h('div','win'),n=Object.keys(W).length,wd=Math.min(a.w,innerWidth-12),ht=Math.min(a.h,innerHeight-130);
-el.classList.add('opening');setTimeout(()=>{el.classList.remove('opening');sync()},360);el.style.cssText=`left:${Math.max(6,(innerWidth-wd)/2+n*22-30)}px;top:${20+n*22}px;width:${wd}px;height:${ht}px`;
+AuroraBusy.start();el.classList.add('opening');setTimeout(()=>{el.classList.remove('opening');AuroraBusy.stop();sync()},360);el.style.cssText=`left:${Math.max(6,(innerWidth-wd)/2+n*22-30)}px;top:${20+n*22}px;width:${wd}px;height:${ht}px`;
 el.innerHTML=`<div class="tbar"><i class="tt">${tile(id)}</i><span>${a.n}</span><button class="mn" aria-label="Minimize">&#8211;</button><button class="mx" aria-label="Maximize">&#9633;</button><button class="x" aria-label="Close">&#10005;</button></div><div class="body"></div><i class="rzr"></i><i class="rzb"></i><i class="rz"></i>`;
 $('#desk').appendChild(el);w=W[key]={el,body:$('.body',el),id:key,app:id,setTitle:t=>$('.tbar span',el).textContent=t};
 el.addEventListener('pointerdown',()=>{if(topId!==key)focusW(key)},true);
@@ -223,7 +232,7 @@ function minW(w){if(!w||w.el.classList.contains('min'))return;w.el.classList.add
 function showW(w){if(w.el.classList.contains('min')){w.el.classList.remove('min');w.el.classList.add('opening');setTimeout(()=>{w.el.classList.remove('opening');sync()},360)}focusW(w.id)}
 function focusW(key){topId=key;for(const k in W)W[k].el.classList.toggle('on',k===key);W[key].el.style.zIndex=++zi;dockUpdate();sync()}
 function closeW(key,force){const w=W[key];if(!w)return;if(!force&&w.dirty&&w.dirty()){w.el.classList.remove('min');focusW(key);return w.ask(()=>closeW(key,true))}
-try{w.onclose&&w.onclose()}catch(e){console.error(e)}w.el.classList.add('closing');sync();setTimeout(()=>w.el.remove(),230);delete W[key];if(topId===key){topId=null;const k=Object.keys(W).filter(x=>!W[x].el.classList.contains('min')).pop();if(k)focusW(k)}dockUpdate();sync()}
+try{w.onclose&&w.onclose()}catch(e){console.error(e)}AuroraBusy.start();w.el.classList.add('closing');sync();setTimeout(()=>{w.el.remove();AuroraBusy.stop()},340);delete W[key];if(topId===key){topId=null;const k=Object.keys(W).filter(x=>!W[x].el.classList.contains('min')).pop();if(k)focusW(k)}dockUpdate();sync()}
 function dockUpdate(){const box=$('#tasks');const run=Object.values(W).map(x=>x.app);const ids=[...PIN,...[...new Set(run)].filter(x=>!PIN.includes(x)&&x!=='about')];const have=$$('.dk',box).map(b=>b.dataset.id).join();
 if(have!==ids.join()){box.innerHTML='';ids.forEach(id=>{const d=h('button','dk',tile(id));d.title=A[id].n;d.dataset.id=id;d.onclick=()=>{const l=wins(id);if(!l.length)return openApp(id);const vis=l.filter(w=>!w.el.classList.contains('min')),t=vis.find(w=>w.id===topId);if(t){l.forEach(minW)}else{showW(vis[0]||l[0])}};box.appendChild(d)})}
 $$('.dk',box).forEach(b=>b.classList.toggle('open',run.includes(b.dataset.id)));updateFs()}
@@ -317,7 +326,7 @@ function inertia(tg,vx,vy){cancelAnimationFrame(svr);let last=performance.now();
 function pDown(id,x,y){cancelAnimationFrame(svr);ptr.set(id,{x,y});if(ptr.size===1){g={t:Date.now(),m:0,two:false,vx:0,vy:0,lt:0};g.lp=setTimeout(()=>{if(g&&!g.two&&g.m<10&&!g.dm){g.dm=true;VM.L=true;VM.d=press();VM.p={x:VM.x,y:VM.y};curEl.classList.add('grab');ripple();try{navigator.vibrate&&navigator.vibrate(20)}catch(e){}}},S.hd)}else if(g){g.two=true;clearTimeout(g.lp);if(g.dm){g.dm=false;lEnd()}}}
 function pMove(id,x,y){const p=ptr.get(id);if(!p||!g)return;const dx=x-p.x,dy=y-p.y;p.x=x;p.y=y;g.m+=Math.abs(dx)+Math.abs(dy);
 if(ptr.size>=2){const k=S.sc/ptr.size,sx=-dx*k,sy=-dy*k;if(g.st===undefined)g.st=scTarget();scDo(g.st,sx,sy);const n=performance.now();if(!g.lt)g.lt=n;g.lm=n;g.ax=(g.ax||0)+sx;g.ay=(g.ay||0)+sy;const dt=n-g.lt;if(dt>=16){g.vx=Math.max(-3,Math.min(3,g.vx*.5+g.ax/dt*.5));g.vy=Math.max(-3,Math.min(3,g.vy*.5+g.ay/dt*.5));g.ax=g.ay=0;g.lt=n}return}
-VM.x=Math.max(0,Math.min(innerWidth-1,VM.x+dx*S.sp));VM.y=Math.max(0,Math.min(maxH()-1,VM.y+dy*S.sp));place();dockFx(VM.x,VM.y);{const mt=tgt();if(mt&&mt.id==='canvas')ev(mt,'mousemove',{buttons:VM.L?1:0})}
+VM.x=Math.max(0,Math.min(innerWidth-1,VM.x+dx*(VM.L?1:S.sp)));VM.y=Math.max(0,Math.min(maxH()-1,VM.y+dy*(VM.L?1:S.sp)));place();dockFx(VM.x,VM.y);{const mt=tgt();if(mt&&mt.id==='canvas')ev(mt,'mousemove',{buttons:VM.L?1:0})}
 if(VM.L){const b=bpos();if(Lnat&&b)npt(b,'move');else if(!Lnat)ev(tgt(),'pointermove',{buttons:1})}else{const b=bpos(),n=Date.now();if(b&&n-lastHover>60){lastHover=n;npt(b,'hover')}}}
 function pUp(id){if(!ptr.has(id))return;ptr.delete(id);if(g&&!ptr.size){clearTimeout(g.lp);const dt=Date.now()-g.t;if(g.dm)lEnd();else if(!g.two&&!g.done&&g.m<10&&dt<350)vclick();else if(g.two&&g.m<16&&dt<350)rclick();else if(g.two&&g.st!==undefined&&(Math.abs(g.vx)>.05||Math.abs(g.vy)>.05)&&performance.now()-g.lm<90)inertia(g.st,g.vx,g.vy);g=null}}
 pad.addEventListener('pointerdown',e=>{pad.setPointerCapture(e.pointerId);pDown(e.pointerId,e.clientX,e.clientY)});
@@ -515,7 +524,7 @@ function appSet(w){const SP=[['Slow',1.1],['Normal',1.8],['Fast',3]],HD=[['0.6 s
 NF&&NF.status().then(s=>{granted=s.granted;r()}).catch(()=>{});
 w.body.onclick=e=>{const b=e.target.closest('button');if(!b)return;const d=b.dataset;if(d.w!=null){S.wall=+d.w;ls('aur.wall',S.wall);applyWall()}if(d.t){S.theme=d.t;ls('aur.theme',d.t);applyTheme()}if(d.a){S.acc=d.a;ls('aur.acc',d.a);applyTheme()}if(d.m!=null)vmSet(d.m==='1');if(d.s){S.sp=+d.s;ls('aur.sp',S.sp)}if(d.e){S.se=d.e;ls('aur.se',d.e)}if(d.hd){S.hd=+d.hd;ls('aur.hd',S.hd)}if(d.sc){S.sc=+d.sc;ls('aur.sc',S.sc)}
 if(d.ms!=null){S.ms=d.ms==='0'?1:Math.max(.5,Math.min(3,Math.round((S.ms+(+d.ms)*.1)*10)/10));ls('aur.ms',S.ms);applyMouse();vmCursor()}
-if(d.ui!=null){S.ui=d.ui==='0'?1:Math.max(.7,Math.min(1.5,Math.round((S.ui+(+d.ui)*.1)*10)/10));ls('aur.ui',S.ui);setViewport(S.ui);const want=Math.round(1280/S.ui);setTimeout(()=>{fitWins();sync();vmCursor();if(Math.abs(innerWidth-want)>3)toast('Restart the app to apply the new size')},350)}
+if(d.ui!=null){S.ui=d.ui==='0'?.8:Math.max(.5,Math.min(1.5,Math.round((S.ui+(+d.ui)*.1)*10)/10));ls('aur.ui',S.ui);setViewport(S.ui);const want=Math.round(1280/S.ui);setTimeout(()=>{fitWins();sync();vmCursor();if(Math.abs(innerWidth-want)>3)toast('Restart the app to apply the new size')},350)}
 if(d.p&&NF&&!granted)NF.requestAccess().catch(()=>{});r()}}
 function appAbout(w){w.body.innerHTML=`<div class="about"><div class="big">${tile('about')}</div><h2>Aurora OS</h2><p>Version 2.1.0</p><ul><li>Real browser (Android WebView)</li><li>File Explorer on your real storage</li><li>Notepad, Photos, Media Player</li><li>Virtual mouse &amp; touchpad</li></ul></div>`}
 /* Aurora OS - Windows VM app (v86). Loaded after the main script; uses its globals. */
