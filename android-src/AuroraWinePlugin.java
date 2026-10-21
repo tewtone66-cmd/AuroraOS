@@ -73,6 +73,7 @@ public class AuroraWinePlugin extends Plugin {
         android.view.Window w = a.getWindow();
         w.addFlags(WindowManager.LayoutParams.FLAG_NOT_TOUCH_MODAL | WindowManager.LayoutParams.FLAG_LAYOUT_NO_LIMITS);
         WindowManager.LayoutParams lp = w.getAttributes();
+        if (lp.x == r[0] && lp.y == r[1] && lp.width == r[2] && lp.height == r[3] && lp.gravity == (Gravity.TOP | Gravity.LEFT)) return; // aurora-p08
         lp.gravity = Gravity.TOP | Gravity.LEFT;
         lp.x = r[0];
         lp.y = r[1];
@@ -414,6 +415,46 @@ public class AuroraWinePlugin extends Plugin {
         }
     }
 
+    // aurora-p08: kill leftover wineserver/wine/box64 processes of an earlier run (they cause the esync error)
+    private void killStaleWine() {
+        int killed = 0;
+        try {
+            int me = android.os.Process.myPid();
+            String rootDir = RootFS.find(getContext()).getRootDir().getPath().toLowerCase();
+            File[] ps = new File("/proc").listFiles();
+            java.util.ArrayList<Integer> dead = new java.util.ArrayList<>();
+            if (ps != null) {
+                for (File p : ps) {
+                    String n = p.getName();
+                    if (!n.matches("\\d+")) continue;
+                    int pid = Integer.parseInt(n);
+                    if (pid == me) continue;
+                    String cmd;
+                    try (java.io.FileInputStream in = new java.io.FileInputStream(new File(p, "cmdline"))) {
+                        byte[] b = new byte[4096];
+                        int len = Math.max(0, in.read(b));
+                        cmd = new String(b, 0, len, java.nio.charset.StandardCharsets.UTF_8).replace('\0', ' ').toLowerCase();
+                    } catch (Exception e) {
+                        continue;
+                    }
+                    if (cmd.contains("wineserver") || cmd.contains("wine64") || cmd.contains("box64") || cmd.contains(rootDir)) {
+                        android.os.Process.killProcess(pid);
+                        dead.add(pid);
+                        killed++;
+                    }
+                }
+            }
+            long end = System.currentTimeMillis() + 1500;
+            while (!dead.isEmpty() && System.currentTimeMillis() < end) {
+                for (int i = dead.size() - 1; i >= 0; i--) if (!new File("/proc/" + dead.get(i)).exists()) dead.remove(i);
+                if (!dead.isEmpty()) Thread.sleep(50);
+            }
+            addJavaNote("killStaleWine: killed " + killed + " old process(es), still alive " + dead.size());
+        } catch (Throwable e) {
+            addJavaNote("killStaleWine FAILED: " + e);
+        }
+    }
+
     private void addJavaNote(String line) {
         String n = javaNote;
         javaNote = n.isEmpty() ? line : n + "\n" + line;
@@ -608,6 +649,7 @@ public class AuroraWinePlugin extends Plugin {
         busy = true;
         try {
             ensureJava(ctx, containerId);
+            killStaleWine();
             ensureJavaEnv(ctx, containerId);
             ensureWineDebug(ctx, containerId);
             ensureWineD3D(ctx, containerId);
@@ -646,8 +688,24 @@ public class AuroraWinePlugin extends Plugin {
         final JSObject data = call.getData();
         getActivity().runOnUiThread(() -> {
             int[] r = rectToScreen(data);
-            if (r != null) applyRect(a, r);
+            if (r != null) queueRect(r);
             call.resolve();
+        });
+    }
+
+    // aurora-p08: coalesce rect updates to one per frame (no lag while dragging/resizing)
+    private volatile int[] pendRect;
+    private boolean rectQueued; // UI thread only
+
+    private void queueRect(int[] r) {
+        pendRect = r;
+        if (rectQueued) return;
+        rectQueued = true;
+        android.view.Choreographer.getInstance().postFrameCallback(t -> {
+            rectQueued = false;
+            int[] p = pendRect;
+            Activity a = curActivity;
+            if (p != null && a != null) applyRect(a, p);
         });
     }
 
