@@ -72,7 +72,7 @@ button,input,textarea{font:inherit;color:inherit}
 .ni{display:flex;gap:8px;align-items:center;padding:7px 8px;border-radius:6px;cursor:pointer}.ni:hover{background:var(--hov)}.ni.sel{background:var(--selbg)}.ni span{overflow:hidden;white-space:nowrap;text-overflow:ellipsis}.ni svg{flex:none}
 .elist{flex:1;overflow:auto;touch-action:pan-x pan-y;padding:4px;position:relative}
 .row{display:grid;grid-template-columns:minmax(140px,1fr) 140px 110px 80px;align-items:center;gap:8px;padding:5px 10px;border-radius:5px;cursor:default}.row.hd{position:sticky;top:0;background:var(--surf);color:var(--mut);font-size:11.5px;border-bottom:1px solid var(--line);border-radius:0;z-index:1;padding:6px 10px}.row.hd span{cursor:pointer}.row.hd span:hover{color:var(--txt)}
-.row:not(.hd):hover{background:var(--hov)}.row.sel{background:var(--selbg)}.row.cut{opacity:.5}.nm{display:flex;gap:8px;align-items:center;overflow:hidden}.nm span{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}.nm svg{width:20px;height:20px;flex:none}
+.row:not(.hd):hover{background:var(--hov)}.row.sel{background:var(--selbg)}.row.cut{opacity:.5}.row.dndt{background:var(--selbg);outline:2px solid var(--acc);outline-offset:-2px}[data-dp].dndt{background:var(--selbg);outline:1px solid var(--acc)}.row.dnddrag{opacity:.45}.dndg{position:fixed;left:0;top:0;z-index:9500;pointer-events:none;display:flex;align-items:center;gap:8px;padding:5px 10px;border-radius:6px;background:var(--surf2);border:1px solid var(--line);box-shadow:0 10px 24px #0006;max-width:260px;will-change:transform}.dndg .nm{overflow:hidden}.dndg b{background:var(--acc);color:#fff;border-radius:10px;padding:0 7px;font-size:11px;font-weight:600}.dndg i{font-style:normal;font-size:11px;color:var(--mut);white-space:nowrap}.dndg.no i{color:#e5484d}.nm{display:flex;gap:8px;align-items:center;overflow:hidden}.nm span{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}.nm svg{width:20px;height:20px;flex:none}
 .row>span{overflow:hidden;white-space:nowrap;text-overflow:ellipsis;color:var(--mut);font-size:12px}.row .nm span{color:var(--txt);font-size:13px}
 .th{width:20px;height:20px;border-radius:3px;object-fit:cover;flex:none;background:var(--surf2)}
 .ic{display:flex;flex-wrap:wrap;align-content:flex-start;gap:4px;padding:8px}.ic .row{width:104px;display:flex;flex-direction:column;text-align:center;padding:8px 4px}.ic .row.hd,.ic .row>span{display:none}.ic .nm{flex-direction:column;gap:6px}.ic .nm svg{width:52px;height:52px}.ic .th{width:68px;height:52px;border-radius:5px}.ic .nm span{white-space:normal;word-break:break-word;font-size:12px;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical}
@@ -370,7 +370,7 @@ IC.taskmgr=P('<g stroke="none"><path d="M5 19v-9h3v9zM10.5 19V5h3v14zM16 19v-6h3
 IC.code=P('<g stroke="none"><path d="M9 7 4 12l5 5 1.4-1.4L6.8 12l3.6-3.6zM15 7l-1.4 1.4 3.6 3.6-3.6 3.6L15 17l5-5z" fill="#fff"/></g>');
 IC.music=P('<g stroke="none"><path d="M9 4v11.3a3 3 0 1 0 2 2.7V8h6V4z" fill="#fff"/></g>');
 IC.zip=P('<g stroke="none"><path d="M5 3h9l5 5v13H5z" fill="#fff"/><path d="M11 3.5h2v2h-2zM11 7.5h2v2h-2zM11 11.5h2v2h-2z" fill="#d97706"/><path d="M10.5 14.5h3v3a1.5 1.5 0 0 1-3 0z" fill="#d97706"/></g>');
-const PIN=['browser','files','notes','photos','calc','set'],DESK=[['files','This PC'],['trash','Recycle Bin'],['win']];
+const PIN=['browser','files','notes','photos','calc','set'],DESK=[['files','This PC'],['trash','Recycle Bin']];
 try{const sp=jl('aur.pin',null);if(Array.isArray(sp)){const ok=sp.filter(x=>typeof x==='string'&&A[x]&&x!=='trash');PIN.splice(0,PIN.length,...ok)}}catch(e){}
 let SITES=(a=>Array.isArray(a)?a.filter(s=>s&&typeof s.u==='string'):[])(jl('aur.sites',[]));
 SITES.forEach(s=>DESK.push(['site',s.t||'',s.u]));
@@ -489,7 +489,7 @@ if(n){toast(n===1?'Added to desktop: '+first.t:n+' programs added to desktop');i
 const low=String(path||'').toLowerCase();
 if(path&&/\.exe$/.test(low)&&!/\/\.wine\/drive_c\//.test(low)&&!/(setup|install|unins|update|redist)/.test(low.split('/').pop())&&!EXES.some(x=>x.p===path||x.l===path))await addExe({p:path},false,0)}catch(e){reportErr(e,'after-exe','Could not read the Start Menu')}}
 function buildUI(){buildIcons();const ic=$('#icons');
-Object.keys(A).filter(id=>id!=='dl'&&id!=='exew').forEach((id,ix)=>{const p=h('button','',`<div class="t">${tile(id)}</div><span>${A[id].n}</span>`);p.style.setProperty('--i',ix);p.onclick=()=>openApp(id);$('#pins').appendChild(p)});dockUpdate();
+Object.keys(A).filter(id=>id!=='dl'&&id!=='exew'&&id!=='win').forEach((id,ix)=>{const p=h('button','',`<div class="t">${tile(id)}</div><span>${A[id].n}</span>`);p.style.setProperty('--i',ix);p.onclick=()=>openApp(id);$('#pins').appendChild(p)});dockUpdate();
 $('#startBtn').innerHTML=`<div class="ico" style="--g:linear-gradient(150deg,#071a2b,#0d2a45 55%,#1a1a45)">${STAR}</div>`;
 $('#startBtn').onclick=e=>{e.stopPropagation();const o=!$('#start').classList.contains('show');closeMenus();if(o){$('#start').classList.add('show');menuOpen=true;sync()}};
 startInit();$('#pw').onclick=()=>location.reload();$('#mbtn').onclick=()=>vmSet(!VM.on);
@@ -667,12 +667,12 @@ function mk(it){const k=kind(it),th=k==='img'&&it.size>0&&it.size<8e6;const r=h(
 r.onclick=e=>{L.focus();if(e.shiftKey||e.ctrlKey||e.metaKey||E.multi){pick(it,e);return}if(act(r,()=>open(it),e))return;pick(it,e)};
 r.oncontextmenu=e=>{e.preventDefault();e.stopPropagation();if(!E.sel.has(it.path)){E.sel=new Set([it.path]);E.anchor=it;paint()}const one=E.sel.size===1;ctx(e.clientX,e.clientY,[['Open',()=>open(it),'',!one],...(E.sr&&one?[['Open file location',()=>go(dirname(it.path))]]:[]),...(one&&!it.isDirectory?[['Open with Notepad',()=>openApp('notes',{path:it.path})],['Open with Code Editor',()=>openApp('code',{path:it.path})],...(kind(it)==='zip'?[['Extract here',()=>cmd('unzip')],['Extract to…',()=>cmd('unzipto')]]:[])]:[]),['Compress to ZIP',()=>cmd('zip')],...(one&&!it.isDirectory&&kind(it)==='exe'?[['Add to Desktop',()=>addExe({p:it.path})]]:[]),null,['Cut',()=>cmd('cut'),'Ctrl+X'],['Copy',()=>cmd('copy'),'Ctrl+C'],null,['Rename',()=>cmd('ren'),'F2',!one],['Delete',()=>cmd('del'),'Del'],null,['Properties',()=>cmd('props')]])};return r}
 function draw(){const v=vis();L.className='elist'+(E.view==='i'&&(E.path!=null||E.sr)?' ic':'')+(E.view==='l'&&(E.path!=null||E.sr)?' lt':'');
-nav.innerHTML='';const sec=t=>nav.appendChild(h('h5','',t)),item=(label,ico,path)=>{const n=h('div','ni'+(E.path===path?' sel':''),ico+'<span></span>');$('span',n).textContent=label;n.onclick=()=>go(path);nav.appendChild(n)};
+nav.innerHTML='';const sec=t=>nav.appendChild(h('h5','',t)),item=(label,ico,path)=>{const n=h('div','ni'+(E.path===path?' sel':''),ico+'<span></span>');$('span',n).textContent=label;n.onclick=()=>go(path);if(path)n.dataset.dp=path;nav.appendChild(n)};
 const hm=h('div','ni'+(E.path==null?' sel':''),'<svg viewBox="0 0 24 24" width="20" height="20"><rect x="3" y="4" width="18" height="12" rx="2" fill="#4facfe"/><path d="M8 20h8M12 16v4" stroke="#7a8599" stroke-width="2"/></svg><span>This PC</span>');hm.onclick=()=>go(null);nav.appendChild(hm);
 if(E.quick.length){sec('Quick access');E.quick.forEach(q=>item(q.n,ficon({isDirectory:1,name:q.n}).replace('<svg','<svg width="20" height="20"'),q.path))}
 if(E.roots.length){sec('Devices');E.roots.forEach(r=>item(rlabel(r),'<svg viewBox="0 0 24 24" width="20" height="20"><rect x="3" y="8" width="18" height="9" rx="2" fill="#8e98a8"/><circle cx="17" cy="12.5" r="1.2" fill="#3fdc83"/></svg>',r.path))}
 const cs=[{l:'This PC',p:null}];if(E.path!=null){const r=rootOf(E.path);if(r){cs.push({l:rlabel(r),p:r.path});E.path.slice(r.path.length).split('/').filter(Boolean).forEach((s,i,a)=>cs.push({l:s,p:r.path+'/'+a.slice(0,i+1).join('/')}))}else cs.push({l:E.path,p:E.path})}
-crumb.innerHTML='';cs.forEach((c,i)=>{if(i)crumb.appendChild(h('s','','›'));const b=h('b','');b.textContent=c.l;b.onclick=e=>{e.stopPropagation();go(c.p)};crumb.appendChild(b)});
+crumb.innerHTML='';cs.forEach((c,i)=>{if(i)crumb.appendChild(h('s','','›'));const b=h('b','');b.textContent=c.l;b.onclick=e=>{e.stopPropagation();go(c.p)};if(c.p)b.dataset.dp=c.p;crumb.appendChild(b)});
 if(E.sr){const b=h('b','');b.textContent='Search results';crumb.appendChild(h('s','','›'));crumb.appendChild(b)}
 if(!E.ok){L.innerHTML='';return paint()}
 if(E.path==null&&!E.sr){L.innerHTML='';L.appendChild(h('div','sec','Folders'));const g1=h('div','fgrid');E.quick.forEach(q=>{const t=h('div','ftile',ficon({isDirectory:1,name:q.n})+'<span></span>');$('span',t).textContent=q.n;t.onclick=e=>{if(act(t,()=>go(q.path),e))return;$$('.sel',L).forEach(x=>x.classList.remove('sel'));t.classList.add('sel')};g1.appendChild(t)});if(!E.quick.length)g1.textContent='No folders yet';L.appendChild(g1);
@@ -698,6 +698,35 @@ function setView(v){E.view=v;ls('aur.fv',v);draw()}
 B.addEventListener('click',e=>{const a=e.target.closest('[data-a]');if(a&&!a.closest('.gate')){cmd(a.dataset.a);return}const v=e.target.closest('[data-v]');if(v)setView(v.dataset.v);const hd=e.target.closest('.row.hd span[data-k]');if(hd){const k=hd.dataset.k;if(E.sk===k)E.asc=!E.asc;else{E.sk=k;E.asc=true}ls('aur.fsk',E.sk);ls('aur.fsa',E.asc?'1':'0');draw()}});
 L.addEventListener('click',e=>{if(e.target===L||e.target.classList.contains('fgrid')){E.sel.clear();paint()}});
 L.addEventListener('contextmenu',e=>{if(e.target.closest('.row[data-p]'))return;e.preventDefault();if(E.path==null)return;ctx(e.clientX,e.clientY,[['New folder',()=>cmd('mkdir')],['New text document',()=>cmd('mktxt')],null,['Paste',()=>cmd('paste'),'Ctrl+V',!CLIP.paths.length],null,['Sort by…',()=>cmd('sort')],['View…',()=>cmd('view')],['Refresh',()=>load()],null,['Properties',()=>{E.sel.clear();cmd('props')}]])});
+/* aurora-dnd: drag files/folders onto a folder, sidebar item or path segment (Move; Ctrl or another drive = Copy) */
+(()=>{let d=null,hot=null,sup=false;const TH=7;
+const clr=()=>{if(hot){hot.classList.remove('dndt');hot=null}};
+const dst=(s,x,y)=>{const e=document.elementFromPoint(x,y);if(!e)return null;const t=e.closest('.row[data-p],[data-dp]');if(!t||!B.contains(t))return null;
+let p=t.dataset.dp,nm=t.textContent.trim();if(!p){const it=E.items.find(i=>i.path===t.dataset.p);if(!it||!it.isDirectory)return null;p=it.path;nm=it.name}
+if(s.paths.some(q=>q===p||p.startsWith(q+'/')))return null;return{el:t,path:p,name:nm}};
+const copyMode=(s,t,e)=>{if(e.ctrlKey)return true;if(!t)return false;const a=rootOf(s.paths[0]),b=rootOf(t.path);return !!(a&&b&&a!==b)};
+const noop=(s,t,mv)=>mv&&s.paths.every(q=>dirname(q)===t.path);
+L.addEventListener('pointerdown',e=>{const r=e.target.closest('.row[data-p]');if(!r||e.button||d)return;
+d={r,x:e.clientX,y:e.clientY,px:e.clientX,py:e.clientY,pid:e.pointerId,go:false,arm:e.pointerType!=='touch'};
+if(!d.arm){const c=d;c.lp=setTimeout(()=>{if(d===c){c.arm=true;try{navigator.vibrate&&navigator.vibrate(15)}catch(_){}}},380)}});
+addEventListener('pointermove',e=>{if(!d||e.pointerId!==d.pid)return;const dx=e.clientX-d.x,dy=e.clientY-d.y;d.px=e.clientX;d.py=e.clientY;
+if(!d.go){if(!d.arm){if(Math.hypot(dx,dy)>10){clearTimeout(d.lp);d=null}return}
+if(Math.hypot(dx,dy)<TH)return;const p=d.r.dataset.p;if(!E.sel.has(p)){E.sel=new Set([p]);paint()}
+d.paths=[...E.sel];if(!d.paths.length){d=null;return}d.rows=$$('.row[data-p]',L).filter(x=>E.sel.has(x.dataset.p));
+const g=h('div','dndg',($('.nm',d.r)?$('.nm',d.r).outerHTML:'')+(d.paths.length>1?'<b>'+d.paths.length+'</b>':'')+'<i></i>');document.body.appendChild(g);d.g=g;
+d.rows.forEach(x=>x.classList.add('dnddrag'));d.go=true;dragging=true;sync();
+d.iv=setInterval(()=>{if(!d)return;const r=L.getBoundingClientRect();if(d.py<r.top+30)L.scrollTop-=10;else if(d.py>r.bottom-30)L.scrollTop+=10},16)}
+d.g.style.transform='translate('+(e.clientX+14)+'px,'+(e.clientY+14)+'px)';const t=dst(d,e.clientX,e.clientY);
+if(t!==null&&hot!==t.el){clr();hot=t.el;hot.classList.add('dndt')}else if(t===null)clr();
+const cp=copyMode(d,t,e),tip=$('i',d.g);d.g.classList.toggle('no',!t);tip.textContent=t?(cp?'Copy to ':'Move to ')+t.name:''});
+addEventListener('touchmove',e=>{if(d&&(d.go||d.arm)&&e.cancelable)e.preventDefault()},{passive:false});
+const end=e=>{if(!d||e.pointerId!==d.pid)return;const s=d;d=null;clearTimeout(s.lp);if(!s.go)return;clearInterval(s.iv);s.g.remove();clr();dragging=false;
+s.rows.forEach(x=>x.classList.remove('dnddrag'));sup=true;setTimeout(()=>sup=false,80);sync();if(e.type==='pointercancel')return;
+const t=dst(s,e.clientX,e.clientY);if(!t)return;const mv=!copyMode(s,t,e);if(noop(s,t,mv))return;const n=s.paths.length;
+pstart((mv?'Moving ':'Copying ')+n+' item'+(n>1?'s':''));
+NF.paste({paths:s.paths,dest:t.path,move:mv}).then(()=>{toast(n+' item'+(n>1?'s':'')+(mv?' moved to ':' copied to ')+t.name);load()}).catch(err).finally(pend)};
+addEventListener('pointerup',end);addEventListener('pointercancel',end);
+L.addEventListener('click',e=>{if(sup){e.stopPropagation();e.preventDefault()}},true)})();
 abar.addEventListener('click',e=>{if(e.target.closest('.crumb b')||abar.classList.contains('edit'))return;abar.classList.add('edit');apath.value=E.path==null?'This PC':E.path;apath.focus();apath.select()});
 apath.onkeydown=e=>{if(e.key==='Enter'){const v=apath.value.trim();abar.classList.remove('edit');if(!v||/^this pc$/i.test(v))go(null);else NF.list({path:v}).then(()=>go(v.replace(/\/+$/,'')||'/')).catch(err)}else if(e.key==='Escape'){abar.classList.remove('edit');L.focus()}};apath.onblur=()=>abar.classList.remove('edit');
 srch.oninput=()=>{E.q=srch.value;draw()};
