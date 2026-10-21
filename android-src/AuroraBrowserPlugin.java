@@ -140,12 +140,50 @@ public class AuroraBrowserPlugin extends Plugin {
         }, 400);
     }
     private final Map<String, Integer> zoomOf = new HashMap<>();
+    /** Width (Aurora CSS px) of each tab's visible area; set by create()/show(). */
+    private final Map<String, Float> viewW = new HashMap<>();
+    /** Aurora CSS px per page CSS px at 100% zoom (bigger = bigger pages). Tune here. */
+    private static final float PAGE_K = 1.4f;
+
+    /** Page layout width in CSS px = window width / (PAGE_K * zoom). 0 = size not known yet. */
+    private int cssWidth(String tabId) {
+        Float w = viewW.get(tabId);
+        if (w == null || w < 40f) return 0;
+        Integer z = zoomOf.get(tabId);
+        float zoom = (z == null ? 100 : z) / 100f;
+        return Math.max(200, Math.min(4000, Math.round(w / (PAGE_K * zoom))));
+    }
+
+    /** Forces <meta viewport width=W> (and keeps it forced); the WebView then fits the page to the view, like Chrome zoom. */
+    private static String vpScript(int cssW) {
+        return "(function(W){try{var d=document,w=window;w.__aurW=W;"
+            + "var fix=function(){try{var h=d.head||d.documentElement;if(!h)return;var c='width='+w.__aurW+',user-scalable=no';"
+            + "var ms=d.querySelectorAll('meta[name=viewport i]'),m=ms[0];"
+            + "for(var i=1;i<ms.length;i++){if(ms[i].parentNode)ms[i].parentNode.removeChild(ms[i])}"
+            + "if(!m){m=d.createElement('meta');m.setAttribute('name','viewport');m.setAttribute('content',c);h.appendChild(m)}"
+            + "else if(m.getAttribute('content')!==c){m.setAttribute('content',c)}}catch(e){}};"
+            + "w.__aurFix=fix;fix();"
+            + "if(!w.__aurObs&&w.MutationObserver){w.__aurObs=1;try{new MutationObserver(function(){if(w.__aurFix)w.__aurFix()}).observe(d.documentElement,{childList:true,subtree:true,attributes:true,attributeFilter:['content','name']})}catch(e){}}"
+            + "}catch(e){}})(" + cssW + ")";
+    }
+
     private void applyZoom(WebView v, String tabId) {
         try {
-            Integer z = zoomOf.get(tabId);
-            String val = (z == null || z == 100) ? "" : String.valueOf(z / 100f);
-            v.evaluateJavascript("(function(){try{document.documentElement.style.zoom='" + val + "'}catch(e){}})()", null);
+            int cw = cssWidth(tabId);
+            if (cw <= 0) return;
+            v.evaluateJavascript(vpScript(cw), null);
         } catch (Throwable ignored) { }
+    }
+
+    /** Applies now and again shortly after: some pages add their own viewport meta late. */
+    private void applyZoomSoon(final WebView v, final String tabId) {
+        applyZoom(v, tabId);
+        long[] delays = { 250, 900, 2500 };
+        for (long dl : delays) {
+            main.postDelayed(new Runnable() {
+                @Override public void run() { if (views.get(tabId) == v) applyZoom(v, tabId); }
+            }, dl);
+        }
     }
 
     /** Arrow cursor drawn natively so it stays visible above the browser surface. */
@@ -198,19 +236,23 @@ public class AuroraBrowserPlugin extends Plugin {
     public void create(final PluginCall call) {
         final String id = call.getString("id", "");
         final String url = call.getString("url", "about:blank");
-        // PAGE_K = Aurora CSS px per page CSS px (bigger = bigger pages). Tune here if sites look too small/large.
-        final float PAGE_K = 1.4f;
-        final float pageScale = Math.max(25f, Math.min(300f, dens(call) / density() * 100f * PAGE_K));
+        Float vwf = call.getFloat("vw", 0f);
+        final float vw0 = vwf == null ? 0f : vwf;
+        Integer zf = call.getInt("z", 100);
+        final int z0 = zf == null ? 100 : zf;
+        dens(call);
         ui(() -> {
             if (views.containsKey(id)) { call.resolve(); return; }
+            if (vw0 > 40f) viewW.put(id, vw0);
+            zoomOf.put(id, Math.max(40, Math.min(300, z0)));
             final WebView w = new WebView(getContext());
             WebSettings s = w.getSettings();
             s.setJavaScriptEnabled(true);
             s.setDomStorageEnabled(true);
             s.setDatabaseEnabled(true);
             s.setLoadWithOverviewMode(false);
-            s.setUseWideViewPort(false);
-            w.setInitialScale(Math.round(pageScale));
+            s.setUseWideViewPort(true);
+            w.setInitialScale(0);
             s.setSupportZoom(false);
             s.setBuiltInZoomControls(false);
             s.setDisplayZoomControls(false);
@@ -236,8 +278,8 @@ public class AuroraBrowserPlugin extends Plugin {
                     } catch (Exception ignored) { }
                     return true;
                 }
-                @Override public void onPageStarted(WebView v, String u, Bitmap f) { emit(id, v, true); }
-                @Override public void onPageFinished(WebView v, String u) { applyZoom(v, id); emit(id, v, false); }
+                @Override public void onPageStarted(WebView v, String u, Bitmap f) { applyZoom(v, id); emit(id, v, true); }
+                @Override public void onPageFinished(WebView v, String u) { applyZoomSoon(v, id); emit(id, v, false); }
                 @Override public void onPageCommitVisible(WebView v, String u) { applyZoom(v, id); }
                 @Override public void doUpdateVisitedHistory(WebView v, String u, boolean reload) { emit(id, v, v.getProgress() < 100); }
             });
@@ -404,6 +446,8 @@ public class AuroraBrowserPlugin extends Plugin {
                     w.setLayoutParams(p);
                     w.setVisibility(View.VISIBLE);
                     w.bringToFront();
+                    Float oldW = viewW.put(id, ww);
+                    if (oldW == null || Math.abs(oldW - ww) > 0.5f) applyZoomSoon(w, id); else applyZoom(w, id);
                 } else {
                     w.setVisibility(View.GONE);
                 }
@@ -489,6 +533,7 @@ public class AuroraBrowserPlugin extends Plugin {
         ui(() -> {
             WebView w = views.remove(id);
             zoomOf.remove(id);
+            viewW.remove(id);
             if (w != null) {
                 if (w.getParent() instanceof ViewGroup) ((ViewGroup) w.getParent()).removeView(w);
                 w.destroy();

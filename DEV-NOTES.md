@@ -16,3 +16,6 @@
   appCode (ادیتور کد + hl/hlx هایلایت)، appZip (آرشیو)، appMusic + MU (پلیر جدا) + #np/#npc (نشانگر کنار داک)
   فایل‌منیجر: E.sr (نتایج سرچ سراسری، NF.search)، پیشرفت کپی/انتقال (.fpg، رویداد fprog)، نمای d/l/i
   بومی: AuroraFilesPlugin → search، zipList/zipExtract/zipCreate، cancel، درایوهای مجازی D/E (AuroraOS/D و /E)
+
+- v3-p06: مرورگر: مقیاس صفحه دیگه با setInitialScale نیست؛ جاوا (AuroraBrowserPlugin: cssWidth/vpScript/applyZoom) عرض viewport رو = عرض پنجره / (PAGE_K × زوم) اجبار می‌کنه (PAGE_K=1.4 ثابت کلاس جاوا). زوم: اسلایدر `.bz` + چیپ `.bzc` کنار آدرس + Ctrl +/-/0 (ZL پله‌ها)
+  فول‌اسکرین: آیکن‌های SVG نوار عنوان (WI)، دکمه‌ی `.fsd` برای نمایش موقت داک (fsPeek، کلاس body.peek، ۴.۵ثانیه)
