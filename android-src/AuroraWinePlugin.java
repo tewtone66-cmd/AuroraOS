@@ -105,6 +105,14 @@ public class AuroraWinePlugin extends Plugin {
     @Override
     public void load() {
         inst = this;
+        try { // aurora-p08c: the back button goes to the Aurora page (blue "keep / shut down" screen)
+            getActivity().getOnBackPressedDispatcher().addCallback(getActivity(), new androidx.activity.OnBackPressedCallback(true) {
+                @Override
+                public void handleOnBackPressed() {
+                    notifyListeners("backPressed", new JSObject());
+                }
+            });
+        } catch (Throwable ignored) { }
         Application app = (Application) getContext().getApplicationContext();
         app.registerActivityLifecycleCallbacks(new Application.ActivityLifecycleCallbacks() {
             @Override
@@ -122,7 +130,7 @@ public class AuroraWinePlugin extends Plugin {
             public void onActivityStarted(Activity a) { }
 
             @Override
-            public void onActivityResumed(Activity a) { }
+            public void onActivityResumed(Activity a) { if (a == getActivity()) notifyListeners("appResumed", new JSObject()); }
 
             @Override
             public void onActivityPaused(Activity a) { }
@@ -453,6 +461,172 @@ public class AuroraWinePlugin extends Plugin {
         } catch (Throwable e) {
             addJavaNote("killStaleWine FAILED: " + e);
         }
+    }
+
+    // ---- aurora-p08c: exe visibility, Aurora cursor overlay, background run, back button ----
+    private static volatile android.graphics.Bitmap cursorBmp;
+    private static volatile int cursorW = 26, cursorH = 28;
+    private static volatile boolean overlayOk = false;
+    private final android.os.Handler bgH = new android.os.Handler(android.os.Looper.getMainLooper());
+    private Runnable bgR;
+
+    /** false = hide Wine's own cursor (the Aurora cursor overlay is drawn instead). */
+    public static boolean xCursor(Intent it) {
+        return !(it != null && it.hasExtra("aurora_rect") && cursorBmp != null && overlayOk);
+    }
+
+    /** Called from XServerDisplayActivity.setupUI: draws the Aurora cursor image at the X pointer position. */
+    public static void cursorOverlay(final Activity a, final android.widget.FrameLayout root, final Object xs) {
+        try {
+            final android.graphics.Bitmap bmp = cursorBmp;
+            if (bmp == null || a == null || root == null || xs == null) return;
+            String scr = a.getIntent().getStringExtra("aurora_screen");
+            if (scr == null || scr.indexOf('x') < 0) return;
+            final int sw = Integer.parseInt(scr.substring(0, scr.indexOf('x')));
+            final int sh = Integer.parseInt(scr.substring(scr.indexOf('x') + 1));
+            if (sw <= 0 || sh <= 0) return;
+            Object po = xs.getClass().getField("pointer").get(xs);
+            if (!(po instanceof com.winlator.xserver.Pointer)) return;
+            final com.winlator.xserver.Pointer pt = (com.winlator.xserver.Pointer) po;
+            final android.widget.ImageView iv = new android.widget.ImageView(a);
+            iv.setImageBitmap(bmp);
+            iv.setScaleType(android.widget.ImageView.ScaleType.FIT_XY);
+            iv.setClickable(false);
+            iv.setFocusable(false);
+            root.addView(iv, new android.widget.FrameLayout.LayoutParams(cursorW, cursorH));
+            overlayOk = true;
+            android.view.Choreographer.getInstance().postFrameCallback(new android.view.Choreographer.FrameCallback() {
+                @Override
+                public void doFrame(long t) {
+                    if (a.isFinishing() || a.isDestroyed()) {
+                        overlayOk = false;
+                        return;
+                    }
+                    int vw = root.getWidth(), vh = root.getHeight();
+                    if (vw > 0 && vh > 0) {
+                        iv.setTranslationX(pt.getClampedX() * (float) vw / sw);
+                        iv.setTranslationY(pt.getClampedY() * (float) vh / sh);
+                    }
+                    android.view.Choreographer.getInstance().postFrameCallback(this);
+                }
+            });
+        } catch (Throwable e) {
+            overlayOk = false;
+        }
+    }
+
+    /** {png: dataURL, w, h, vw}: the Aurora mouse image and its size in CSS px (vw = page width in CSS px). */
+    @PluginMethod
+    public void setExeCursor(final PluginCall call) {
+        final String png = call.getString("png");
+        final double cw = call.getDouble("w", 26.0);
+        final double ch = call.getDouble("h", 28.0);
+        final double vw = call.getDouble("vw", 0.0);
+        new Thread(() -> {
+            try {
+                if (png != null) {
+                    int c = png.indexOf(',');
+                    byte[] b = android.util.Base64.decode(c >= 0 ? png.substring(c + 1) : png, android.util.Base64.DEFAULT);
+                    android.graphics.Bitmap bm = android.graphics.BitmapFactory.decodeByteArray(b, 0, b.length);
+                    if (bm != null) {
+                        android.webkit.WebView wv = getBridge().getWebView();
+                        double k = (vw > 0 && wv != null && wv.getWidth() > 0) ? wv.getWidth() / vw
+                            : getContext().getResources().getDisplayMetrics().density;
+                        cursorW = Math.max(8, (int) Math.round(cw * k));
+                        cursorH = Math.max(8, (int) Math.round(ch * k));
+                        cursorBmp = bm;
+                    }
+                }
+            } catch (Throwable ignored) { }
+            call.resolve();
+        }, "aurora-cursor").start();
+    }
+
+    /** {v}: false hides the program window and lets touches through (an Aurora window is in front of it); true shows it. */
+    @PluginMethod
+    public void setExeVisible(final PluginCall call) {
+        final Activity a = curActivity;
+        final boolean v = call.getBoolean("v", true);
+        if (a == null) {
+            call.resolve();
+            return;
+        }
+        a.runOnUiThread(() -> {
+            try {
+                android.view.Window w = a.getWindow();
+                if (v) w.clearFlags(WindowManager.LayoutParams.FLAG_NOT_TOUCHABLE);
+                else w.addFlags(WindowManager.LayoutParams.FLAG_NOT_TOUCHABLE);
+                w.getDecorView().setVisibility(v ? android.view.View.VISIBLE : android.view.View.INVISIBLE);
+            } catch (Throwable ignored) { }
+            call.resolve();
+        });
+    }
+
+    /** Sends the whole app to the background (programs keep running). */
+    @PluginMethod
+    public void moveToBackground(final PluginCall call) {
+        final Activity m = getActivity();
+        if (m == null) {
+            call.resolve();
+            return;
+        }
+        m.runOnUiThread(() -> {
+            try {
+                m.moveTaskToBack(true);
+            } catch (Throwable ignored) { }
+            call.resolve();
+        });
+    }
+
+    /** {ms}: native safety net. ms + 15 s after the app went to the background everything is closed and the app exits. */
+    @PluginMethod
+    public void bgSchedule(PluginCall call) {
+        int ms = call.getInt("ms", 300000);
+        if (bgR != null) bgH.removeCallbacks(bgR);
+        bgR = () -> {
+            new Thread(() -> {
+                try {
+                    killStaleWine();
+                } catch (Throwable ignored) { }
+            }, "aurora-bg-kill").start();
+            Activity c = curActivity;
+            if (c != null) c.finish();
+            Activity m = getActivity();
+            if (m != null) m.finishAndRemoveTask();
+            bgH.postDelayed(() -> android.os.Process.killProcess(android.os.Process.myPid()), 900);
+        };
+        bgH.postDelayed(bgR, ms + 15000L);
+        call.resolve();
+    }
+
+    @PluginMethod
+    public void bgCancel(PluginCall call) {
+        if (bgR != null) bgH.removeCallbacks(bgR);
+        bgR = null;
+        call.resolve();
+    }
+
+    /** Closes the program, stops Wine and exits the app. */
+    @PluginMethod
+    public void quitApp(final PluginCall call) {
+        call.resolve();
+        new Thread(() -> {
+            try {
+                killStaleWine();
+            } catch (Throwable ignored) { }
+            final Activity m = getActivity();
+            if (m != null) {
+                m.runOnUiThread(() -> {
+                    Activity c = curActivity;
+                    if (c != null) c.finish();
+                    m.finishAndRemoveTask();
+                });
+            }
+            try {
+                Thread.sleep(900);
+            } catch (Exception ignored) { }
+            android.os.Process.killProcess(android.os.Process.myPid());
+        }, "aurora-quit").start();
     }
 
     private void addJavaNote(String line) {

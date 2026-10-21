@@ -323,6 +323,18 @@ body.tb-light #clock{color:#111;text-shadow:none}body.no-clock #clock{display:no
 .trw{display:flex;flex-direction:column;height:100%}.trb{display:flex;gap:6px;padding:10px;border-bottom:1px solid var(--line);flex-wrap:wrap}.trl{flex:1;overflow:auto;padding:6px}
 .trr{display:flex;align-items:center;gap:10px;padding:8px 10px;border-radius:10px;font-size:13px;border:0;background:none;color:var(--txt);width:100%;text-align:left}.trr:hover,.trr.vh{background:var(--hov)}.trr.sel{background:var(--selbg)}.trr small{display:block;color:var(--mut);font-size:11px}.trr .n{flex:1;min-width:0}.trr .n b{display:block;font-weight:500;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 .treq{display:grid;place-items:center;height:100%;color:var(--mut);font-size:14px}
+#bsod{position:fixed;inset:0;z-index:99996;display:none;align-items:center;justify-content:center;background:#0b5ed7;color:#fff;font-family:"Segoe UI",system-ui,sans-serif}
+#bsod.on{display:flex}#bsod .bsi{max-width:620px;padding:24px;display:flex;flex-direction:column;gap:14px}#bsod .bsf{font-size:84px;line-height:1}
+#bsod h1{margin:0;font-size:26px;font-weight:600}#bsod p{margin:0;font-size:15px;opacity:.92}#bsod .bsb{display:flex;flex-wrap:wrap;gap:10px;margin-top:6px}
+#bsod .bsb button{border:2px solid #fff;background:transparent;color:#fff;padding:9px 16px;font-size:14px;border-radius:2px;cursor:pointer;touch-action:manipulation}
+#bsod .bsb button[data-k=bg]{background:#fff;color:#0b5ed7;font-weight:600}#bsod .bsb button:active{background:#ffffff40;color:#fff}#bsod small{opacity:.8;font-size:12px}
+@keyframes exind{to{left:65%}}
+.exes.inst .exsp{width:70%!important;height:16px!important;border:1px solid #ffffff44!important;border-radius:3px!important;animation:none!important;position:relative;overflow:hidden;background:#0003}
+.exes.inst .exsp::after{content:'';position:absolute;top:0;bottom:0;left:0;width:35%;background:linear-gradient(#3fd07a,#06b025);animation:exind 1.2s ease-in-out infinite alternate}
+.exinst{position:absolute;left:0;right:0;top:0;height:8px;background:#0b1220;overflow:hidden;z-index:5}
+.exinst i{position:absolute;top:0;bottom:0;left:0;width:35%;background:linear-gradient(#3fd07a,#06b025);animation:exind 1.2s ease-in-out infinite alternate}
+.exbehind::after{content:'Program is running - tap to bring it to the front';position:absolute;inset:0;display:flex;align-items:center;justify-content:center;background:#111827;color:#cbd5e1;font-size:14px;text-align:center;padding:16px;z-index:4}
+/* aurora-p08c */
 </style></head><body class="booting"><div id="boot"><svg class="bl" viewBox="0 0 1024 1024"><path d="M262 800C340 560 430 380 512 214" stroke="url(#gl)" stroke-width="156" stroke-linecap="round" fill="none" opacity="0.1"/><path d="M762 800C684 560 594 380 512 214" stroke="url(#gr)" stroke-width="156" stroke-linecap="round" fill="none" opacity="0.1"/><path d="M262 800C340 560 430 380 512 214" stroke="url(#gl)" stroke-width="124" stroke-linecap="round" fill="none" opacity="0.14"/><path d="M762 800C684 560 594 380 512 214" stroke="url(#gr)" stroke-width="124" stroke-linecap="round" fill="none" opacity="0.14"/><path d="M262 800C340 560 430 380 512 214" stroke="url(#gl)" stroke-width="96" stroke-linecap="round" fill="none"/><path d="M762 800C684 560 594 380 512 214" stroke="url(#gr)" stroke-width="96" stroke-linecap="round" fill="none"/><path d="M352 640C420 584 462 704 512 640S604 584 672 640" stroke="url(#gw)" stroke-width="44" stroke-linecap="round" fill="none"/><g fill="#e0f2fe"><circle cx="812" cy="262" r="13"/><circle cx="226" cy="318" r="9"/><circle cx="716" cy="140" r="7"/></g></svg><div class="bd"><i></i><i></i><i></i></div></div><div id="shut"><svg class="lg" viewBox="0 0 1024 1024"><path d="M262 800C340 560 430 380 512 214" stroke="url(#gl)" stroke-width="156" stroke-linecap="round" fill="none" opacity="0.1"/><path d="M762 800C684 560 594 380 512 214" stroke="url(#gr)" stroke-width="156" stroke-linecap="round" fill="none" opacity="0.1"/><path d="M262 800C340 560 430 380 512 214" stroke="url(#gl)" stroke-width="124" stroke-linecap="round" fill="none" opacity="0.14"/><path d="M762 800C684 560 594 380 512 214" stroke="url(#gr)" stroke-width="124" stroke-linecap="round" fill="none" opacity="0.14"/><path d="M262 800C340 560 430 380 512 214" stroke="url(#gl)" stroke-width="96" stroke-linecap="round" fill="none"/><path d="M762 800C684 560 594 380 512 214" stroke="url(#gr)" stroke-width="96" stroke-linecap="round" fill="none"/><path d="M352 640C420 584 462 704 512 640S604 584 672 640" stroke="url(#gw)" stroke-width="44" stroke-linecap="round" fill="none"/><g fill="#e0f2fe"><circle cx="812" cy="262" r="13"/><circle cx="226" cy="318" r="9"/><circle cx="716" cy="140" r="7"/></g></svg><div class="slot"><div class="sm"><span>Shutting down</span><div class="bd"><i></i><i></i><i></i></div></div><button id="pw" aria-label="Power on"><svg viewBox="0 0 24 24"><path d="M12 3v8M6.6 6.8a8 8 0 1 0 10.8 0"/></svg></button></div><div class="hint">Tap to power on</div></div><script>(function(){var t0=Date.now(),d=0;function go(){if(d)return;d=1;var b=document.getElementById("boot");document.body.classList.remove("booting");if(b){b.classList.add("out");setTimeout(function(){b.remove()},800)}}function chk(){setTimeout(go,Math.max(0,1700-(Date.now()-t0)))}if(document.readyState==="complete")chk();else addEventListener("load",chk);setTimeout(go,5000)})();</script>
 <svg width="0" height="0" style="position:absolute"><defs><linearGradient id="gs" x1="0" y1="0" x2="1" y2="1"><stop stop-color="#8f9bff"/><stop offset="1" stop-color="#c26bff"/></linearGradient><linearGradient id="gl" x1="0" y1="1" x2="1" y2="0"><stop stop-color="#34d399"/><stop offset="1" stop-color="#22d3ee"/></linearGradient><linearGradient id="gr" x1="1" y1="1" x2="0" y2="0"><stop stop-color="#a78bfa"/><stop offset="1" stop-color="#22d3ee"/></linearGradient><linearGradient id="gw" x1="0" y1="0" x2="1" y2="0"><stop stop-color="#5eead4"/><stop offset="1" stop-color="#c4b5fd"/></linearGradient></defs></svg>
 <div id="desk"><div id="icons"></div></div>
@@ -478,18 +490,18 @@ function launchExe(e){if(!e)return;return window.aurora.openExe(e.p,{alt:e.l||''
 const seenLnk=()=>new Set(jl('aur.lnkseen',[]));
 async function lnkBaseline(){if(!NW||(ls('aur.lnkseen')!=null&&ls('aur.pfseen')!=null))return;try{const r=await NW.scanStart({});if(ls('aur.lnkseen')==null)ls('aur.lnkseen',JSON.stringify(((r&&r.items)||[]).map(i=>i.lnk)));if(ls('aur.pfseen')==null)ls('aur.pfseen',JSON.stringify(((r&&r.dirs)||[]).map(d=>d.k)))}catch(e){if(isJsErr(e))reportErr(e,'baseline')}}
 /* after a Windows program closes: new Start Menu shortcuts (installer) become icons; a portable exe is added by itself */
-async function afterExe(path){if(!NW)return;ls('aur.pend','');try{const r=await NW.scanStart({}),items=(r&&r.items)||[],dirs=(r&&r.dirs)||[],seen=seenLnk(),hadPf=ls('aur.pfseen')!=null,pf=new Set(jl('aur.pfseen',[])),fresh=items.filter(i=>!seen.has(i.lnk)),freshDirs=hadPf?dirs.filter(d=>!pf.has(d.k)):[];
+async function afterExe(path){if(!NW)return;ls('aur.pend','');const inst=instRun;instRun=false;AuroraBusy.start();try{const r=await NW.scanStart({}),items=(r&&r.items)||[],dirs=(r&&r.dirs)||[],seen=seenLnk(),hadPf=ls('aur.pfseen')!=null,pf=new Set(jl('aur.pfseen',[])),fresh=items.filter(i=>!seen.has(i.lnk)),freshDirs=hadPf?dirs.filter(d=>!pf.has(d.k)):[];
 items.forEach(i=>seen.add(i.lnk));ls('aur.lnkseen',JSON.stringify([...seen]));dirs.forEach(d=>pf.add(d.k));ls('aur.pfseen',JSON.stringify([...pf]));
 const known=EXES.some(x=>x.p===path||x.l===path);
 const cand=fresh.map(i=>({p:i.target,t:i.name,a:i.args,w:i.cwd,l:i.lnk,ip:i.iconPath,ii:i.iconIndex}));
 for(const d of freshDirs)if(d.exe&&!cand.some(c=>String(c.p).toLowerCase().indexOf(String(d.dir).toLowerCase()+'/')===0))cand.push({p:d.exe,t:d.name});
-let n=0,first=null;
-for(const c of cand)if(await addExe(c,true,n)){n++;if(!first)first=EXES[EXES.length-1]}
-if(n){toast(n===1?'Added to desktop: '+first.t:n+' programs added to desktop');if(!known&&first)setTimeout(()=>launchExe(first),500);return}
+let n=0,first=null;const added=[];AuroraBusy.start();
+for(const c of cand)if(await addExe(c,true,n)){n++;added.push(EXES[EXES.length-1]);if(!first)first=EXES[EXES.length-1]}
+if(n){toast(n===1?'Added to desktop: '+first.t:n+' programs added to desktop');if(inst||!known)openApp('inst',{list:added});return}
 const low=String(path||'').toLowerCase();
-if(path&&/\.exe$/.test(low)&&!/\/\.wine\/drive_c\//.test(low)&&!/(setup|install|unins|update|redist)/.test(low.split('/').pop())&&!EXES.some(x=>x.p===path||x.l===path))await addExe({p:path},false,0)}catch(e){reportErr(e,'after-exe','Could not read the Start Menu')}}
+if(path&&/\.exe$/.test(low)&&!/\/\.wine\/drive_c\//.test(low)&&!/(setup|install|unins|update|redist)/.test(low.split('/').pop())&&!EXES.some(x=>x.p===path||x.l===path))await addExe({p:path},false,0)}catch(e){reportErr(e,'after-exe','Could not read the Start Menu')}finally{AuroraBusy.stop();AuroraBusy.stop()}}
 function buildUI(){buildIcons();const ic=$('#icons');
-Object.keys(A).filter(id=>id!=='dl'&&id!=='exew'&&id!=='win').forEach((id,ix)=>{const p=h('button','',`<div class="t">${tile(id)}</div><span>${A[id].n}</span>`);p.style.setProperty('--i',ix);p.onclick=()=>openApp(id);$('#pins').appendChild(p)});dockUpdate();
+Object.keys(A).filter(id=>id!=='dl'&&id!=='exew'&&id!=='win'&&id!=='inst').forEach((id,ix)=>{const p=h('button','',`<div class="t">${tile(id)}</div><span>${A[id].n}</span>`);p.style.setProperty('--i',ix);p.onclick=()=>openApp(id);$('#pins').appendChild(p)});dockUpdate();
 $('#startBtn').innerHTML=`<div class="ico" style="--g:linear-gradient(150deg,#071a2b,#0d2a45 55%,#1a1a45)">${STAR}</div>`;
 $('#startBtn').onclick=e=>{e.stopPropagation();const o=!$('#start').classList.contains('show');closeMenus();if(o){$('#start').classList.add('show');menuOpen=true;sync()}};
 startInit();$('#pw').onclick=()=>location.reload();$('#mbtn').onclick=()=>vmSet(!VM.on);
@@ -1201,12 +1213,18 @@ function mkFloppy(name,bytes){
 window.aurora=window.aurora||{};
 let wineBusy=false;
 let exeW=null;
-const exeRect=w=>{const r=w.body.getBoundingClientRect();return{x:r.left,y:r.top,w:r.width,h:r.height,vw:innerWidth,vh:innerHeight}};
+async function pushCursor(){if(!NW||!NW.setExeCursor)return;const sa=document.querySelector('#cur .sa');if(!sa)return;const cs=getComputedStyle(curEl),cf=(cs.getPropertyValue('--cf')||'').trim()||'#fff',ck=(cs.getPropertyValue('--cs')||'').trim()||'#111',sw=(typeof S!=='undefined'&&S.ms)||1,W2=Math.round(26*sw),H2=Math.round(28*sw),k=2;
+const svg='<svg xmlns="http://www.w3.org/2000/svg" width="'+W2*k+'" height="'+H2*k+'" viewBox="0 0 26 28"><style>path{fill:'+cf+';stroke:'+ck+'}</style>'+sa.innerHTML+'</svg>';
+const img=new Image();await new Promise((ok,no)=>{img.onload=ok;img.onerror=no;img.src='data:image/svg+xml;charset=utf-8,'+encodeURIComponent(svg)});
+const c=document.createElement('canvas');c.width=W2*k;c.height=H2*k;c.getContext('2d').drawImage(img,0,0);await NW.setExeCursor({png:c.toDataURL('image/png'),w:W2,h:H2,vw:innerWidth})}
+let instRun=false;
+const exeRect=w=>{const r=w.body.getBoundingClientRect(),o=w.inst?8:0;let hh=r.height-o;try{const dk=$('#dock'),d=dk&&dk.getBoundingClientRect();if(d&&d.height>0&&d.top<innerHeight-2&&d.top>r.top+64&&d.left<r.right&&d.right>r.left&&r.top+r.height>d.top)hh=d.top-r.top-o}catch(e){}return{x:r.left,y:r.top+o,w:r.width,h:Math.max(64,hh),vw:innerWidth,vh:innerHeight}};
 function appExe(w,arg){w.path=(arg&&arg.path)||'';w.setTitle(String(w.path).split('/').pop()||'Program');
 if(!$('#exestyle')){const st=h('style');st.id='exestyle';st.textContent='@keyframes exspin{to{transform:rotate(360deg)}}';document.head.appendChild(st)}
 const u=h('div','exes','<div class="exsp" style="width:30px;height:30px;border:3px solid #ffffff33;border-top-color:#60a5fa;border-radius:50%;animation:exspin 1s linear infinite"></div><div class="ext" style="font-size:14px;white-space:pre-wrap;max-width:92%;word-break:break-word"></div><button class="ib pri exb" style="display:none">Close</button>');
 u.style.cssText='position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:12px;background:#111827;color:#fff;text-align:center;padding:16px;overflow:auto;box-sizing:border-box';
 w.body.appendChild(u);
+{const nm=String(w.path).split('/').pop();w.inst=/(setup|install)/i.test(nm)&&!/unins/i.test(nm);if(w.inst){u.classList.add('inst');w.setTitle('Installing '+nm);w.body.appendChild(h('div','exinst','<i></i>'))}}
 $('.exb',u).onclick=()=>closeW(w.id);
 w.exeStatus=(t,err)=>{$('.ext',u).textContent=t;$('.exsp',u).style.display=err?'none':'';$('.exb',u).style.display=err?'':'none';u.style.display='flex'};
 w.exeHide=()=>{u.style.display='none'};
@@ -1214,10 +1232,11 @@ w.exeStatus('Starting…');
 let last='',t1=0,wasMin=false;
 const push=fin=>{if(!w.owns||!W[w.id]||w.el.classList.contains('min')||w.el.classList.contains('minning'))return;let r;try{r=exeRect(w)}catch(e){return}const k=[r.x|0,r.y|0,r.w|0,r.h|0].join();if(k===last&&!fin)return;last=k;NW.setExeRect(r).catch(()=>{})};
 w.sched=()=>{if(!t1)t1=setTimeout(()=>{t1=0;push()},60);clearTimeout(w.tf);w.tf=setTimeout(()=>push(true),420)};
+let vis=true;const vi=setInterval(()=>{if(!w.owns)return;const mn=w.el.classList.contains('min')||w.el.classList.contains('minning'),want=!mn&&topId===w.id&&!menuOpen&&!document.body.classList.contains('shutting')&&!document.body.classList.contains('bsod');if(want!==vis){vis=want;w.body.classList.toggle('exbehind',!want);NW.setExeVisible({v:want}).catch(()=>{})}},120);
 const mo=new MutationObserver(()=>{const m=w.el.classList.contains('min')||w.el.classList.contains('minning');if(m!==wasMin){wasMin=m;if(w.owns){if(m)NW.minimizeExe().catch(()=>{});else setTimeout(()=>{if(W[w.id]&&w.owns)NW.restoreExe(exeRect(w)).catch(()=>{})},380)}}w.sched()});
 mo.observe(w.el,{attributes:true,attributeFilter:['style','class']});
 const ro=new ResizeObserver(()=>w.sched());ro.observe(w.body);
-w.onclose=()=>{mo.disconnect();ro.disconnect();clearTimeout(t1);clearTimeout(w.tf);if(w.owns){w.owns=false;NW.stopExe().catch(()=>{})}if(exeW===w)exeW=null}}
+w.onclose=()=>{clearInterval(vi);mo.disconnect();ro.disconnect();clearTimeout(t1);clearTimeout(w.tf);if(w.owns){w.owns=false;NW.stopExe().catch(()=>{})}if(exeW===w)exeW=null}}
 /* JavaScript bugs go to the red bar; errors reported by the Java layer / Wine engine stay separate (toast) */
 const isJsErr=e=>e instanceof TypeError||e instanceof ReferenceError||e instanceof SyntaxError||e instanceof RangeError;
 const reportErr=(e,where,def)=>{const msg=(e&&(e.message||String(e)))||def||'Something went wrong';if(isJsErr(e))aurBar('Aurora error ('+where+'): '+msg);toast('Error ('+where+'): '+msg,5000);};
@@ -1233,15 +1252,27 @@ const wt=480-(Date.now()-ew.t0);if(wt>0)await new Promise(r=>setTimeout(r,wt));
 if(!W[ew.id])return;
 ew.exeStatus('Starting…');
 const go=f=>{let r=null;try{r=exeRect(ew)}catch(e){}return NW.runExe(r?{path:f,rect:r}:{path:f})};
-let run=p;try{await go(p)}catch(e){if(o&&o.alt&&/not found/i.test((e&&e.message)||'')){run=o.alt;await go(run)}else throw e}
+try{await pushCursor()}catch(e){}let run=p;try{await go(p)}catch(e){if(o&&o.alt&&/not found/i.test((e&&e.message)||'')){run=o.alt;await go(run)}else throw e}
 ew.owns=true;ew.sched();ls('aur.pend',run)}
 catch(e){if(ew&&W[ew.id]){ew.err=(e&&e.message)||'Could not start the program';ew.exeStatus(ew.err,true)}if(ew&&exeW===ew&&!ew.owns)exeW=null;reportErr(e,'openExe','Could not start the program')}
 finally{wineBusy=false}};
+/* aurora-p08c: back button -> blue "keep running / shut down" screen; background timeout -> close all + shutdown */
+const BG_MIN=5;let bgTm=0;
+const bsod=h('div','','<div class="bsi"><div class="bsf">:(</div><h1>Close Aurora OS?</h1><p></p><div class="bsb"><button data-k="bg">Keep running in background</button><button data-k="off">Shut down</button><button data-k="no">Cancel</button></div><small></small></div>');bsod.id='bsod';document.body.appendChild(bsod);
+const bsHide=()=>{bsod.classList.remove('on');document.body.classList.remove('bsod')};
+const bsShow=()=>{closeMenus();const n=Object.keys(W).length;$('small',bsod).textContent='If you do not come back within '+BG_MIN+' minutes, everything is closed automatically.';$('p',bsod).textContent=n?'Your programs are still running. Keep everything open in the background, or close all programs and shut down.':'Nothing is open. Leave Aurora OS in the background or shut it down.';bsod.classList.add('on');document.body.classList.add('bsod')};
+const bgQuit=()=>setTimeout(()=>{try{NW&&NW.quitApp().catch(()=>{})}catch(e){}},3600);
+const bgExpire=()=>{clearTimeout(bgTm);ls('aur.bgdl','');bsHide();doShut();bgQuit()};
+const bgGo=()=>{const ms=BG_MIN*60000;ls('aur.bgdl',String(Date.now()+ms));clearTimeout(bgTm);bgTm=setTimeout(bgExpire,ms);bsHide();try{NW.bgSchedule({ms}).catch(()=>{});NW.moveToBackground().catch(()=>{})}catch(e){}};
+const bgCheck=()=>{const dl=+ls('aur.bgdl');if(!dl)return;if(Date.now()>=dl)return bgExpire();clearTimeout(bgTm);ls('aur.bgdl','');try{NW.bgCancel().catch(()=>{})}catch(e){}};
+bsod.addEventListener('click',e=>{const b=e.target.closest('[data-k]');if(!b)return;const k=b.dataset.k;if(k==='bg')bgGo();else if(k==='off'){bsHide();doShut();bgQuit()}else bsHide()});
+if(NW){try{NW.addListener('backPressed',()=>{if(bsod.classList.contains('on'))return bsHide();if(menuOpen){closeMenus();return}bsShow()});NW.addListener('appResumed',bgCheck)}catch(e){}}
+document.addEventListener('visibilitychange',()=>{if(!document.hidden)bgCheck()});
 function wineEvents(){if(!NW)return;const lw=(n,f)=>{try{return Promise.resolve(NW.addListener(n,f))}catch(e){return Promise.resolve({remove(){}})}};
 lw('progress',e=>{const t=e.step==='container'?'Creating Windows container…':'Installing Windows runtime… '+(e.pct|0)+'%';toast(t);if(exeW&&W[exeW.id]&&!exeW.owns)exeW.exeStatus(t)});
 lw('exeState',e=>{const w=exeW;if(!w||!W[w.id])return;const k=e&&e.state;if(k==='preparing')w.exeStatus('Preparing system files…');else if(k==='launching')w.exeStatus('Starting Wine…');else if(k==='running')w.exeHide();else if(k==='error'){w.err=(e.msg)||'Unknown error';w.exeStatus(w.err,true)}});
 lw('exeStarted',e=>toast('Started '+String(e.path||'').split('/').pop()));
-lw('exeExited',async e=>{const name=String(e.path||'').split('/').pop();const ew=exeW;if(ew&&W[ew.id]){ew.owns=false;if(ew.err)ew.exeStatus(ew.err,true);else closeW(ew.id)}exeW=null;try{const r=await NW.getLastError();if(r&&r.error){toast('Windows app error: '+r.error,5000);return}}catch(err){}toast('Windows app closed: '+name+' (no detailed error was reported by Wine/Box64)',5000);afterExe(e.path)})}
+lw('exeExited',async e=>{const name=String(e.path||'').split('/').pop();const ew=exeW;instRun=!!(ew&&ew.inst);if(ew&&W[ew.id]){ew.owns=false;if(ew.err)ew.exeStatus(ew.err,true);else closeW(ew.id)}exeW=null;try{const r=await NW.getLastError();if(r&&r.error){toast('Windows app error: '+r.error,5000);return}}catch(err){}toast('Windows app closed: '+name+' (no detailed error was reported by Wine/Box64)',5000);afterExe(e.path)})}
 const DL={};
 const dirOf=p=>p.replace(/\/[^/]*$/,'')||'/';
 function dlOpen(d){const p=d.path;if(!p)return;const k=kind({name:d.name});
@@ -1269,6 +1300,10 @@ w.onclose=()=>{d.ui=null;d.w=null};dlPaint(d)}
 if(typeof A!=='undefined'){
 IC.dl=P('<g stroke="none"><path d="M12 3.4a1.4 1.4 0 0 1 1.4 1.4v6.9l2.2-2.2a1.4 1.4 0 0 1 2 2l-4.6 4.6a1.4 1.4 0 0 1-2 0L6.4 11.5a1.4 1.4 0 1 1 2-2l2.2 2.2V4.8A1.4 1.4 0 0 1 12 3.4z" fill="#fff"/><rect x="4" y="18" width="16" height="3" rx="1.5" fill="#fff" opacity=".55"/></g>');
 A.dl={n:'Download',g:'linear-gradient(160deg,#6ee7a0,#16a34a)',w:440,h:210,f:appDl,multi:1};
+function appInst(w,arg){const L=(arg&&arg.list)||[],e0=L[0];w.setTitle('Setup complete');const u=h('div','dlw done','<div class="dh"><div class="instic" style="width:46px;height:46px;flex:none"></div><div style="min-width:0"><div class="dn"></div><div class="ds">Installed successfully</div></div></div><div class="pb"><div class="pf" style="width:100%"></div></div><div class="dst"></div><div class="db"><button class="ib pri" data-k="open">Open</button><button class="ib" data-k="close">Close</button></div>');
+$('.instic',u).innerHTML=e0?etile(e0):'';$('.dn',u).textContent=e0?(L.length>1?e0.t+' and '+(L.length-1)+' more':e0.t):'Program';$('.dst',u).textContent=L.length?'Added to the desktop: '+L.map(x=>x.t).join(', '):'';w.body.appendChild(u);
+$('[data-k=open]',u).onclick=()=>{if(e0)launchExe(e0);closeW(w.id)};$('[data-k=close]',u).onclick=()=>closeW(w.id)}
+IC.inst=IC.dl;A.inst={n:'Setup',g:'linear-gradient(160deg,#6ee7a0,#16a34a)',w:440,h:230,f:appInst,multi:1};
 }
 if(typeof A!=='undefined'){
 IC.win=P('<g stroke="none"><rect x="2.8" y="4" width="18.4" height="12.6" rx="2.8" fill="#fff"/><rect x="8.6" y="18" width="6.8" height="2.2" rx="1.1" fill="#fff" opacity=".55"/><path d="M8.4 7.4h3.2v2.5H8.4zM12.4 7.4h3.2v2.5h-3.2zM8.4 10.7h3.2v2.5H8.4zM12.4 10.7h3.2v2.5h-3.2z" fill="#000" opacity=".28"/></g>');
