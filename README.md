@@ -1,4 +1,4 @@
-# Aurora OS 2.1
+# NexOS 2.1
 
 Desktop-style OS shell packaged as an Android app (landscape). One theme, one icon set.
 
@@ -7,4 +7,4 @@ Desktop-style OS shell packaged as an Android app (landscape). One theme, one ic
 - **Notepad / Photos / Media Player** – open files straight from Explorer.
 - **Virtual mouse** – works on the desktop AND inside the browser.
 
-Build: push to `main`, then download the APK from **Actions → Build Aurora OS APK → Artifacts**.
+Build: push to `main`, then download the APK from **Actions → Build NexOS APK → Artifacts**.
