@@ -78,31 +78,31 @@ html,body{background:#000}
 #dock{height:70px}
 #dock::before,#start::before{content:"";position:absolute;inset:0;border-radius:inherit;pointer-events:none;background:linear-gradient(115deg,transparent 32%,rgba(255,255,255,.13) 46%,transparent 60%);background-size:260% 100%;animation:sheen 7s ease-in-out infinite}
 @keyframes sheen{0%{background-position:130% 0}60%,100%{background-position:-60% 0}}
-.dk.open::after{background:#8fe9ff;box-shadow:0 0 8px #6ee7ff,0 0 14px #8f7bff}
+.dk.open::after{background:#fff;box-shadow:0 0 8px #fff}
 .dv{background:linear-gradient(transparent,#ffffff55,transparent)}
 .win{background:var(--surf);border:1px solid rgba(255,255,255,.1);box-shadow:0 22px 60px rgba(0,0,0,.7),inset 0 1px 0 rgba(255,255,255,.08)}
 .tbar{background:linear-gradient(180deg,rgba(255,255,255,.08),rgba(255,255,255,.02)),var(--surf2)}
 .btab.act{background:var(--surf)}.addr,.esearch{background:var(--surf2);color:var(--txt)}
 .bview{background:#000}.bhome{background:radial-gradient(ellipse at 50% 25%,#2a2370,#05060c 75%)}
 #toast{background:rgba(18,19,26,.6);border:1px solid rgba(255,255,255,.16)}
-#boot{position:fixed;inset:0;z-index:99999;display:grid;place-items:center;background:radial-gradient(ellipse at 50% 40%,#12102a,#000 70%);transition:opacity .8s ease,visibility .8s,transform .8s;touch-action:none}
+#boot{position:fixed;inset:0;z-index:99999;display:grid;place-items:center;background:radial-gradient(ellipse at 50% 40%,#17181d,#000 70%);transition:opacity .8s ease,visibility .8s,transform .8s;touch-action:none}
 #boot.out{opacity:0;visibility:hidden;transform:scale(1.06)}
 .bwrap{position:relative;display:flex;flex-direction:column;align-items:center;gap:10px}
 .orb{position:absolute;top:-40px;width:230px;height:230px;border-radius:50%}
-.orb i{position:absolute;inset:0;border-radius:50%;border:2px solid transparent;border-top-color:#6ee7ff;border-right-color:#8f7bff;filter:blur(1px) drop-shadow(0 0 10px #8f7bff);animation:spin 2.2s linear infinite}
-.orb i+i{inset:22px;border-top-color:#ff6bd5;border-right-color:transparent;border-left-color:#6ee7ff;animation-duration:3.4s;animation-direction:reverse;opacity:.7}
+.orb i{position:absolute;inset:0;border-radius:50%;border:2px solid transparent;border-top-color:#fff;border-right-color:#ffffff55;filter:blur(1px) drop-shadow(0 0 10px #ffffff88);animation:spin 2.2s linear infinite}
+.orb i+i{inset:22px;border-top-color:#ffffff99;border-right-color:transparent;border-left-color:#ffffff44;animation-duration:3.4s;animation-direction:reverse;opacity:.7}
 @keyframes spin{to{transform:rotate(360deg)}}
-.blogo{width:150px;height:150px;filter:drop-shadow(0 0 22px #7c6bffaa);animation:pulse 2.4s ease-in-out infinite}
-.bn{stroke-dasharray:1600;stroke-dashoffset:1600;animation:draw 1.7s .2s cubic-bezier(.6,0,.2,1) forwards}
-@keyframes draw{to{stroke-dashoffset:0}}@keyframes pulse{50%{transform:scale(1.06);filter:drop-shadow(0 0 34px #8f7bffdd)}}
-.bt{margin-top:34px;font:700 30px Inter,system-ui,sans-serif;color:#fff;letter-spacing:.9em;padding-left:.9em;opacity:0;animation:tin 1.4s .9s ease forwards;background:linear-gradient(90deg,#6ee7ff,#a99bff,#ff6bd5);-webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent}
+.blogo{width:150px;height:150px;filter:drop-shadow(0 0 22px #ffffff55);animation:pulse 2.4s ease-in-out infinite}
+.bn{stroke-dasharray:3400;stroke-dashoffset:3400;animation:draw 1.6s .2s cubic-bezier(.6,0,.2,1) forwards,fillin .8s 1.5s ease forwards}@keyframes fillin{to{fill-opacity:1}}
+@keyframes draw{to{stroke-dashoffset:0}}@keyframes pulse{50%{transform:scale(1.06);filter:drop-shadow(0 0 34px #ffffffaa)}}
+.bt{margin-top:34px;font:700 30px Inter,system-ui,sans-serif;color:#fff;letter-spacing:.9em;padding-left:.9em;opacity:0;animation:tin 1.4s .9s ease forwards;background:linear-gradient(180deg,#fff,#8d9099);-webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent}
 @keyframes tin{from{opacity:0;letter-spacing:1.6em}to{opacity:1;letter-spacing:.5em}}
 .bs{font-size:12px;color:#8b93a5;letter-spacing:.2em;text-transform:uppercase;opacity:0;animation:tin2 1s 1.4s ease forwards}@keyframes tin2{to{opacity:1}}
 .bbar{width:200px;height:3px;border-radius:3px;background:#ffffff18;overflow:hidden;margin-top:6px}
-.bbar i{display:block;height:100%;width:0;border-radius:3px;background:linear-gradient(90deg,#6ee7ff,#8f7bff,#ff6bd5);box-shadow:0 0 12px #8f7bff;animation:load 2.6s .3s cubic-bezier(.4,0,.2,1) forwards}@keyframes load{to{width:100%}}
+.bbar i{display:block;height:100%;width:0;border-radius:3px;background:linear-gradient(90deg,#8d9099,#fff);box-shadow:0 0 12px #ffffff88;animation:load 2.6s .3s cubic-bezier(.4,0,.2,1) forwards}@keyframes load{to{width:100%}}
 </style></head><body>
-<svg width="0" height="0" style="position:absolute"><defs><linearGradient id="gs" x1="0" y1="0" x2="1" y2="1"><stop stop-color="#8f9bff"/><stop offset="1" stop-color="#c26bff"/></linearGradient><linearGradient id="gn" x1="0" y1="0" x2="1" y2="1"><stop stop-color="#6ee7ff"/><stop offset=".55" stop-color="#8f7bff"/><stop offset="1" stop-color="#ff6bd5"/></linearGradient></defs></svg>
-<div id="boot"><div class="bwrap"><div class="orb"><i></i><i></i></div><svg class="blogo" viewBox="0 0 1024 1024"><path class="bn" d="M312 744V280L712 744V280" fill="none" stroke="url(#gn)" stroke-width="70" stroke-linecap="round" stroke-linejoin="round"/></svg><div class="bt">NexOS</div><div class="bs">Starting up</div><div class="bbar"><i></i></div></div></div>
+<svg width="0" height="0" style="position:absolute"><defs><linearGradient id="gs" x1="0" y1="0" x2="1" y2="1"><stop stop-color="#8f9bff"/><stop offset="1" stop-color="#c26bff"/></linearGradient><linearGradient id="gn" x1="0" y1="0" x2="0" y2="1"><stop stop-color="#fff"/><stop offset="1" stop-color="#8d9099"/></linearGradient></defs></svg>
+<div id="boot"><div class="bwrap"><div class="orb"><i></i><i></i></div><svg class="blogo" viewBox="0 0 1024 1024"><path class="bn" d="M230 826V198H378L646 560V198H794V826H646L378 464V826Z" fill="#fff" fill-opacity="0" stroke="#fff" stroke-width="12" stroke-linejoin="round"/></svg><div class="bt">NexOS</div><div class="bs">Starting up</div><div class="bbar"><i></i></div></div></div>
 <div id="desk"><div id="icons"></div></div>
 <div id="start"><h3>Apps</h3><div id="pins"></div><div class="sfoot"><span>NexOS</span><span><button id="mbtn">Mouse</button><button id="power">Close all</button></span></div></div>
 <div id="dock"><button id="startBtn" class="dk" aria-label="Apps"></button><i class="dv"></i><div id="tasks"></div><i class="dv"></i><div id="clock"></div></div>
@@ -114,7 +114,7 @@ const $=(s,r=document)=>r.querySelector(s),$$=(s,r=document)=>[...r.querySelecto
 const ls=(k,v)=>{try{if(v===undefined)return localStorage.getItem(k);localStorage.setItem(k,v)}catch(e){return null}};
 const h=(t,c,x)=>{const e=document.createElement(t);if(c)e.className=c;if(x!=null)e.innerHTML=x;return e};
 const P=d=>`<svg viewBox="0 0 24 24">${d}</svg>`;
-const STAR='<svg class="star" viewBox="0 0 1024 1024"><path d="M312 744V280L712 744V280" fill="none" stroke="url(#gn)" stroke-width="86" stroke-linecap="round" stroke-linejoin="round"/></svg>';
+const STAR='<svg class="star" viewBox="0 0 1024 1024"><path d="M230 826V198H378L646 560V198H794V826H646L378 464V826Z" fill="url(#gn)" stroke="url(#gn)" stroke-width="30" stroke-linejoin="round"/></svg>';
 const IC={browser:P('<circle cx="12" cy="12" r="9"/><path d="M3 12h18M12 3c3 3 3 15 0 18M12 3c-3 3-3 15 0 18"/>'),files:P('<path d="M3 7a2 2 0 0 1 2-2h4l2 2h8a2 2 0 0 1 2 2v8a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/>'),calc:P('<rect x="5" y="3" width="14" height="18" rx="3"/><path d="M8 7h8M8 12h2M14 12h2M8 16h2M14 16h2"/>'),notes:P('<path d="M6 3h9l4 4v14H6z"/><path d="M9 12h7M9 16h7"/>'),set:P('<circle cx="12" cy="12" r="3"/><path d="M12 3v3M12 18v3M3 12h3M18 12h3M5.6 5.6l2.1 2.1M16.3 16.3l2.1 2.1M18.4 5.6l-2.1 2.1M7.7 16.3l-2.1 2.1"/>'),about:STAR};
 const A={browser:{n:'Browser',g:'linear-gradient(145deg,#4facfe,#2f6bff)',w:840,h:480,f:appBrowser},files:{n:'File Explorer',g:'linear-gradient(145deg,#ffd45e,#f59e0b)',w:800,h:460,f:appFiles},calc:{n:'Calculator',g:'linear-gradient(145deg,#6ee7b7,#059669)',w:300,h:430,f:appCalc},notes:{n:'Notes',g:'linear-gradient(145deg,#fde047,#ca8a04)',w:460,h:340,f:appNotes},set:{n:'Settings',g:'linear-gradient(145deg,#94a3b8,#475569)',w:520,h:400,f:appSet},about:{n:'About',g:'radial-gradient(circle at 30% 20%,#262a3d,#07080c 70%)',w:340,h:350,f:appAbout}};
 const tile=id=>`<div class="ico" style="--g:${A[id].g}">${IC[id]}</div>`;
