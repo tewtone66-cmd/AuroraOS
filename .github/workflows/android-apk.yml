@@ -23,15 +23,26 @@ jobs:
       - name: Install dependencies
         run: npm install
       - name: Check files
-        run: test -f assets/aurora-icon.svg && test -f capacitor.config.json
+        run: |
+          test -f assets/aurora-icon.svg
+          test -f capacitor.config.json
+          test -f scripts/patch-android.py
+          test -f scripts/setup-winlator.py
+          test -f scripts/patch-exe-window.py
+          test -f scripts/patch-exe-diagnostics.py
       - name: Prepare web app
         run: npm run prepare:web
       - name: Validate JavaScript
         run: |
           python3 - <<'PY'
           import re
-          s = open('src/index.html', encoding='utf-8').read()
-          open('/tmp/aurora.js', 'w', encoding='utf-8').write(re.search(r'<script>(.*)</script>', s, re.S).group(1))
+          from pathlib import Path
+
+          source = Path('src/index.html').read_text(encoding='utf-8')
+          match = re.search(r'<script>(.*?)</script>', source, re.S)
+          if not match:
+              raise SystemExit('Could not find inline <script> block in src/index.html')
+          Path('/tmp/aurora.js').write_text(match.group(1), encoding='utf-8')
           PY
           node --check /tmp/aurora.js
       - name: Add Android platform
@@ -42,6 +53,12 @@ jobs:
           node -e "require('sharp')('assets/aurora-icon.svg').resize(512,512).png().toFile('assets/aurora-icon.png')"
       - name: Patch Android project
         run: python3 scripts/patch-android.py
+      - name: Integrate Winlator core
+        run: python3 scripts/setup-winlator.py
+      - name: Patch EXE window
+        run: python3 scripts/patch-exe-window.py
+      - name: Patch EXE diagnostics
+        run: python3 scripts/patch-exe-diagnostics.py
       - name: Build debug APK
         working-directory: android
         run: ./gradlew assembleDebug --no-daemon
