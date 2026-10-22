@@ -1,4 +1,4 @@
-name: Build Aurora OS APK
+name: Build NexOS APK
 
 on:
   push:
@@ -22,6 +22,8 @@ jobs:
           java-version: '21'
       - name: Install dependencies
         run: npm install
+      - name: Check files
+        run: test -f assets/aurora-icon.svg && test -f capacitor.config.json
       - name: Prepare web app
         run: npm run prepare:web
       - name: Validate JavaScript
@@ -29,38 +31,23 @@ jobs:
           python3 - <<'PY'
           import re
           s = open('src/index.html', encoding='utf-8').read()
-          open('/tmp/aurora.js', 'w', encoding='utf-8').write('\n'.join(re.findall(r'<script>(.*?)</script>', s, re.S)))
+          open('/tmp/aurora.js', 'w', encoding='utf-8').write(re.search(r'<script>(.*)</script>', s, re.S).group(1))
           PY
           node --check /tmp/aurora.js
       - name: Add Android platform
         run: npx cap add android
-      - name: Build launcher icon and splash
+      - name: Build launcher icon
         run: |
           npm install --no-save sharp
-          node scripts/make-icons.mjs
+          node -e "require('sharp')('assets/aurora-icon.svg').resize(512,512).png().toFile('assets/aurora-icon.png')"
       - name: Patch Android project
         run: python3 scripts/patch-android.py
-      - name: Install NDK and CMake (Winlator core)
-        run: |
-          SDKM="$ANDROID_HOME/cmdline-tools/latest/bin/sdkmanager"
-          yes | "$SDKM" --licenses > /dev/null || true
-          "$SDKM" "ndk;24.0.8215888" "cmake;3.22.1"
-      - name: Integrate Winlator core
-        run: python3 scripts/setup-winlator.py
-      - name: Patch EXE window
-        run: python3 scripts/patch-exe-window.py
-      - name: Patch EXE diagnostics
-        run: python3 scripts/patch-exe-diagnostics.py
-      - name: Patch EXE embed
-        run: python3 scripts/patch-exe-embed.py
-      - name: Patch EXE p08 (cursor overlay)
-        run: python3 scripts/patch-exe-p08.py
       - name: Build debug APK
         working-directory: android
         run: ./gradlew assembleDebug --no-daemon
       - uses: actions/upload-artifact@v4
         with:
-          name: AuroraOS-APK
+          name: NexOS-APK
           path: android/app/build/outputs/apk/debug/app-debug.apk
           if-no-files-found: error
           retention-days: 30

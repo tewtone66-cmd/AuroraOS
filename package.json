@@ -1,16 +1,15 @@
 {
-  "name": "aurora-os-android",
-  "version": "2.2.0",
+  "name": "nexos-android",
+  "version": "2.1.0",
   "private": true,
-  "description": "Aurora OS Android wrapper",
+  "description": "NexOS Android wrapper",
   "scripts": {
     "prepare:web": "node scripts/prepare-web.mjs",
     "android:sync": "npm run prepare:web && cap sync android"
   },
   "dependencies": {
     "@capacitor/android": "^7.4.3",
-    "@capacitor/core": "^7.4.3",
-    "v86": "latest"
+    "@capacitor/core": "^7.4.3"
   },
   "devDependencies": {
     "@capacitor/cli": "^7.4.3"
