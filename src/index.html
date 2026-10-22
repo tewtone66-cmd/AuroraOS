@@ -110,6 +110,29 @@ html,body{background:#000}
 <div id="cur"><svg viewBox="0 0 24 24"><path d="M4 2l15 9-6.5 1.5L9 19z" fill="#fff" stroke="#111" stroke-width="1.5" stroke-linejoin="round"/></svg></div>
 <div id="vbtns"><button id="vL">L</button><button id="vR">R</button><button id="vOff">&#10005;</button></div>
 <script>
+/* Start the boot-screen timeout before app initialization, so a startup exception
+   cannot leave NexOS permanently stuck on "Starting up". */
+(function () {
+  const dismissBoot = () => {
+    const boot = document.getElementById('boot');
+    if (boot) {
+      boot.classList.add('out');
+      setTimeout(() => boot.remove(), 900);
+    }
+  };
+  window.__nexBootDismiss = dismissBoot;
+  setTimeout(dismissBoot, 3300);
+  const boot = document.getElementById('boot');
+  if (boot) boot.addEventListener('click', dismissBoot);
+  window.addEventListener('error', function (event) {
+    const subtitle = document.querySelector('#boot .bs');
+    if (subtitle) {
+      const message = event.message || 'Unknown JavaScript error';
+      subtitle.textContent = 'Startup error: ' + message.slice(0, 100);
+      subtitle.style.letterSpacing = 'normal';
+    }
+  });
+})();
 const $=(s,r=document)=>r.querySelector(s),$$=(s,r=document)=>[...r.querySelectorAll(s)];
 const ls=(k,v)=>{try{if(v===undefined)return localStorage.getItem(k);localStorage.setItem(k,v)}catch(e){return null}};
 const h=(t,c,x)=>{const e=document.createElement(t);if(c)e.className=c;if(x!=null)e.innerHTML=x;return e};
@@ -262,5 +285,5 @@ function appNotes(w){w.body.innerHTML='<div class="nw"><textarea class="np" plac
 function appSet(w){const SP=[['Slow',1.1],['Normal',1.8],['Fast',3]],r=()=>{w.body.innerHTML=`<div class="set"><h4>Wallpaper</h4><div class="walls">${WALL.map((g,i)=>`<button data-w="${i}" class="${i===S.wall?'sel':''}" style="background:${g}"></button>`).join('')}</div><h4>Theme</h4><div class="seg">${['auto','light','dark'].map(k=>`<button data-t="${k}" class="${S.theme===k?'sel':''}">${k[0].toUpperCase()+k.slice(1)}</button>`).join('')}</div><h4>Virtual mouse</h4><div class="seg"><button data-m="1" class="${VM.on?'sel':''}">On</button><button data-m="0" class="${VM.on?'':'sel'}">Off</button></div><h4>Mouse speed</h4><div class="seg">${SP.map(([n,v])=>`<button data-s="${v}" class="${S.sp===v?'sel':''}">${n}</button>`).join('')}</div></div>`};r();
 w.body.onclick=e=>{const b=e.target.closest('button');if(!b)return;const d=b.dataset;if(d.w!=null){S.wall=+d.w;ls('nx.wall',S.wall);applyWall()}if(d.t){S.theme=d.t;ls('nx.theme',d.t);applyTheme()}if(d.m!=null)vmSet(d.m==='1');if(d.s){S.sp=+d.s;ls('aur.sp',S.sp)}r()}}
 function appAbout(w){w.body.innerHTML=`<div class="about"><div class="big">${tile('about')}</div><h2>NexOS</h2><p>Version 2.1.0</p><ul><li>Real browser (Android WebView)</li><li>File Explorer with real folders</li><li>Virtual mouse &amp; touchpad</li></ul></div>`}
-setTimeout(()=>{const b=$('#boot');b.classList.add('out');setTimeout(()=>b.remove(),900)},3300);$('#boot').onclick=()=>$('#boot').classList.add('out');applyTheme();applyWall();buildUI();clock();setInterval(clock,20000);vmSet(ls('aur.vm')==='1');
+applyTheme();applyWall();buildUI();clock();setInterval(clock,20000);vmSet(ls('aur.vm')==='1');
 </script></body></html>
