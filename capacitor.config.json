@@ -1,9 +1,9 @@
 {
   "appId": "com.auroraos.desktop",
-  "appName": "NexOS",
+  "appName": "Aurora OS",
   "webDir": "www",
-  "backgroundColor": "#000000",
+  "backgroundColor": "#0b1d3a",
   "android": {
-    "allowMixedContent": true
+    "allowMixedContent": false
   }
 }
