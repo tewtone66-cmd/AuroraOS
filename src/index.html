@@ -366,11 +366,34 @@ body.perf [class*=spin],body.perf [class*=ind]{animation:none!important}
 /* DESK-3.0.5 */
 .di .t{position:relative}
 .di.tfull .t::after{content:attr(data-n);position:absolute;right:-8px;top:-6px;min-width:18px;height:18px;padding:0 5px;border-radius:9px;background:var(--acc,#4f7cff);color:#fff;font:700 11px/18px system-ui,sans-serif;text-align:center;text-shadow:none;box-sizing:border-box}
+/* TB-3.0.6 */
+body.tb-round #dock{border-radius:24px}
+body.tb-square #dock{border-radius:0}
+body.tb-full #dock{left:50%;width:100vw;max-width:100vw;min-width:0;bottom:0;border-radius:0!important;border-left:0!important;border-right:0!important;border-bottom:0!important;padding:0 18px;height:calc(var(--tbs,62px) + 22px);justify-content:center}
+body.tb-full.tb-left #dock{justify-content:flex-start}
+body.tb-full.tb-left #tray{margin-left:auto}
+body.tb-full #start{bottom:calc(var(--tbs,62px) + 32px + env(safe-area-inset-bottom,0px))}
+#tray{display:flex;align-items:center;gap:2px;color:#fff;font-size:12px;font-weight:600;text-shadow:0 1px 3px #0006}
+body.tb-light #tray{color:#111;text-shadow:none}body.no-tray #tray{display:none}
+.tri{display:flex;align-items:center;gap:5px;border:0;background:none;color:inherit;font:inherit;padding:6px 8px;border-radius:10px;cursor:pointer}
+.tri:hover,.tri:active{background:#ffffff2e}.tri svg{display:block}
+#trf{position:fixed;z-index:9300;right:12px;bottom:112px;width:min(300px,calc(100vw - 24px));padding:12px;border-radius:18px;background:var(--pn,var(--surf));color:var(--txt);backdrop-filter:blur(22px);-webkit-backdrop-filter:blur(22px);border:1px solid var(--line);box-shadow:0 18px 50px #0006;display:none}
+#trf.show{display:block}
+.tfr{padding:8px 4px}.tfr b{display:block;font-size:12px;color:var(--mut)}.tfr span{font-size:13px}
+.tfb{height:6px;border-radius:3px;background:#8884;margin-top:8px;overflow:hidden}.tfb i{display:block;height:100%;background:var(--acc,#4f7cff)}
+.tfg{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:6px}
+.tfg button{border:1px solid var(--line);background:#8881;color:var(--txt);border-radius:12px;padding:10px;cursor:pointer;font:inherit;font-size:12px}
+.tfg button.on{background:var(--acc,#4f7cff);color:#fff;border-color:transparent}
+#tbpv{position:fixed;z-index:9300;display:none;gap:10px;padding:10px;border-radius:16px;background:var(--pn,var(--surf));color:var(--txt);border:1px solid var(--line);box-shadow:0 14px 40px #0006;max-width:calc(100vw - 16px);overflow:hidden}
+#tbpv.show{display:flex}
+.pvc{border:1px solid var(--line);background:#8881;border-radius:12px;padding:8px;cursor:pointer;color:inherit;font:inherit;text-align:left}
+.pvc:hover{background:#8883}.pvt{font-size:11px;margin-bottom:6px;max-width:210px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.pvb{position:relative;overflow:hidden;border-radius:6px;background:var(--surf)}
 </style><!--NEXOS-END--></head><body class="booting"><div id="boot"><!--NEXOS-START--><div id="nxb"><svg viewBox="0 0 512 512"><defs><linearGradient id="g" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#22d3ee"/><stop offset="1" stop-color="#8b5cf6"/></linearGradient></defs><path class="p" pathLength="100" d="M168 368V144l176 224V144" fill="none" stroke="url(#g)" stroke-width="40" stroke-linecap="round" stroke-linejoin="round"/></svg><h1>NEXOS</h1><div class="bar"><i></i></div></div><!--NEXOS-END--><svg class="bl" viewBox="0 0 1024 1024"><path d="M262 800C340 560 430 380 512 214" stroke="url(#gl)" stroke-width="156" stroke-linecap="round" fill="none" opacity="0.1"/><path d="M762 800C684 560 594 380 512 214" stroke="url(#gr)" stroke-width="156" stroke-linecap="round" fill="none" opacity="0.1"/><path d="M262 800C340 560 430 380 512 214" stroke="url(#gl)" stroke-width="124" stroke-linecap="round" fill="none" opacity="0.14"/><path d="M762 800C684 560 594 380 512 214" stroke="url(#gr)" stroke-width="124" stroke-linecap="round" fill="none" opacity="0.14"/><path d="M262 800C340 560 430 380 512 214" stroke="url(#gl)" stroke-width="96" stroke-linecap="round" fill="none"/><path d="M762 800C684 560 594 380 512 214" stroke="url(#gr)" stroke-width="96" stroke-linecap="round" fill="none"/><path d="M352 640C420 584 462 704 512 640S604 584 672 640" stroke="url(#gw)" stroke-width="44" stroke-linecap="round" fill="none"/><g fill="#e0f2fe"><circle cx="812" cy="262" r="13"/><circle cx="226" cy="318" r="9"/><circle cx="716" cy="140" r="7"/></g></svg><div class="bd"><i></i><i></i><i></i></div></div><div id="shut"><svg class="lg" viewBox="0 0 1024 1024"><path d="M262 800C340 560 430 380 512 214" stroke="url(#gl)" stroke-width="156" stroke-linecap="round" fill="none" opacity="0.1"/><path d="M762 800C684 560 594 380 512 214" stroke="url(#gr)" stroke-width="156" stroke-linecap="round" fill="none" opacity="0.1"/><path d="M262 800C340 560 430 380 512 214" stroke="url(#gl)" stroke-width="124" stroke-linecap="round" fill="none" opacity="0.14"/><path d="M762 800C684 560 594 380 512 214" stroke="url(#gr)" stroke-width="124" stroke-linecap="round" fill="none" opacity="0.14"/><path d="M262 800C340 560 430 380 512 214" stroke="url(#gl)" stroke-width="96" stroke-linecap="round" fill="none"/><path d="M762 800C684 560 594 380 512 214" stroke="url(#gr)" stroke-width="96" stroke-linecap="round" fill="none"/><path d="M352 640C420 584 462 704 512 640S604 584 672 640" stroke="url(#gw)" stroke-width="44" stroke-linecap="round" fill="none"/><g fill="#e0f2fe"><circle cx="812" cy="262" r="13"/><circle cx="226" cy="318" r="9"/><circle cx="716" cy="140" r="7"/></g></svg><div class="slot"><div class="sm"><span>Shutting down</span><div class="bd"><i></i><i></i><i></i></div></div><button id="pw" aria-label="Power on"><svg viewBox="0 0 24 24"><path d="M12 3v8M6.6 6.8a8 8 0 1 0 10.8 0"/></svg></button></div><div class="hint">Tap to power on</div></div><script>(function(){var t0=Date.now(),d=0;function go(){if(d)return;d=1;var b=document.getElementById("boot");document.body.classList.remove("booting");if(b){b.classList.add("out");setTimeout(function(){b.remove()},800)}}function chk(){setTimeout(go,Math.max(0,1700-(Date.now()-t0)))}if(document.readyState==="complete")chk();else addEventListener("load",chk);setTimeout(go,5000)})();</script>
 <svg width="0" height="0" style="position:absolute"><defs><linearGradient id="gs" x1="0" y1="0" x2="1" y2="1"><stop stop-color="#8f9bff"/><stop offset="1" stop-color="#c26bff"/></linearGradient><linearGradient id="gl" x1="0" y1="1" x2="1" y2="0"><stop stop-color="#34d399"/><stop offset="1" stop-color="#22d3ee"/></linearGradient><linearGradient id="gr" x1="1" y1="1" x2="0" y2="0"><stop stop-color="#a78bfa"/><stop offset="1" stop-color="#22d3ee"/></linearGradient><linearGradient id="gw" x1="0" y1="0" x2="1" y2="0"><stop stop-color="#5eead4"/><stop offset="1" stop-color="#c4b5fd"/></linearGradient></defs></svg>
 <div id="desk"><div id="icons"></div></div>
 <div id="start"><div class="sbox"><input id="sq" type="text" placeholder="Search apps, actions, the web…" autocomplete="off" spellcheck="false"></div><div id="sres"></div><div id="sbody"><h3>Apps</h3><div id="pins"></div><h3 style="margin-top:12px">Quick settings</h3><div class="sqk"><button id="mbtn">Mouse</button><button id="mblur">Blur</button><button id="thm">Theme</button><button id="power">Close all</button></div></div><div class="sfoot"><span>NexOS</span><span><button id="rst">Restart</button><button id="off">Shut down</button></span></div></div>
-<div id="dock"><button id="startBtn" class="dk" aria-label="Apps"></button><i class="dv"></i><div id="tasks"></div><i class="dv"></i><div id="clock"></div></div>
+<div id="dock"><button id="startBtn" class="dk" aria-label="Apps"></button><i class="dv"></i><div id="tasks"></div><i class="dv"></i><div id="tray"></div><div id="clock"></div></div>
 <div id="ctx"></div><div id="toast"></div><div id="pad"></div>
 <div id="cur" class="c-arrow"><svg width="0" height="0" style="position:absolute"><defs><filter id="mbfl" x="-60%" y="-60%" width="220%" height="220%"><feGaussianBlur id="mbf" stdDeviation="0 0"/></filter></defs></svg><svg class="cs sa" viewBox="0 0 26 28"><path d="M1.2 1.2V21.4L6.2 16.6L9.4 24.6L13.4 22.9L10.3 15.2H17.2Z" fill="#fff" stroke="#111" stroke-width="1.4" stroke-linejoin="round"/></svg><svg class="cs sh" viewBox="0 0 26 28"><path d="M9.2 1.2C10.6 1.2 11.6 2.2 11.6 3.6V10.2C12 9.9 12.5 9.8 13 9.8C14.1 9.8 14.9 10.5 15.1 11.4C15.5 11.1 15.9 11 16.4 11C17.5 11 18.4 11.7 18.6 12.7C19 12.5 19.4 12.4 19.8 12.4C21.2 12.4 22.3 13.5 22.3 14.9V19.6C22.3 23.2 19.5 26 16 26H12.6C10.4 26 8.7 25 7.6 23.3L3 16.4C2.4 15.4 2.7 14.4 3.6 14C4.5 13.6 5.5 13.9 6.1 14.6L7 15.8V3.6C7 2.2 8 1.2 9.2 1.2Z" fill="#fff" stroke="#111" stroke-width="1.3" stroke-linejoin="round"/><path class="ln" d="M11.6 11.4V15.6M15.1 12.2V15.6M18.6 13.4V15.6"/></svg><svg class="cs si" viewBox="0 0 26 28"><path d="M8 2H18M8 26H18M13 2V26" fill="none" stroke="#fff" stroke-width="4.4" stroke-linecap="round"/><path d="M8 2H18M8 26H18M13 2V26" fill="none" stroke="#111" stroke-width="2" stroke-linecap="round"/></svg><svg class="cs sb" viewBox="0 0 26 28"><circle cx="13" cy="14" r="9" fill="none" stroke="#111" stroke-opacity=".55" stroke-width="7"/><circle cx="13" cy="14" r="9" fill="none" stroke="#fff" stroke-width="5"/><circle cx="13" cy="14" r="9" fill="none" stroke="#0a84ff" stroke-width="3.4" stroke-dasharray="15 42" stroke-linecap="round"><animateTransform attributeName="transform" type="rotate" from="0 13 14" to="360 13 14" dur=".9s" repeatCount="indefinite"/></circle></svg></div>
 <div id="vbtns"><button id="vL">L</button><button id="vR">R</button><button id="vOff">&#10005;</button></div>
@@ -1080,7 +1103,7 @@ if(/^[a-z]:$/i.test(c)){if(c.toLowerCase()!=='c:')E('The system cannot find the 
 switch(c){
 case'help':case'?':HELP.forEach(T);break;
 case'cls':case'clear':out.innerHTML='';break;
-case'ver':T('');T('NexOS [Version 3.0.5 alpha]');T('');break;
+case'ver':T('');T('NexOS [Version 3.0.6 alpha]');T('');break;
 case'date':{const d=new Date();T('The current date is: '+['Sun','Mon','Tue','Wed','Thu','Fri','Sat'][d.getDay()]+' '+pad2(d.getMonth()+1)+'/'+pad2(d.getDate())+'/'+d.getFullYear());break}
 case'time':{const d=new Date();T('The current time is: '+pad2(d.getHours())+':'+pad2(d.getMinutes())+':'+pad2(d.getSeconds())+'.'+pad2(Math.floor(d.getMilliseconds()/10)));break}
 case'pwd':T(win(cwd));break;
@@ -1105,7 +1128,7 @@ if(line.trim()){hist.push(line);if(hist.length>100)hist.shift()}hi=hist.length;b
 else if(e.key==='ArrowUp'){e.preventDefault();if(hi>0){hi--;inp.value=hist[hi]}}
 else if(e.key==='ArrowDown'){e.preventDefault();if(hi<hist.length-1){hi++;inp.value=hist[hi]}else{hi=hist.length;inp.value=''}}};
 tm.onclick=()=>{if(!String(getSelection()))inp.focus()};
-T('NexOS [Version 3.0.5 alpha]');T('Commands run on the NexOS file system (C:\\ = internal storage). Type HELP.');T('');
+T('NexOS [Version 3.0.6 alpha]');T('Commands run on the NexOS file system (C:\\ = internal storage). Type HELP.');T('');
 prompt();setTimeout(()=>inp.focus(),380);
 }
 /* ---------- Task Manager (v3-p07) ---------- */
@@ -1158,13 +1181,13 @@ const kv=a=>a.map(([k,v])=>`<div class="kv"><span>${k}</span><b>${esc(String(v))
 const REPO='https://github.com/tewtone66-cmd/NexOS';
 const PGS={
 about(){const ua=navigator.userAgent,and=(/Android ([\d.]+)/.exec(ua)||[])[1]||'?',mod=(/;\s*([^;)]+?)\s+Build/.exec(ua)||/Android [\d.]+;\s*([^;)]+)/.exec(ua)||[])[1]||'Unknown',chr=(/Chrome\/([\d.]+)/.exec(ua)||[])[1]||'?';
-return `<h3>About</h3><div class="abh"><div class="abl">${STAR}</div><div><h2>NexOS</h2><p>Version 3.0.5 alpha</p></div></div>${kv([['Edition','NexOS Alpha'],['Version','3.0.0 (alpha)'],['Device',mod],['Android',and],['WebView (Chrome)',chr],['Screen',innerWidth+' × '+innerHeight+' (UI '+Math.round(S.ui*100)+'%)'],['CPU cores',navigator.hardwareConcurrency||'?'],['Memory',navigator.deviceMemory?'≥ '+navigator.deviceMemory+' GB':'?'],['Storage access',granted===null?'…':granted?'Allowed':'Not allowed']])}<h4>Update</h4>${kv([['Channel','Alpha'],['Installed version','3.0.5 alpha'],['Updates','Installed manually from GitHub']])}<button class="pgb" data-k="go" data-v="${REPO}">Open GitHub</button><h4>What is new in 3.0.0</h4><ul><li>New virtual mouse with cursor states and motion blur</li><li>New taskbar and Start menu with search</li><li>Recycle Bin that really keeps deleted items</li><li>Settings with categories and search</li></ul>`},
-update(){return `<h3>Update</h3>${kv([['Channel','Alpha'],['Installed version','3.0.5 alpha'],['Status','Updates are installed manually: rebuild the app from GitHub']])}<button class="pgb" data-k="go" data-v="${REPO}">Open GitHub</button>`},
+return `<h3>About</h3><div class="abh"><div class="abl">${STAR}</div><div><h2>NexOS</h2><p>Version 3.0.6 alpha</p></div></div>${kv([['Edition','NexOS Alpha'],['Version','3.0.0 (alpha)'],['Device',mod],['Android',and],['WebView (Chrome)',chr],['Screen',innerWidth+' × '+innerHeight+' (UI '+Math.round(S.ui*100)+'%)'],['CPU cores',navigator.hardwareConcurrency||'?'],['Memory',navigator.deviceMemory?'≥ '+navigator.deviceMemory+' GB':'?'],['Storage access',granted===null?'…':granted?'Allowed':'Not allowed']])}<h4>Update</h4>${kv([['Channel','Alpha'],['Installed version','3.0.6 alpha'],['Updates','Installed manually from GitHub']])}<button class="pgb" data-k="go" data-v="${REPO}">Open GitHub</button><h4>What is new in 3.0.0</h4><ul><li>New virtual mouse with cursor states and motion blur</li><li>New taskbar and Start menu with search</li><li>Recycle Bin that really keeps deleted items</li><li>Settings with categories and search</li></ul>`},
+update(){return `<h3>Update</h3>${kv([['Channel','Alpha'],['Installed version','3.0.6 alpha'],['Status','Updates are installed manually: rebuild the app from GitHub']])}<button class="pgb" data-k="go" data-v="${REPO}">Open GitHub</button>`},
 display(){return `<h3>Display & size</h3><h4>App size (whole interface)</h4><div class="step"><button data-k="ui" data-v="-1">&#8722;</button><b>${Math.round(S.ui*100)}%</b><button data-k="ui" data-v="1">+</button><button data-k="ui" data-v="0">Reset</button></div><h4>Desktop icon size</h4>${chips('is',[36,48,60,72],S.is,v=>({36:'Small',48:'Medium',60:'Large',72:'Extra large'})[v])}`},
 storage(){return `<h3>Storage</h3><h4>Access to your files</h4><div class="seg"><button data-k="perm" class="${granted?'sel':''}">${granted===null?'Checking…':granted?'Allowed':'Allow access to files'}</button></div>`},
 bg(){return `<h3>Background</h3><div class="walls">${WALL.map((g,i)=>`<button data-k="wall" data-v="${i}" class="${!S.wc&&i===S.wall?'sel':''}" style="background:${g}"></button>`).join('')}</div><h4>Solid color</h4><div class="sw">${['#0b1d3a','#111827','#1f3b2d','#3b1f3a','#3a2a1f','#475569','#e5e7eb'].map(c=>`<button data-k="wc" data-v="${c}" class="${S.wc===c?'sel':''}" style="background:${c}"></button>`).join('')}</div>`},
 color(){return `<h3>Colors</h3><h4>Theme</h4>${chips('theme',['auto','light','dark'],S.theme,v=>v[0].toUpperCase()+v.slice(1))}<h4>Accent color</h4><div class="sw">${ACC.map(c=>`<button data-k="acc" data-v="${c}" class="${S.acc===c?'sel':''}" style="background:${c}"></button>`).join('')}</div><h4>Custom accent</h4><input type="color" data-k="accc" value="${/^#[\da-f]{6}$/i.test(S.acc)?S.acc:'#4f7cff'}">`},
-task(){return `<h3>Taskbar</h3><h4>Icon size</h4>${chips('tbs',[44,52,62,72],S.tbs,v=>({44:'Small',52:'Medium',62:'Default',72:'Large'})[v])}<h4>Transparency</h4>${chips('tbo',[.5,1,1.8],S.tbo,v=>({.5:'Clear',1:'Normal',1.8:'Solid'})[v])}<h4>Color</h4>${chips('tbc',['glass','dark','light','accent'],S.tbc,v=>v[0].toUpperCase()+v.slice(1))}<h4>Magnify icons on hover</h4>${onoff('tbm',S.tbm)}<h4>Show clock</h4>${onoff('tbk',S.tbk)}<h4>Performance mode (no blur, shadows or heavy animations)</h4>${onoff('perf',S.perf)}<h4>Pinned apps</h4><div class="seg">${Object.keys(A).filter(id=>id!=='trash'&&id!=='dl'&&id!=='exew').map(id=>`<button data-k="pin" data-v="${id}" class="${PIN.includes(id)?'sel':''}">${A[id].n}</button>`).join('')}</div>`},
+task(){return `<h3>Taskbar</h3><h4>Icon size</h4>${chips('tbs',[44,52,62,72],S.tbs,v=>({44:'Small',52:'Medium',62:'Default',72:'Large'})[v])}<h4>Transparency</h4>${chips('tbo',[.5,1,1.8],S.tbo,v=>({.5:'Clear',1:'Normal',1.8:'Solid'})[v])}<h4>Color</h4>${chips('tbc',['glass','dark','light','accent'],S.tbc,v=>v[0].toUpperCase()+v.slice(1))}<h4>Magnify icons on hover</h4>${onoff('tbm',S.tbm)}<h4>Show clock</h4>${onoff('tbk',S.tbk)}<h4>Shape</h4>${chips('tbr',['pill','round','square'],S.tbr,v=>({pill:'Pill',round:'Rounded',square:'Square'})[v])}<h4>Layout</h4>${chips('tbw',['float','full'],S.tbw,v=>v==='full'?'Full width (Windows style)':'Floating')}<h4>Icon alignment (full width)</h4>${chips('tba',['center','left'],S.tba,v=>v==='left'?'Left':'Center')}<h4>Show system tray (network, battery)</h4>${onoff('tbt',S.tbt)}<h4>Window previews on hover</h4>${onoff('tbv',S.tbv)}<h4>Performance mode (no blur, shadows or heavy animations)</h4>${onoff('perf',S.perf)}<h4>Pinned apps</h4><div class="seg">${Object.keys(A).filter(id=>id!=='trash'&&id!=='dl'&&id!=='exew').map(id=>`<button data-k="pin" data-v="${id}" class="${PIN.includes(id)?'sel':''}">${A[id].n}</button>`).join('')}</div>`},
 mouse(){const sw=S.ms,W2=26*sw,H2=28*sw,cl=c=>`<svg class="cs ${c}" viewBox="0 0 26 28">${document.querySelector('#cur .'+c).innerHTML}</svg>`;
 const box=(c,l)=>`<div class="mpi"><div class="mpc" style="width:${W2}px;height:${H2}px">${cl(c)}</div>${l}</div>`;
 return `<h3>Mouse</h3><div class="mpv${S.mb?' mb':''}" id="mpv"><svg width="0" height="0" style="position:absolute"><defs><filter id="mbfl2" x="-60%" y="-60%" width="220%" height="220%"><feGaussianBlur id="mbf2" stdDeviation="0 0"/></filter></defs></svg><div class="mpa" id="mpa"><i>Move your finger here · tap to change state</i><div class="mpm c-arrow" id="mpm" style="width:${W2}px;height:${H2}px">${cl('sa')}${cl('sh')}${cl('si')}${cl('sb')}</div></div><div class="mps">${box('sa','Arrow')}${box('sh','Link')}${box('si','Text')}${box('sb','Loading')}</div></div>
@@ -1195,7 +1218,7 @@ else if(k==='acc'){S.acc=v;ls('aur.acc',v);applyTheme();applyTb()}
 else if(k==='tbs'){S.tbs=+v;ls('aur.tbs',S.tbs);applyTb()}
 else if(k==='tbo'){S.tbo=+v;ls('aur.tbo',S.tbo);applyTb()}
 else if(k==='tbc'){S.tbc=v;ls('aur.tbc',v);applyTb()}
-else if(k==='pw'){S.pw=+v;ls('aur.pw',v);sync()}else if(k==='rp'){S.rp=v==='1';ls('aur.rp',v)}else if(k==='kb'){S.kb=v==='1';ls('aur.kb',v)}else if(k==='perf'){setPerf(v==='1')}else if(k==='tbm'){S.tbm=v==='1';ls('aur.tbm',v);dockFx(null,0)}
+else if(k==='pw'){S.pw=+v;ls('aur.pw',v);sync()}else if(k==='tbr'||k==='tbw'||k==='tba'){S[k]=v;ls('aur.'+k,v);applyTb();sync()}else if(k==='tbt'||k==='tbv'){S[k]=v==='1';ls('aur.'+k,v);applyTb();sync()}else if(k==='rp'){S.rp=v==='1';ls('aur.rp',v)}else if(k==='kb'){S.kb=v==='1';ls('aur.kb',v)}else if(k==='perf'){setPerf(v==='1')}else if(k==='tbm'){S.tbm=v==='1';ls('aur.tbm',v);dockFx(null,0)}
 else if(k==='tbk'){S.tbk=v==='1';ls('aur.tbk',v);applyTb()}
 else if(k==='pin'){const i=PIN.indexOf(v);if(i>=0)PIN.splice(i,1);else PIN.push(v);ls('aur.pin',JSON.stringify(PIN));dockUpdate()}
 else if(k==='ms'){S.ms=+v;ls('aur.ms2',S.ms);applyMouse();vmCursor()}
@@ -1478,4 +1501,58 @@ var trBadge=function(){try{var n=TR.length;$$('#icons .di').forEach(function(b){
 if(typeof buildIcons==='function'){var _bi=buildIcons;buildIcons=function(re){var r=_bi(re);trBadge();return r}}
 trBadge();
 })()}catch(e){}
-})();</script><!--NEXOS-END--></body></html>
+})();</script><script>/* TB-3.0.6 */
+(function(){try{
+Object.assign(S,{tbr:['pill','round','square'].includes(ls('aur.tbr'))?ls('aur.tbr'):'pill',tbw:ls('aur.tbw')==='full'?'full':'float',tba:ls('aur.tba')==='left'?'left':'center',tbt:ls('aur.tbt')!=='0',tbv:ls('aur.tbv')!=='0'});
+var _atb=applyTb;
+applyTb=function(){var r=_atb.apply(this,arguments),b=document.body;b.classList.toggle('tb-round',S.tbr==='round');b.classList.toggle('tb-square',S.tbr==='square');b.classList.toggle('tb-full',S.tbw==='full');b.classList.toggle('tb-left',S.tba==='left');b.classList.toggle('no-tray',!S.tbt);return r};
+var tray=$('#tray'),dock=$('#dock'),BAT=null;
+var svg=function(p){return '<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">'+p+'</svg>'};
+var ico={wifi:svg('<path d="M2 9a15 15 0 0 1 20 0"/><path d="M5.5 12.5a10 10 0 0 1 13 0"/><path d="M9 16a5 5 0 0 1 6 0"/><circle cx="12" cy="19.5" r="1" fill="currentColor"/>'),
+ off:svg('<path d="M2 9a15 15 0 0 1 20 0" opacity=".45"/><path d="M5.5 12.5a10 10 0 0 1 13 0" opacity=".45"/><path d="M9 16a5 5 0 0 1 6 0" opacity=".45"/><path d="M3 3l18 18"/>'),
+ cell:svg('<path d="M4 20v-3M9 20v-7M14 20v-11M19 20V4"/>')};
+var batIco=function(l,ch){var col=ch?'#3ddc84':(l<.2?'#ff5a5a':'currentColor');return '<svg width="26" height="16" viewBox="0 0 26 14" fill="none"><rect x="1" y="1" width="21" height="12" rx="3" stroke="currentColor" stroke-width="1.6"/><rect x="23" y="4.5" width="2" height="5" rx="1" fill="currentColor"/><rect x="3" y="3" width="'+Math.max(1,17*l).toFixed(1)+'" height="8" rx="1.5" fill="'+col+'"/>'+(ch?'<path d="M12.6 3L8.4 7.5H11.6L10.6 11L14.8 6.5H11.6Z" fill="#fff" stroke="#111" stroke-width=".4" stroke-linejoin="round"/>':'')+'</svg>'};
+var trf=document.createElement('div');trf.id='trf';document.body.appendChild(trf);
+function draw(){if(!tray)return;var c=navigator.connection,on=navigator.onLine!==false,t=c&&c.type,h='<button class="tri" id="trNet" title="Network">'+(!on?ico.off:(t==='cellular'?ico.cell:ico.wifi))+'</button>';
+ if(BAT){var p=Math.round(BAT.level*100);h+='<button class="tri" id="trBat" title="Battery '+p+'%">'+batIco(BAT.level,BAT.charging)+'<span>'+p+'%</span></button>'}
+ tray.innerHTML=h}
+function fly(){var c=navigator.connection,on=navigator.onLine!==false,h='';
+ if(BAT){var p=Math.round(BAT.level*100),tm=BAT.charging?BAT.chargingTime:BAT.dischargingTime,ts=(isFinite(tm)&&tm>0)?Math.floor(tm/3600)+' h '+Math.round(tm%3600/60)+' min '+(BAT.charging?'until full':'remaining'):'';
+  h+='<div class="tfr"><b>Battery</b><span>'+p+'% · '+(BAT.charging?'Charging':'On battery')+(ts?' · '+ts:'')+'</span><div class="tfb"><i style="width:'+p+'%"></i></div></div>'}
+ h+='<div class="tfr"><b>Network</b><span>'+(on?('Online'+((c&&c.type&&c.type!=='unknown')?' · '+c.type:((c&&c.effectiveType)?' · '+c.effectiveType:''))+((c&&c.downlink)?' · '+c.downlink+' Mbps':'')):'Offline')+'</span></div>'
+  +'<div class="tfg"><button data-q="perf" class="'+(S.perf?'on':'')+'">Performance mode</button><button data-q="theme">Dark / Light</button></div>';
+ trf.innerHTML=h}
+function flyPos(){var d=dock.getBoundingClientRect();trf.style.bottom=Math.max(8,innerHeight-d.top+10)+'px'}
+trf.addEventListener('click',function(e){e.stopPropagation();var q=e.target.closest&&e.target.closest('[data-q]');if(!q)return;if(q.dataset.q==='perf')setPerf(!S.perf);else if(q.dataset.q==='theme'&&typeof togTheme==='function')togTheme();fly()});
+if(tray)tray.addEventListener('click',function(e){e.stopPropagation();var open=trf.classList.contains('show');closeMenus();if(open)return;fly();flyPos();trf.classList.add('show');menuOpen=true;sync()});
+if(navigator.getBattery)navigator.getBattery().then(function(b){BAT=b;['levelchange','chargingchange','chargingtimechange','dischargingtimechange'].forEach(function(n){b.addEventListener(n,function(){draw();if(trf.classList.contains('show'))fly()})});draw()}).catch(function(){});
+addEventListener('online',draw);addEventListener('offline',draw);if(navigator.connection&&navigator.connection.addEventListener)navigator.connection.addEventListener('change',draw);
+/* window previews */
+var pv=document.createElement('div');pv.id='tbpv';document.body.appendChild(pv);
+var pvApp=null,pvTm=0,pvIv=0,pvMenu=false;
+function pvHide(){clearTimeout(pvTm);clearInterval(pvIv);pvIv=0;pvApp=null;pv.classList.remove('show');if(pvMenu){pvMenu=false;menuOpen=false;sync()}}
+function pvBuild(){var ws=Object.keys(W).map(function(k){return W[k]}).filter(function(w){return w&&w.app===pvApp&&w.el&&!w.el.classList.contains('closing')});
+ if(!ws.length){pvHide();return false}
+ pv.innerHTML='';
+ ws.slice(0,4).forEach(function(w){var el=w.el,sw=el.offsetWidth||parseFloat(el.style.width)||720,sh=el.offsetHeight||parseFloat(el.style.height)||460,k=Math.min(210/sw,128/sh);
+  var card=document.createElement('button'),head=document.createElement('div'),box=document.createElement('div'),t=el.querySelector('.tbar span');
+  card.className='pvc';head.className='pvt';head.textContent=(t&&t.textContent)||(A[w.app]&&A[w.app].n)||w.app;
+  box.className='pvb';box.style.width=Math.round(sw*k)+'px';box.style.height=Math.round(sh*k)+'px';
+  var cl=el.cloneNode(true);['min','minning','closing','opening','max'].forEach(function(x){cl.classList.remove(x)});
+  cl.removeAttribute('id');cl.querySelectorAll('[id]').forEach(function(n){n.removeAttribute('id')});
+  cl.querySelectorAll('video,audio,iframe,webview').forEach(function(n){n.remove()});
+  cl.style.cssText='position:absolute;left:0;top:0;margin:0;width:'+sw+'px;height:'+sh+'px;transform:scale('+k+');transform-origin:0 0;pointer-events:none;animation:none;display:flex;box-shadow:none';
+  box.appendChild(cl);card.appendChild(head);card.appendChild(box);
+  card.onclick=function(e){e.stopPropagation();pvHide();try{showW(w)}catch(x){}};
+  pv.appendChild(card)});
+ return true}
+function pvPos(btn){var r=btn.getBoundingClientRect(),w=pv.offsetWidth;pv.style.left=Math.max(8,Math.min(innerWidth-w-8,r.left+r.width/2-w/2))+'px';pv.style.bottom=Math.max(8,innerHeight-dock.getBoundingClientRect().top+10)+'px'}
+function pvShow(btn,id){pvApp=id;if(!pvBuild())return;pv.classList.add('show');if(!menuOpen){pvMenu=true;menuOpen=true;sync()}pvPos(btn);clearInterval(pvIv);pvIv=setInterval(function(){if(pvApp&&pvBuild())pvPos(btn)},1500)}
+var tasks=$('#tasks');
+if(tasks)tasks.addEventListener('pointermove',function(e){if(!S.tbv||e.pointerType==='touch')return;var b=e.target.closest&&e.target.closest('.dk');if(!b||!b.dataset.id||b.dataset.id===pvApp)return;clearTimeout(pvTm);var id=b.dataset.id;pvTm=setTimeout(function(){pvShow(b,id)},380)},{passive:true});
+dock.addEventListener('pointerleave',function(){clearTimeout(pvTm);pvTm=setTimeout(function(){if(!pv.matches(':hover'))pvHide()},300)});
+addEventListener('pointerdown',function(e){if(pvApp&&!(e.target.closest&&e.target.closest('#tbpv')))pvHide()},true);
+var _cm=closeMenus;closeMenus=function(){trf.classList.remove('show');pvHide();return _cm.apply(this,arguments)};
+applyTb();draw();
+}catch(e){try{console.error(e)}catch(x){}}})();
+</script><!--NEXOS-END--></body></html>
