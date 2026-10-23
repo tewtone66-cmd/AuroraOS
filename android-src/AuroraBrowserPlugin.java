@@ -144,6 +144,8 @@ public class AuroraBrowserPlugin extends Plugin {
     private final Map<String, Float> viewW = new HashMap<>();
     /** Aurora CSS px per page CSS px at 100% zoom (bigger = bigger pages). Tune here. */
     private static final float PAGE_K = 1.4f;
+    private float screenW = 0f;
+    private float refW = 1280f;
 
     /** Page layout width in CSS px = window width / (PAGE_K * zoom). 0 = size not known yet. */
     private int cssWidth(String tabId) {
@@ -151,7 +153,9 @@ public class AuroraBrowserPlugin extends Plugin {
         if (w == null || w < 40f) return 0;
         Integer z = zoomOf.get(tabId);
         float zoom = (z == null ? 100 : z) / 100f;
-        return Math.max(200, Math.min(4000, Math.round(w / (PAGE_K * zoom))));
+        /* BRSIZE-3.0.4: lay the page out like a PC screen refW px wide (default 1280) when the Aurora window is full width */
+        float base = (screenW > 200f) ? (w * refW / (screenW * zoom)) : (w / (PAGE_K * zoom));
+        return Math.max(320, Math.min(4000, Math.round(base)));
     }
 
     /** Forces <meta viewport width=W> (and keeps it forced); the WebView then fits the page to the view, like Chrome zoom. */
@@ -240,6 +244,8 @@ public class AuroraBrowserPlugin extends Plugin {
         final float vw0 = vwf == null ? 0f : vwf;
         Integer zf = call.getInt("z", 100);
         final int z0 = zf == null ? 100 : zf;
+        Float cwf0 = call.getFloat("cw", 0f); if (cwf0 != null && cwf0 > 200f) screenW = cwf0;
+        Float rf0 = call.getFloat("ref", 0f); if (rf0 != null && rf0 > 300f) refW = rf0;
         dens(call);
         ui(() -> {
             if (views.containsKey(id)) { call.resolve(); return; }
@@ -427,6 +433,10 @@ public class AuroraBrowserPlugin extends Plugin {
         final float x = call.getFloat("x", 0f), y = call.getFloat("y", 0f);
         final float ww = call.getFloat("w", 100f), hh = call.getFloat("h", 100f);
         final float dd = dens(call);
+        Float swf = call.getFloat("cw", 0f); if (swf != null && swf > 200f) screenW = swf;
+        Float rff = call.getFloat("ref", 0f);
+        final boolean refCh = rff != null && rff > 300f && Math.abs(rff - refW) > 0.5f;
+        if (rff != null && rff > 300f) refW = rff;
         ui(() -> {
             int[] a = new int[2], b = new int[2];
             getBridge().getWebView().getLocationOnScreen(a);
@@ -447,7 +457,7 @@ public class AuroraBrowserPlugin extends Plugin {
                     w.setVisibility(View.VISIBLE);
                     w.bringToFront();
                     Float oldW = viewW.put(id, ww);
-                    if (oldW == null || Math.abs(oldW - ww) > 0.5f) applyZoomSoon(w, id); else applyZoom(w, id);
+                    if (oldW == null || Math.abs(oldW - ww) > 0.5f || refCh) applyZoomSoon(w, id); else applyZoom(w, id);
                 } else {
                     w.setVisibility(View.GONE);
                 }
