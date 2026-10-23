@@ -45,7 +45,7 @@ if styles.exists():
     st = styles.read_text(encoding='utf-8')
     m = re.search(r'(<style name="AppTheme\.NoActionBarLaunch"[^>]*>)(.*?)(</style>)', st, re.S)
     if m and 'windowSplashScreenBackground' not in m.group(2):
-        extra = ('\n        <item name="windowSplashScreenBackground">#111d46</item>'
+        extra = ('\n        <item name="windowSplashScreenBackground">#06080f</item>'
                  '\n        <item name="windowSplashScreenAnimatedIcon">@drawable/aurora_ic_fg</item>\n    ')
         st = st[:m.start(3)] + extra + st[m.start(3):]
         styles.write_text(st, encoding='utf-8')

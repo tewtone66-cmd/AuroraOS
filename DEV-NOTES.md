@@ -21,3 +21,5 @@
   فول‌اسکرین: آیکن‌های SVG نوار عنوان (WI)، دکمه‌ی `.fsd` برای نمایش موقت داک (fsPeek، کلاس body.peek، ۴.۵ثانیه)
 
 - v3-p07: ماشین‌حساب از نو (appCalc: تاریخچه، ripple، کیبورد، CSS `.cc*`)؛ ترمینال appTerm (دستورات روی NF، مسیر C:\ = ریشه‌ی NF.roots()[0])؛ تسک‌منیجر appTask (`taskmgr`، Ctrl+Shift+Esc، گراف CPU/RAM)؛ بومی: AuroraFilesPlugin.sysInfo (رم سیستم، PSS، زمان CPU پروسه)
+
+- v3.0.1 (perf): drag()/dockFx با rAF (یک حرکت در هر فریم)؛ کلاس body.pdrag هنگام درگ سایه/بلور رو خاموش می‌کنه؛ حالت کارایی: S.perf، setPerf()، کلاس body.perf، کلید aur.perf، تنظیمات ← تسک‌بار؛ CSS با کامنت PERF-3.0.1 ته استایل
