@@ -1,29 +1,15 @@
-# NEXT (بعد از v3.0.9)
-همه‌ی آیتم‌های چت ۹ نوشته شدند ولی روی گوشی تست نشده‌اند. اگه بیلد خطا داد، متن خطا رو بفرست.
+# NEXT (بعد از v3.0.11 Android/data)
+روی گوشی تست نشده. اگه بیلد یا اجرا خطا داد، متن خطا رو بفرست.
 
-## v3.0.9 چی اضافه شد
-- پنجره‌ی exe: کارت پیشرفت ۴ مرحله‌ای (Download runtime ← Install ← Setup ← Open window) با رویدادهای واقعی جاوا. «Download runtime» در واقع باز کردن runtime از داخل APK هست و فقط بار اول طول می‌کشه.
-- فیکس جا موندن پنجره‌ی برنامه: بعد از exeStarted/launching/running، بعد از نمایش دوباره و بعد از برگشت از بکگراند rect دوباره فرستاده میشه (علت: جاوا قبل از ساخته شدن Activity بی‌صدا رد می‌کرد).
-- اجرای .bat/.cmd توی ترمینال (دوبار لمس توی فایل‌منیجر) و دکمه‌ی Run توی ادیتور کد (.html .js .json .bat).
+## v3.0.11 چی اضافه شد
+- فایل‌منیجر: Quick access جدید «Android data»، «Android obb»، «App data».
+- Android 10 و پایین‌تر: Android/data مستقیم باز میشه. Android 11 و 12: یه بار «Grant access» (انتخاب پوشه و Use this folder). Android 13+: توی بیشتر گوشی‌ها SAF بسته‌ست؛ فقط root (یا بعدا Shizuku).
+- با root: Android/data، obb و /data/data (پوشه‌ی برنامه‌ها) باز میشه، خوندن/نوشتن/کپی/حذف.
 
-## محدودیت‌ها / کارهای مونده
-- ترمینال: FOR /F /D /R، `%VAR:a=b%`، `!var!` (delayed expansion)، `start`، `&`/`&&`/`|` و اجرای exe از ترمینال پشتیبانی نمیشه. `pause` با Enter ادامه میده. Ctrl+C فقط با کیبورد فیزیکی.
-- Run: فقط html/js/json/bat. python/java/kotlin و ... اجرا نمیشن. اسکریپت js داخل Worker اجرا میشه، پس document/window نداره (برای اون html بنویس). html داخل iframe سندباکس هست؛ حلقه‌ی بی‌نهایت توی html کل UI رو قفل می‌کنه.
-- اگه پنجره‌ی برنامه هنوز جا می‌مونه، ویدیو بگیر یا بگو دقیقا کی (شروع برنامه، درگ، مینیمایز، برگشت از بکگراند).
-- از قبل: ماوس Aurora داخل exe با عکس لحظه‌ی شروع ساخته میشه؛ پنجره‌ی exe وقتی زیر پنجره‌ی دیگه‌ست مخفی میشه (نه اینکه واقعا بینشون قرار بگیره). لاگ Wine پر از خطای d3d هست (گرافیک)، ربطی به لانچ نداره.
-
-
-## Done in 3.0.10a
-- PowerShell terminal + AuroraNet plugin (see DEV-NOTES).
-
-## Todo after 3.0.10a
-- PS: Copy-Item/Move-Item to a new file name (needs a copy API in AuroraFilesPlugin), tab completion, .ps1 run from Files/Code, switch statement, Get-PSDrive.
-- Found, not touched: none yet.
-
-## Done in 3.0.10b
-- Visual Studio Code app (web edition), preinstalled, found only through search (not on desktop, Start pins or Recent). Not tested on a phone yet.
-
-## Todo after 3.0.10b
-- VS Code: opening device folders needs a native bridge (no File System Access API in WebView). Possible next step: a small file-bridge plugin or an open-from-Files action that uploads the file.
-- VS Code: if the page layout looks too big or small, tune Settings > Browser > Page size (S.pw) or the A.vscode w/h.
-
+## کارهای مونده
+- Shizuku (برای Android 13+ بدون root): نیاز به اضافه کردن کتابخونه‌ی Shizuku به gradle و provider توی Manifest از طریق scripts/patch-android.py.
+- جستجو (search) و zip داخل Android/data و /data پشتیبانی نمیشه.
+- کپی به/از این پوشه‌ها نوار پیشرفت نداره.
+- با root، فایل‌های جدید داخل Android/data مالک پوشه‌ی والد میشن (chown)، ولی SELinux label دستی درست نمیشه.
+- «Open with VS Code» از فایل‌منیجر هنوز وصل نیست (openApp('vscode',{path}) آماده‌ست).
+- محدودیت‌های قبلی: VS Code بدون Extensions/Git/Debug؛ حذف توی VS Code دائمیه.

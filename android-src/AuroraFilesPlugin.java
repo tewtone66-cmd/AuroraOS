@@ -19,6 +19,8 @@ import com.getcapacitor.Plugin;
 import com.getcapacitor.PluginCall;
 import com.getcapacitor.PluginMethod;
 import com.getcapacitor.annotation.CapacitorPlugin;
+import com.getcapacitor.annotation.ActivityCallback;
+import androidx.activity.result.ActivityResult;
 import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.FileInputStream;
@@ -203,6 +205,7 @@ public class AuroraFilesPlugin extends Plugin {
     @PluginMethod
     public void list(PluginCall call) {
         try {
+            if (rh(call.getString("path", ""))) { rList(call); return; }
             if (!hasAccess()) { call.reject("Storage access is not allowed yet"); return; }
             File d = guard(call.getString("path", ""));
             File[] kids = d.listFiles();
@@ -219,6 +222,7 @@ public class AuroraFilesPlugin extends Plugin {
     @PluginMethod
     public void info(PluginCall call) {
         try {
+            if (rh(call.getString("path", ""))) { rInfo(call); return; }
             File f = guard(call.getString("path", ""));
             long[] acc = new long[] { 0, 0, 0 }; // size, files, folders
             long deadline = System.currentTimeMillis() + 3000;
@@ -246,6 +250,7 @@ public class AuroraFilesPlugin extends Plugin {
     @PluginMethod
     public void mkdir(PluginCall call) {
         try {
+            if (rh(call.getString("path", ""))) { rMkdir(call); return; }
             File parent = guard(call.getString("path", ""));
             String name = call.getString("name", "New folder");
             if (name.contains("/") || name.isEmpty()) { call.reject("Invalid name"); return; }
@@ -258,6 +263,7 @@ public class AuroraFilesPlugin extends Plugin {
     @PluginMethod
     public void rename(PluginCall call) {
         try {
+            if (rh(call.getString("path", ""))) { rRename(call); return; }
             File f = guard(call.getString("path", ""));
             String name = call.getString("name", "");
             if (name.isEmpty() || name.contains("/")) { call.reject("Invalid name"); return; }
@@ -270,6 +276,7 @@ public class AuroraFilesPlugin extends Plugin {
     @PluginMethod
     public void remove(PluginCall call) {
         try {
+            for (String q0 : strings(call, "paths")) { if (rh(q0)) { rRemove(call); return; } }
             int fail = 0;
             for (String p : strings(call, "paths")) {
                 File f = guard(p);
@@ -318,6 +325,9 @@ public class AuroraFilesPlugin extends Plugin {
     @PluginMethod
     public void paste(PluginCall call) {
         try {
+            boolean rr = rh(call.getString("dest", ""));
+            for (String q0 : strings(call, "paths")) { if (rh(q0)) rr = true; }
+            if (rr) { rPaste(call); return; }
             File dest = guard(call.getString("dest", ""));
             boolean move = Boolean.TRUE.equals(call.getBoolean("move", false));
             int done = 0;
@@ -352,6 +362,7 @@ public class AuroraFilesPlugin extends Plugin {
     @PluginMethod
     public void readText(PluginCall call) {
         try {
+            if (rh(call.getString("path", ""))) { rRead(call); return; }
             File f = guard(call.getString("path", ""));
             if (f.length() > 3L * 1024 * 1024) { call.reject("File is too large for Notepad (3 MB max)"); return; }
             ByteArrayOutputStream bo = new ByteArrayOutputStream();
@@ -369,6 +380,7 @@ public class AuroraFilesPlugin extends Plugin {
     @PluginMethod
     public void writeText(PluginCall call) {
         try {
+            if (rh(call.getString("path", ""))) { rWrite(call); return; }
             File f = guard(call.getString("path", ""));
             String text = call.getString("text", "");
             try (OutputStream out = new FileOutputStream(f)) { out.write(text.getBytes(StandardCharsets.UTF_8)); }
@@ -379,6 +391,7 @@ public class AuroraFilesPlugin extends Plugin {
     @PluginMethod
     public void open(PluginCall call) {
         try {
+            if (rh(call.getString("path", ""))) { rOpen(call); return; }
             File f = guard(call.getString("path", ""));
             Uri u = FileProvider.getUriForFile(getContext(), getContext().getPackageName() + ".aurorafiles", f);
             Intent i = new Intent(Intent.ACTION_VIEW);
@@ -593,6 +606,174 @@ public class AuroraFilesPlugin extends Plugin {
         } catch (Exception e) {
             if (out != null) out.delete();
             call.reject(e.getMessage() == null ? "Compress failed" : e.getMessage(), e);
+        }
+    }
+
+    // ---------- v3.0.11: Android/data, Android/obb, app folders (SAF grant or root) ----------
+    private boolean rh(String p) { return p != null && !p.isEmpty() && AuroraRestricted.handles(getContext(), p); }
+
+    private JSObject rdesc(AuroraRestricted.Item it) {
+        JSObject o = new JSObject();
+        o.put("name", it.name);
+        o.put("path", it.path);
+        o.put("isDirectory", it.dir);
+        o.put("size", it.dir ? -1L : it.size);
+        o.put("lastModified", it.mod);
+        o.put("mimeType", it.mime == null ? "application/octet-stream" : it.mime);
+        o.put("hidden", it.name != null && it.name.startsWith("."));
+        return o;
+    }
+
+    private void rfail(PluginCall call, Exception e) {
+        if (e instanceof AuroraRestricted.AccessException) {
+            AuroraRestricted.AccessException a = (AuroraRestricted.AccessException) e;
+            call.reject("[" + a.code + "] " + a.getMessage(), a.code);
+        } else {
+            call.reject(e.getMessage() == null ? "Operation failed" : e.getMessage(), e);
+        }
+    }
+
+    private void rList(PluginCall call) {
+        try {
+            String p = call.getString("path", "");
+            JSArray items = new JSArray();
+            for (AuroraRestricted.Item it : AuroraRestricted.list(getContext(), p)) items.put(rdesc(it));
+            JSObject out = new JSObject();
+            out.put("items", items);
+            out.put("path", AuroraRestricted.norm(p));
+            call.resolve(out);
+        } catch (Exception e) { rfail(call, e); }
+    }
+
+    private void rInfo(PluginCall call) {
+        try {
+            String p = call.getString("path", "");
+            AuroraRestricted.Item it = AuroraRestricted.stat(getContext(), p);
+            long deadline = System.currentTimeMillis() + 3000;
+            long[] acc = AuroraRestricted.sizeOf(getContext(), p, deadline);
+            JSObject o = rdesc(it);
+            o.put("totalSize", acc[0]);
+            o.put("files", acc[1]);
+            o.put("folders", acc[2]);
+            o.put("partial", System.currentTimeMillis() > deadline);
+            call.resolve(o);
+        } catch (Exception e) { rfail(call, e); }
+    }
+
+    private void rMkdir(PluginCall call) {
+        try {
+            String name = call.getString("name", "New folder");
+            if (name.contains("/") || name.isEmpty()) { call.reject("Invalid name"); return; }
+            AuroraRestricted.mkdir(getContext(), call.getString("path", ""), name);
+            call.resolve();
+        } catch (Exception e) { rfail(call, e); }
+    }
+
+    private void rRename(PluginCall call) {
+        try {
+            String name = call.getString("name", "");
+            if (name.isEmpty() || name.contains("/")) { call.reject("Invalid name"); return; }
+            AuroraRestricted.rename(getContext(), call.getString("path", ""), name);
+            call.resolve();
+        } catch (Exception e) { rfail(call, e); }
+    }
+
+    private void rRemove(PluginCall call) {
+        try {
+            for (String p : strings(call, "paths")) {
+                String q = rh(p) ? AuroraRestricted.norm(p) : guard(p).getAbsolutePath();
+                AuroraRestricted.delete(getContext(), q);
+            }
+            call.resolve();
+        } catch (Exception e) { rfail(call, e); }
+    }
+
+    private void rRead(PluginCall call) {
+        try {
+            String t = AuroraRestricted.readText(getContext(), call.getString("path", ""), 3L * 1024 * 1024);
+            JSObject o = new JSObject();
+            o.put("text", t);
+            call.resolve(o);
+        } catch (Exception e) { rfail(call, e); }
+    }
+
+    private void rWrite(PluginCall call) {
+        try {
+            AuroraRestricted.writeText(getContext(), call.getString("path", ""), call.getString("text", ""));
+            call.resolve();
+        } catch (Exception e) { rfail(call, e); }
+    }
+
+    private void rOpen(PluginCall call) {
+        try {
+            File f = AuroraRestricted.toCache(getContext(), call.getString("path", ""));
+            Uri u = FileProvider.getUriForFile(getContext(), getContext().getPackageName() + ".aurorafiles", f);
+            Intent i = new Intent(Intent.ACTION_VIEW);
+            String mime = call.getString("mimeType", mimeOf(f));
+            i.setDataAndType(u, mime == null || mime.isEmpty() ? "*/*" : mime);
+            i.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION | Intent.FLAG_ACTIVITY_NEW_TASK);
+            getContext().startActivity(i);
+            call.resolve();
+        } catch (android.content.ActivityNotFoundException e) {
+            call.reject("No app can open this file", e);
+        } catch (Exception e) { rfail(call, e); }
+    }
+
+    private void rPaste(PluginCall call) {
+        try {
+            boolean move = Boolean.TRUE.equals(call.getBoolean("move", false));
+            String d0 = call.getString("dest", "");
+            String dest = rh(d0) ? AuroraRestricted.norm(d0) : guard(d0).getAbsolutePath();
+            List<String> src = new ArrayList<>();
+            for (String p : strings(call, "paths")) src.add(rh(p) ? AuroraRestricted.norm(p) : guard(p).getAbsolutePath());
+            int n = AuroraRestricted.paste(getContext(), src, dest, move);
+            JSObject o = new JSObject();
+            o.put("count", n);
+            call.resolve(o);
+        } catch (Exception e) { rfail(call, e); }
+    }
+
+    /** What is possible on this phone: SDK, SAF grants, root. probe=true asks for root now. */
+    @PluginMethod
+    public void restrictedStatus(PluginCall call) {
+        boolean probe = Boolean.TRUE.equals(call.getBoolean("probe", false));
+        JSObject o = new JSObject();
+        o.put("sdk", Build.VERSION.SDK_INT);
+        o.put("safData", AuroraRestricted.hasGrant(getContext(), "data"));
+        o.put("safObb", AuroraRestricted.hasGrant(getContext(), "obb"));
+        o.put("root", AuroraRestricted.rootAvailable(probe));
+        o.put("pkg", getContext().getPackageName());
+        call.resolve(o);
+    }
+
+    /** Opens the Android folder picker on Android/data (or obb); the user taps "Use this folder". */
+    @PluginMethod
+    public void restrictedGrant(PluginCall call) {
+        try {
+            String which = "obb".equals(call.getString("which", "data")) ? "obb" : "data";
+            startActivityForResult(call, AuroraRestricted.grantIntent(which), "restrictedGrantResult");
+        } catch (Exception e) {
+            call.reject("Could not open the folder picker", e);
+        }
+    }
+
+    @ActivityCallback
+    private void restrictedGrantResult(PluginCall call, ActivityResult result) {
+        if (call == null) return;
+        try {
+            String which = "obb".equals(call.getString("which", "data")) ? "obb" : "data";
+            if (result.getResultCode() != android.app.Activity.RESULT_OK || result.getData() == null || result.getData().getData() == null) {
+                call.reject("Cancelled");
+                return;
+            }
+            String err = AuroraRestricted.saveGrant(getContext(), which, result.getData().getData());
+            if (err != null) { call.reject(err); return; }
+            JSObject o = new JSObject();
+            o.put("granted", true);
+            o.put("which", which);
+            call.resolve(o);
+        } catch (Exception e) {
+            call.reject("Could not save the access", e);
         }
     }
 
