@@ -11,3 +11,12 @@
 - Run: فقط html/js/json/bat. python/java/kotlin و ... اجرا نمیشن. اسکریپت js داخل Worker اجرا میشه، پس document/window نداره (برای اون html بنویس). html داخل iframe سندباکس هست؛ حلقه‌ی بی‌نهایت توی html کل UI رو قفل می‌کنه.
 - اگه پنجره‌ی برنامه هنوز جا می‌مونه، ویدیو بگیر یا بگو دقیقا کی (شروع برنامه، درگ، مینیمایز، برگشت از بکگراند).
 - از قبل: ماوس Aurora داخل exe با عکس لحظه‌ی شروع ساخته میشه؛ پنجره‌ی exe وقتی زیر پنجره‌ی دیگه‌ست مخفی میشه (نه اینکه واقعا بینشون قرار بگیره). لاگ Wine پر از خطای d3d هست (گرافیک)، ربطی به لانچ نداره.
+
+
+## Done in 3.0.10a
+- PowerShell terminal + AuroraNet plugin (see DEV-NOTES).
+
+## Todo after 3.0.10a
+- 3.0.10b: full VS Code app (preinstalled, only in taskbar search, not on desktop).
+- PS: Copy-Item/Move-Item to a new file name (needs a copy API in AuroraFilesPlugin), tab completion, .ps1 run from Files/Code, switch statement, Get-PSDrive.
+- Found, not touched: none yet.
