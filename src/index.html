@@ -469,6 +469,26 @@ body.tb-light #tray{color:#111;text-shadow:none}body.no-tray #tray{display:none}
 #lck .lh{font-size:13px;opacity:.85;padding:9px 18px;border-radius:999px;background:#ffffff26;backdrop-filter:blur(8px);animation:lckp 2.4s ease-in-out infinite}@keyframes lckp{50%{opacity:.45}}
 body.perf #lck .lh{backdrop-filter:none;animation:none}
 #srchBtn .ico svg{width:60%;height:60%}
+/* EXE-3.0.9 */
+.exes .exsp{display:none!important}
+.exes:not(.exerr) .ext{display:none}
+.exc{width:min(290px,92%);background:#1b2231;border:1px solid #ffffff22;border-radius:12px;padding:14px 14px 12px;box-shadow:0 10px 30px #0008;text-align:left;box-sizing:border-box;direction:ltr}
+.exh{display:flex;align-items:center;gap:8px;margin-bottom:10px;min-width:0}
+.exh b{font-size:13px;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;flex:1}
+.exh span{font-size:11px;color:#94a3b8;flex:none}
+.exst{list-style:none;margin:0 0 10px;padding:0;display:flex;flex-direction:column;gap:7px}
+.exst li{display:flex;align-items:center;gap:9px;font-size:12.5px;color:#64748b}
+.exst li i{flex:none;width:16px;height:16px;border-radius:50%;border:2px solid #475569;box-sizing:border-box;position:relative}
+.exst li.act{color:#fff}
+.exst li.act i{border-color:#ffffff33;border-top-color:#60a5fa;animation:exspin 1s linear infinite}
+.exst li.done{color:#cbd5e1}
+.exst li.done i{border-color:#34d399;background:#34d399}
+.exst li.done i::after{content:'';position:absolute;left:3.5px;top:.5px;width:4px;height:8px;border:solid #06281c;border-width:0 2px 2px 0;transform:rotate(45deg)}
+.exerr .exst li.act i{animation:none;border-color:#f87171;background:#f87171}
+.exbar{height:5px;border-radius:3px;background:#0b1220;overflow:hidden}
+.exbar i{display:block;height:100%;width:0;background:linear-gradient(90deg,#3b82f6,#60a5fa);transition:width .3s}
+.exsub{font-size:11.5px;color:#94a3b8;margin-top:8px;min-height:15px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.exerr .exsub{display:none}
 </style><!--NEXOS-END--></head><body class="booting"><div id="boot"><!--NEXOS-START--><div id="nxb"><svg viewBox="0 0 512 512"><defs><linearGradient id="g" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#22d3ee"/><stop offset="1" stop-color="#8b5cf6"/></linearGradient></defs><path class="p" pathLength="100" d="M168 368V144l176 224V144" fill="none" stroke="url(#g)" stroke-width="40" stroke-linecap="round" stroke-linejoin="round"/></svg><h1>NEXOS</h1><div class="bar"><i></i></div></div><!--NEXOS-END--><svg class="bl" viewBox="0 0 1024 1024"><path d="M262 800C340 560 430 380 512 214" stroke="url(#gl)" stroke-width="156" stroke-linecap="round" fill="none" opacity="0.1"/><path d="M762 800C684 560 594 380 512 214" stroke="url(#gr)" stroke-width="156" stroke-linecap="round" fill="none" opacity="0.1"/><path d="M262 800C340 560 430 380 512 214" stroke="url(#gl)" stroke-width="124" stroke-linecap="round" fill="none" opacity="0.14"/><path d="M762 800C684 560 594 380 512 214" stroke="url(#gr)" stroke-width="124" stroke-linecap="round" fill="none" opacity="0.14"/><path d="M262 800C340 560 430 380 512 214" stroke="url(#gl)" stroke-width="96" stroke-linecap="round" fill="none"/><path d="M762 800C684 560 594 380 512 214" stroke="url(#gr)" stroke-width="96" stroke-linecap="round" fill="none"/><path d="M352 640C420 584 462 704 512 640S604 584 672 640" stroke="url(#gw)" stroke-width="44" stroke-linecap="round" fill="none"/><g fill="#e0f2fe"><circle cx="812" cy="262" r="13"/><circle cx="226" cy="318" r="9"/><circle cx="716" cy="140" r="7"/></g></svg><div class="bd"><i></i><i></i><i></i></div></div><div id="shut"><svg class="lg" viewBox="0 0 1024 1024"><path d="M262 800C340 560 430 380 512 214" stroke="url(#gl)" stroke-width="156" stroke-linecap="round" fill="none" opacity="0.1"/><path d="M762 800C684 560 594 380 512 214" stroke="url(#gr)" stroke-width="156" stroke-linecap="round" fill="none" opacity="0.1"/><path d="M262 800C340 560 430 380 512 214" stroke="url(#gl)" stroke-width="124" stroke-linecap="round" fill="none" opacity="0.14"/><path d="M762 800C684 560 594 380 512 214" stroke="url(#gr)" stroke-width="124" stroke-linecap="round" fill="none" opacity="0.14"/><path d="M262 800C340 560 430 380 512 214" stroke="url(#gl)" stroke-width="96" stroke-linecap="round" fill="none"/><path d="M762 800C684 560 594 380 512 214" stroke="url(#gr)" stroke-width="96" stroke-linecap="round" fill="none"/><path d="M352 640C420 584 462 704 512 640S604 584 672 640" stroke="url(#gw)" stroke-width="44" stroke-linecap="round" fill="none"/><g fill="#e0f2fe"><circle cx="812" cy="262" r="13"/><circle cx="226" cy="318" r="9"/><circle cx="716" cy="140" r="7"/></g></svg><div class="slot"><div class="sm"><span>Shutting down</span><div class="bd"><i></i><i></i><i></i></div></div><button id="pw" aria-label="Power on"><svg viewBox="0 0 24 24"><path d="M12 3v8M6.6 6.8a8 8 0 1 0 10.8 0"/></svg></button></div><div class="hint">Tap to power on</div></div><script>(function(){var t0=Date.now(),d=0;function go(){if(d)return;d=1;var b=document.getElementById("boot");document.body.classList.remove("booting");if(b){b.classList.add("out");setTimeout(function(){b.remove()},800)}}function chk(){setTimeout(go,Math.max(0,1700-(Date.now()-t0)))}if(document.readyState==="complete")chk();else addEventListener("load",chk);setTimeout(go,5000)})();</script>
 <svg width="0" height="0" style="position:absolute"><defs><linearGradient id="gs" x1="0" y1="0" x2="1" y2="1"><stop stop-color="#8f9bff"/><stop offset="1" stop-color="#c26bff"/></linearGradient><linearGradient id="gl" x1="0" y1="1" x2="1" y2="0"><stop stop-color="#34d399"/><stop offset="1" stop-color="#22d3ee"/></linearGradient><linearGradient id="gr" x1="1" y1="1" x2="0" y2="0"><stop stop-color="#a78bfa"/><stop offset="1" stop-color="#22d3ee"/></linearGradient><linearGradient id="gw" x1="0" y1="0" x2="1" y2="0"><stop stop-color="#5eead4"/><stop offset="1" stop-color="#c4b5fd"/></linearGradient></defs></svg>
 <div id="desk"><div id="icons"></div></div>
@@ -1183,7 +1203,7 @@ if(/^[a-z]:$/i.test(c)){if(c.toLowerCase()!=='c:')E('The system cannot find the 
 switch(c){
 case'help':case'?':HELP.forEach(T);break;
 case'cls':case'clear':out.innerHTML='';break;
-case'ver':T('');T('NexOS [Version 3.0.8 alpha]');T('');break;
+case'ver':T('');T('NexOS [Version 3.0.9 alpha]');T('');break;
 case'date':{const d=new Date();T('The current date is: '+['Sun','Mon','Tue','Wed','Thu','Fri','Sat'][d.getDay()]+' '+pad2(d.getMonth()+1)+'/'+pad2(d.getDate())+'/'+d.getFullYear());break}
 case'time':{const d=new Date();T('The current time is: '+pad2(d.getHours())+':'+pad2(d.getMinutes())+':'+pad2(d.getSeconds())+'.'+pad2(Math.floor(d.getMilliseconds()/10)));break}
 case'pwd':T(win(cwd));break;
@@ -1208,7 +1228,7 @@ if(line.trim()){hist.push(line);if(hist.length>100)hist.shift()}hi=hist.length;b
 else if(e.key==='ArrowUp'){e.preventDefault();if(hi>0){hi--;inp.value=hist[hi]}}
 else if(e.key==='ArrowDown'){e.preventDefault();if(hi<hist.length-1){hi++;inp.value=hist[hi]}else{hi=hist.length;inp.value=''}}};
 tm.onclick=()=>{if(!String(getSelection()))inp.focus()};
-T('NexOS [Version 3.0.8 alpha]');T('Commands run on the NexOS file system (C:\\ = internal storage). Type HELP.');T('');
+T('NexOS [Version 3.0.9 alpha]');T('Commands run on the NexOS file system (C:\\ = internal storage). Type HELP.');T('');
 prompt();setTimeout(()=>inp.focus(),380);
 }
 /* ---------- Task Manager (v3-p07) ---------- */
@@ -1261,8 +1281,8 @@ const kv=a=>a.map(([k,v])=>`<div class="kv"><span>${k}</span><b>${esc(String(v))
 const REPO='https://github.com/tewtone66-cmd/NexOS';
 const PGS={
 about(){const ua=navigator.userAgent,and=(/Android ([\d.]+)/.exec(ua)||[])[1]||'?',mod=(/;\s*([^;)]+?)\s+Build/.exec(ua)||/Android [\d.]+;\s*([^;)]+)/.exec(ua)||[])[1]||'Unknown',chr=(/Chrome\/([\d.]+)/.exec(ua)||[])[1]||'?';
-return `<h3>About</h3><div class="abh"><div class="abl">${STAR}</div><div><h2>NexOS</h2><p>Version 3.0.8 alpha</p></div></div>${kv([['Edition','NexOS Alpha'],['Version','3.0.0 (alpha)'],['Device',mod],['Android',and],['WebView (Chrome)',chr],['Screen',innerWidth+' × '+innerHeight+' (UI '+Math.round(S.ui*100)+'%)'],['CPU cores',navigator.hardwareConcurrency||'?'],['Memory',navigator.deviceMemory?'≥ '+navigator.deviceMemory+' GB':'?'],['Storage access',granted===null?'…':granted?'Allowed':'Not allowed']])}<h4>Update</h4>${kv([['Channel','Alpha'],['Installed version','3.0.8 alpha'],['Updates','Installed manually from GitHub']])}<button class="pgb" data-k="go" data-v="${REPO}">Open GitHub</button><h4>What is new in 3.0.0</h4><ul><li>New virtual mouse with cursor states and motion blur</li><li>New taskbar and Start menu with search</li><li>Recycle Bin that really keeps deleted items</li><li>Settings with categories and search</li></ul>`},
-update(){return `<h3>Update</h3>${kv([['Channel','Alpha'],['Installed version','3.0.8 alpha'],['Status','Updates are installed manually: rebuild the app from GitHub']])}<button class="pgb" data-k="go" data-v="${REPO}">Open GitHub</button>`},
+return `<h3>About</h3><div class="abh"><div class="abl">${STAR}</div><div><h2>NexOS</h2><p>Version 3.0.9 alpha</p></div></div>${kv([['Edition','NexOS Alpha'],['Version','3.0.0 (alpha)'],['Device',mod],['Android',and],['WebView (Chrome)',chr],['Screen',innerWidth+' × '+innerHeight+' (UI '+Math.round(S.ui*100)+'%)'],['CPU cores',navigator.hardwareConcurrency||'?'],['Memory',navigator.deviceMemory?'≥ '+navigator.deviceMemory+' GB':'?'],['Storage access',granted===null?'…':granted?'Allowed':'Not allowed']])}<h4>Update</h4>${kv([['Channel','Alpha'],['Installed version','3.0.9 alpha'],['Updates','Installed manually from GitHub']])}<button class="pgb" data-k="go" data-v="${REPO}">Open GitHub</button><h4>What is new in 3.0.0</h4><ul><li>New virtual mouse with cursor states and motion blur</li><li>New taskbar and Start menu with search</li><li>Recycle Bin that really keeps deleted items</li><li>Settings with categories and search</li></ul>`},
+update(){return `<h3>Update</h3>${kv([['Channel','Alpha'],['Installed version','3.0.9 alpha'],['Status','Updates are installed manually: rebuild the app from GitHub']])}<button class="pgb" data-k="go" data-v="${REPO}">Open GitHub</button>`},
 display(){return `<h3>Display & size</h3><h4>App size (whole interface)</h4><div class="step"><button data-k="ui" data-v="-1">&#8722;</button><b>${Math.round(S.ui*100)}%</b><button data-k="ui" data-v="1">+</button><button data-k="ui" data-v="0">Reset</button></div><h4>Desktop icon size</h4>${chips('is',[36,48,60,72],S.is,v=>({36:'Small',48:'Medium',60:'Large',72:'Extra large'})[v])}`},
 storage(){return `<h3>Storage</h3><h4>Access to your files</h4><div class="seg"><button data-k="perm" class="${granted?'sel':''}">${granted===null?'Checking…':granted?'Allowed':'Allow access to files'}</button></div>`},
 bg(){return `<h3>Background</h3><div class="walls">${WALL.map((g,i)=>`<button data-k="wall" data-v="${i}" class="${!S.wc&&i===S.wall?'sel':''}" style="background:${g}"></button>`).join('')}</div><h4>Solid color</h4><div class="sw">${['#0b1d3a','#111827','#1f3b2d','#3b1f3a','#3a2a1f','#475569','#e5e7eb'].map(c=>`<button data-k="wc" data-v="${c}" class="${S.wc===c?'sel':''}" style="background:${c}"></button>`).join('')}</div>`},
@@ -1369,20 +1389,28 @@ if(!$('#exestyle')){const st=h('style');st.id='exestyle';st.textContent='@keyfra
 const u=h('div','exes','<div class="exsp" style="width:30px;height:30px;border:3px solid #ffffff33;border-top-color:#60a5fa;border-radius:50%;animation:exspin 1s linear infinite"></div><div class="ext" style="font-size:14px;white-space:pre-wrap;max-width:92%;word-break:break-word"></div><button class="ib pri exb" style="display:none">Close</button>');
 u.style.cssText='position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:12px;background:#111827;color:#fff;text-align:center;padding:16px;overflow:auto;box-sizing:border-box';
 w.body.appendChild(u);
+{/* EXE-3.0.9 progress card */const card=h('div','exc','<div class="exh"><b></b><span>Windows program</span></div><ol class="exst"><li><i></i>Download runtime</li><li><i></i>Install</li><li><i></i>Setup</li><li><i></i>Open window</li></ol><div class="exbar"><i></i></div><div class="exsub"></div>');
+$('.exh b',card).textContent=String(w.path).split('/').pop()||'Program';
+u.insertBefore(card,$('.ext',u));
+const lis=[...card.querySelectorAll('li')],bar=$('.exbar i',card),sub=$('.exsub',card);
+w.exeSub=t=>{sub.textContent=t==null?'':String(t)};
+w.exeStep=(i,t,f)=>{w.exst=i;lis.forEach((l,k)=>{l.classList.toggle('done',k<i);l.classList.toggle('act',k===i)});bar.style.width=Math.min(100,Math.round((Math.min(i,4)+(f>0&&f<1?f:0))/4*100))+'%';if(t!=null)sub.textContent=String(t)};
+w.exeStep(0,'')}
 {const nm=String(w.path).split('/').pop();w.inst=/(setup|install)/i.test(nm)&&!/unins/i.test(nm);if(w.inst){u.classList.add('inst');w.setTitle('Installing '+nm);w.body.appendChild(h('div','exinst','<i></i>'))}}
 $('.exb',u).onclick=()=>closeW(w.id);
-w.exeStatus=(t,err)=>{$('.ext',u).textContent=t;$('.exsp',u).style.display=err?'none':'';$('.exb',u).style.display=err?'':'none';u.style.display='flex'};
+w.exeStatus=(t,err)=>{u.classList.toggle('exerr',!!err);$('.ext',u).textContent=t;if(!err&&w.exeSub)w.exeSub(t);$('.exsp',u).style.display=err?'none':'';$('.exb',u).style.display=err?'':'none';u.style.display='flex'};
 w.exeHide=()=>{u.style.display='none'};
 w.exeStatus('Starting…');
 let last='',t1=0,wasMin=false;
 const push=fin=>{if(!w.owns||!W[w.id]||w.el.classList.contains('min')||w.el.classList.contains('minning'))return;let r;try{r=exeRect(w)}catch(e){return}const k=[r.x|0,r.y|0,r.w|0,r.h|0].join();if(k===last&&!fin)return;last=k;NW.setExeRect(r).catch(()=>{})};
-w.sched=()=>{if(!t1)t1=setTimeout(()=>{t1=0;push()},60);clearTimeout(w.tf);w.tf=setTimeout(()=>push(true),420)};
-let vis=true;const vi=setInterval(()=>{if(!w.owns)return;const mn=w.el.classList.contains('min')||w.el.classList.contains('minning'),want=!mn&&topId===w.id&&!menuOpen&&!document.body.classList.contains('shutting')&&!document.body.classList.contains('bsod');if(want!==vis){vis=want;w.body.classList.toggle('exbehind',!want);NW.setExeVisible({v:want}).catch(()=>{})}},120);
+w.sched=()=>{if(!t1)t1=setTimeout(()=>{t1=0;push()},16);clearTimeout(w.tf);w.tf=setTimeout(()=>push(true),420)};w.forcePush=()=>{last='';push(true)};
+let vis=true;const vi=setInterval(()=>{if(!w.owns)return;const mn=w.el.classList.contains('min')||w.el.classList.contains('minning'),want=!mn&&topId===w.id&&!menuOpen&&!document.body.classList.contains('shutting')&&!document.body.classList.contains('bsod');if(want!==vis){vis=want;w.body.classList.toggle('exbehind',!want);NW.setExeVisible({v:want}).catch(()=>{});if(want)setTimeout(()=>{if(w.forcePush)w.forcePush()},60)}},120);
 const mo=new MutationObserver(()=>{const m=w.el.classList.contains('min')||w.el.classList.contains('minning');if(m!==wasMin){wasMin=m;if(w.owns){if(m)NW.minimizeExe().catch(()=>{});else setTimeout(()=>{if(W[w.id]&&w.owns)NW.restoreExe(exeRect(w)).catch(()=>{})},380)}}w.sched()});
 mo.observe(w.el,{attributes:true,attributeFilter:['style','class']});
 const ro=new ResizeObserver(()=>w.sched());ro.observe(w.body);
 w.onclose=()=>{clearInterval(vi);mo.disconnect();ro.disconnect();clearTimeout(t1);clearTimeout(w.tf);if(w.owns){w.owns=false;NW.stopExe().catch(()=>{})}if(exeW===w)exeW=null}}
 /* JavaScript bugs go to the red bar; errors reported by the Java layer / Wine engine stay separate (toast) */
+const exePushSoon=w=>{[0,400,1200].forEach(d=>setTimeout(()=>{if(w&&W[w.id]&&w.forcePush)w.forcePush()},d))};
 const isJsErr=e=>e instanceof TypeError||e instanceof ReferenceError||e instanceof SyntaxError||e instanceof RangeError;
 const reportErr=(e,where,def)=>{const msg=(e&&(e.message||String(e)))||def||'Something went wrong';if(isJsErr(e))aurBar('NexOS error ('+where+'): '+msg);toast('Error ('+where+'): '+msg,5000);};
 window.aurora.openExe=async(p,o)=>{
@@ -1390,15 +1418,15 @@ if(!NW)return openApp('win',{exe:p});
 if(wineBusy)return toast('Windows runtime is still being prepared');
 if(exeW&&W[exeW.id]){showW(exeW);return toast('A Windows program is already running')}
 wineBusy=true;let ew=null;
-try{ew=exeW=openApp('exew',{path:p});ew.t0=Date.now();ew.exeStatus('Preparing Windows runtime…');
-const st=await NW.status();if(!st.installed||!st.containers){await NW.init()}
+try{ew=exeW=openApp('exew',{path:p});ew.t0=Date.now();ew.exeStatus('Preparing Windows runtime…');ew.exeStep(0,'Checking the Windows runtime…');
+const st=await NW.status();if(!st.installed||!st.containers){await NW.init()}if(W[ew.id])ew.exeStep(1,'Setting up the program environment…');
 await lnkBaseline();
 const wt=480-(Date.now()-ew.t0);if(wt>0)await new Promise(r=>setTimeout(r,wt));
 if(!W[ew.id])return;
-ew.exeStatus('Starting…');
+ew.exeStatus('Preparing the program…');
 const go=f=>{let r=null;try{r=exeRect(ew)}catch(e){}return NW.runExe(r?{path:f,rect:r}:{path:f})};
 try{await pushCursor()}catch(e){}let run=p;try{await go(p)}catch(e){if(o&&o.alt&&/not found/i.test((e&&e.message)||'')){run=o.alt;await go(run)}else throw e}
-ew.owns=true;ew.sched();ls('aur.pend',run)}
+ew.owns=true;ew.sched();if(!(ew.exst>=3))ew.exeStep(2,'Starting Wine…');exePushSoon(ew);ls('aur.pend',run)}
 catch(e){if(ew&&W[ew.id]){ew.err=(e&&e.message)||'Could not start the program';ew.exeStatus(ew.err,true)}if(ew&&exeW===ew&&!ew.owns)exeW=null;reportErr(e,'openExe','Could not start the program')}
 finally{wineBusy=false}};
 /* aurora-p08c: back button -> blue "keep running / shut down" screen; background timeout -> close all + shutdown */
@@ -1411,12 +1439,12 @@ const bgExpire=()=>{clearTimeout(bgTm);ls('aur.bgdl','');bsHide();doShut();bgQui
 const bgGo=()=>{const ms=BG_MIN*60000;ls('aur.bgdl',String(Date.now()+ms));clearTimeout(bgTm);bgTm=setTimeout(bgExpire,ms);bsHide();try{NW.bgSchedule({ms}).catch(()=>{});NW.moveToBackground().catch(()=>{})}catch(e){}};
 const bgCheck=()=>{const dl=+ls('aur.bgdl');if(!dl)return;if(Date.now()>=dl)return bgExpire();clearTimeout(bgTm);ls('aur.bgdl','');try{NW.bgCancel().catch(()=>{})}catch(e){}};
 bsod.addEventListener('click',e=>{const b=e.target.closest('[data-k]');if(!b)return;const k=b.dataset.k;if(k==='bg')bgGo();else if(k==='off'){bsHide();doShut();bgQuit()}else bsHide()});
-if(NW){try{NW.addListener('backPressed',()=>{if(bsod.classList.contains('on'))return bsHide();if(menuOpen){closeMenus();return}bsShow()});NW.addListener('appResumed',bgCheck)}catch(e){}}
+if(NW){try{NW.addListener('backPressed',()=>{if(bsod.classList.contains('on'))return bsHide();if(menuOpen){closeMenus();return}bsShow()});NW.addListener('appResumed',()=>{bgCheck();if(exeW&&exeW.forcePush)setTimeout(()=>exeW.forcePush(),150)})}catch(e){}}
 document.addEventListener('visibilitychange',()=>{if(!document.hidden)bgCheck()});
 function wineEvents(){if(!NW)return;const lw=(n,f)=>{try{return Promise.resolve(NW.addListener(n,f))}catch(e){return Promise.resolve({remove(){}})}};
-lw('progress',e=>{const t=e.step==='container'?'Creating Windows container…':'Installing Windows runtime… '+(e.pct|0)+'%';toast(t);if(exeW&&W[exeW.id]&&!exeW.owns)exeW.exeStatus(t)});
-lw('exeState',e=>{const w=exeW;if(!w||!W[w.id])return;const k=e&&e.state;if(k==='preparing')w.exeStatus('Preparing system files…');else if(k==='launching')w.exeStatus('Starting Wine…');else if(k==='running')w.exeHide();else if(k==='error'){w.err=(e.msg)||'Unknown error';w.exeStatus(w.err,true)}});
-lw('exeStarted',e=>toast('Started '+String(e.path||'').split('/').pop()));
+lw('progress',e=>{const t=e.step==='container'?'Creating Windows container…':'Installing Windows runtime… '+(e.pct|0)+'%';toast(t);if(exeW&&W[exeW.id]&&!exeW.owns){exeW.exeStatus(t);if(e.step==='container')exeW.exeStep(1,t);else if(e.step==='rootfs')exeW.exeStep(0,t,(e.pct|0)/100)}});
+lw('exeState',e=>{const w=exeW;if(!w||!W[w.id])return;const k=e&&e.state;if(k==='preparing'){w.exeStatus('Preparing system files…');if(!(w.exst>=2))w.exeStep(1,'Preparing system files…')}else if(k==='launching'){w.exeStatus('Starting Wine…');w.exeStep(2,'Starting Wine…');exePushSoon(w)}else if(k==='running'){w.exeStep(3,'Opening the program window…');exePushSoon(w);setTimeout(()=>{if(W[w.id]&&!w.err){w.exeStep(4,'Done');setTimeout(()=>{if(W[w.id]&&!w.err)w.exeHide()},300)}},350)}else if(k==='error'){w.err=(e.msg)||'Unknown error';w.exeStatus(w.err,true)}});
+lw('exeStarted',e=>{toast('Started '+String(e.path||'').split('/').pop());if(exeW)exePushSoon(exeW)});
 lw('exeExited',async e=>{const name=String(e.path||'').split('/').pop();const ew=exeW;instRun=!!(ew&&ew.inst);if(ew&&W[ew.id]){ew.owns=false;if(ew.err)ew.exeStatus(ew.err,true);else closeW(ew.id)}exeW=null;try{const r=await NW.getLastError();if(r&&r.error){toast('Windows app error: '+r.error,5000);return}}catch(err){}toast('Windows app closed: '+name+' (no detailed error was reported by Wine/Box64)',5000);afterExe(e.path)})}
 const DL={};
 const dirOf=p=>p.replace(/\/[^/]*$/,'')||'/';
