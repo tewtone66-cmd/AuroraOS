@@ -17,6 +17,13 @@
 - PowerShell terminal + AuroraNet plugin (see DEV-NOTES).
 
 ## Todo after 3.0.10a
-- 3.0.10b: full VS Code app (preinstalled, only in taskbar search, not on desktop).
 - PS: Copy-Item/Move-Item to a new file name (needs a copy API in AuroraFilesPlugin), tab completion, .ps1 run from Files/Code, switch statement, Get-PSDrive.
 - Found, not touched: none yet.
+
+## Done in 3.0.10b
+- Visual Studio Code app (web edition), preinstalled, found only through search (not on desktop, Start pins or Recent). Not tested on a phone yet.
+
+## Todo after 3.0.10b
+- VS Code: opening device folders needs a native bridge (no File System Access API in WebView). Possible next step: a small file-bridge plugin or an open-from-Files action that uploads the file.
+- VS Code: if the page layout looks too big or small, tune Settings > Browser > Page size (S.pw) or the A.vscode w/h.
+

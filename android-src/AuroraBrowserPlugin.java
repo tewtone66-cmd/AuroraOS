@@ -272,6 +272,7 @@ public class AuroraBrowserPlugin extends Plugin {
             CookieManager.getInstance().setAcceptThirdPartyCookies(w, true);
             w.setFocusable(true);
             w.setFocusableInTouchMode(true);
+            if ("vsc".equals(id)) w.setBackgroundColor(Color.parseColor("#1E1E1E"));
             w.setWebViewClient(new WebViewClient() {
                 @Override
                 public boolean shouldOverrideUrlLoading(WebView v, WebResourceRequest r) {

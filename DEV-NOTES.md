@@ -49,3 +49,12 @@
 - Cmdlets live in `const PSCMD`; aliases in `PSALIAS`; app names for Start-Process in `PSAPPS`.
 - Network: android-src/AuroraNetPlugin.java (http, ping[TCP probe], tcp, dns, netinfo) registered in MainActivity; JS `psNetCall`.
 - Terminal opens as PowerShell; `cmd` switches to Command Prompt, `powershell` goes back. Batch launches stay in cmd.
+
+## 3.0.10b - Visual Studio Code app (VSC-3.0.10b)
+- App id `vscode` (A.vscode, name "Visual Studio Code"): opens https://vscode.dev in a native WebView (id `vsc`) filling the window body. No address bar/tabs; DOM splash `.vsl` while loading, error panel `.vse` + "Try again" (30 s timeout, offline, or Android error page title).
+- Code block `/* VSC-3.0.10b */` just before the Task Manager section: appVsc, A.vscode, IC.vscode. CSS block `/* VSC-3.0.10b */` at the end of the style tag.
+- Hidden from desktop and Start pins/Recent: flag `A.vscode.hid=1` (checked in the #pins builder and recent()). Found only by search: search match also uses `A[id].kw` (keywords: vscode vs code ide editor).
+- Native surface is now shared: `natCands()` lists visible native views (browser tab or `vsc`), `sync()` shows the one on the top-most window, `natSnap/natUnsnap` keep snapshots, `bpos()` (virtual mouse) follows `shownTab`. Browser `popup`/`tabtouch` handlers ignore events while `shownTab==='vsc'`. VS Code popups (e.g. GitHub sign-in) open in the Browser app.
+- Java: AuroraBrowserPlugin.create sets a dark WebView background for id `vsc` (no white flash).
+- Limit: Android WebView has no File System Access API, so "Open Folder" on device storage does not work; use GitHub repos, virtual files and uploads.
+

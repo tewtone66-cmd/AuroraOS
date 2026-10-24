@@ -495,6 +495,13 @@ body.perf #lck .lh{backdrop-filter:none;animation:none}
 .crh b{flex:1;font-weight:600;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 .cro{flex:1;min-height:0;overflow:auto;padding:6px 10px;font:12px/1.5 Consolas,"Cascadia Mono",ui-monospace,monospace;white-space:pre-wrap;word-break:break-word;user-select:text;direction:ltr;text-align:left}
 .cro .e{color:#e5484d}.cro .w{color:#d97706}.cro .m{color:var(--mut)}
+
+/* VSC-3.0.10b */
+.vsc{height:100%}.vview{position:relative;height:100%;background:#1e1e1e center/100% 100% no-repeat;overflow:hidden}
+.vsl,.vse{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:14px;color:#ccc;font:13px "Segoe UI",system-ui,sans-serif;text-align:center;padding:20px}
+.vsl svg,.vse svg{width:84px;height:84px;fill:#2b8fe0}.vsl b,.vse b{font-weight:400;font-size:18px;color:#e6e6e6}.vse span{opacity:.75;max-width:360px;line-height:1.45}
+.vsp{width:22px;height:22px;border:2px solid #3c3c3c;border-top-color:#3794ff;border-radius:50%;animation:vsspin .8s linear infinite}@keyframes vsspin{to{transform:rotate(360deg)}}
+.vsr{margin-top:6px;background:#0e639c;color:#fff;border:0;padding:8px 20px;border-radius:2px;font:inherit}.vsr:hover{background:#1177bb}
 </style><!--NEXOS-END--></head><body class="booting"><div id="boot"><!--NEXOS-START--><div id="nxb"><svg viewBox="0 0 512 512"><defs><linearGradient id="g" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#22d3ee"/><stop offset="1" stop-color="#8b5cf6"/></linearGradient></defs><path class="p" pathLength="100" d="M168 368V144l176 224V144" fill="none" stroke="url(#g)" stroke-width="40" stroke-linecap="round" stroke-linejoin="round"/></svg><h1>NEXOS</h1><div class="bar"><i></i></div></div><!--NEXOS-END--><svg class="bl" viewBox="0 0 1024 1024"><path d="M262 800C340 560 430 380 512 214" stroke="url(#gl)" stroke-width="156" stroke-linecap="round" fill="none" opacity="0.1"/><path d="M762 800C684 560 594 380 512 214" stroke="url(#gr)" stroke-width="156" stroke-linecap="round" fill="none" opacity="0.1"/><path d="M262 800C340 560 430 380 512 214" stroke="url(#gl)" stroke-width="124" stroke-linecap="round" fill="none" opacity="0.14"/><path d="M762 800C684 560 594 380 512 214" stroke="url(#gr)" stroke-width="124" stroke-linecap="round" fill="none" opacity="0.14"/><path d="M262 800C340 560 430 380 512 214" stroke="url(#gl)" stroke-width="96" stroke-linecap="round" fill="none"/><path d="M762 800C684 560 594 380 512 214" stroke="url(#gr)" stroke-width="96" stroke-linecap="round" fill="none"/><path d="M352 640C420 584 462 704 512 640S604 584 672 640" stroke="url(#gw)" stroke-width="44" stroke-linecap="round" fill="none"/><g fill="#e0f2fe"><circle cx="812" cy="262" r="13"/><circle cx="226" cy="318" r="9"/><circle cx="716" cy="140" r="7"/></g></svg><div class="bd"><i></i><i></i><i></i></div></div><div id="shut"><svg class="lg" viewBox="0 0 1024 1024"><path d="M262 800C340 560 430 380 512 214" stroke="url(#gl)" stroke-width="156" stroke-linecap="round" fill="none" opacity="0.1"/><path d="M762 800C684 560 594 380 512 214" stroke="url(#gr)" stroke-width="156" stroke-linecap="round" fill="none" opacity="0.1"/><path d="M262 800C340 560 430 380 512 214" stroke="url(#gl)" stroke-width="124" stroke-linecap="round" fill="none" opacity="0.14"/><path d="M762 800C684 560 594 380 512 214" stroke="url(#gr)" stroke-width="124" stroke-linecap="round" fill="none" opacity="0.14"/><path d="M262 800C340 560 430 380 512 214" stroke="url(#gl)" stroke-width="96" stroke-linecap="round" fill="none"/><path d="M762 800C684 560 594 380 512 214" stroke="url(#gr)" stroke-width="96" stroke-linecap="round" fill="none"/><path d="M352 640C420 584 462 704 512 640S604 584 672 640" stroke="url(#gw)" stroke-width="44" stroke-linecap="round" fill="none"/><g fill="#e0f2fe"><circle cx="812" cy="262" r="13"/><circle cx="226" cy="318" r="9"/><circle cx="716" cy="140" r="7"/></g></svg><div class="slot"><div class="sm"><span>Shutting down</span><div class="bd"><i></i><i></i><i></i></div></div><button id="pw" aria-label="Power on"><svg viewBox="0 0 24 24"><path d="M12 3v8M6.6 6.8a8 8 0 1 0 10.8 0"/></svg></button></div><div class="hint">Tap to power on</div></div><script>(function(){var t0=Date.now(),d=0;function go(){if(d)return;d=1;var b=document.getElementById("boot");document.body.classList.remove("booting");if(b){b.classList.add("out");setTimeout(function(){b.remove()},800)}}function chk(){setTimeout(go,Math.max(0,1700-(Date.now()-t0)))}if(document.readyState==="complete")chk();else addEventListener("load",chk);setTimeout(go,5000)})();</script>
 <svg width="0" height="0" style="position:absolute"><defs><linearGradient id="gs" x1="0" y1="0" x2="1" y2="1"><stop stop-color="#8f9bff"/><stop offset="1" stop-color="#c26bff"/></linearGradient><linearGradient id="gl" x1="0" y1="1" x2="1" y2="0"><stop stop-color="#34d399"/><stop offset="1" stop-color="#22d3ee"/></linearGradient><linearGradient id="gr" x1="1" y1="1" x2="0" y2="0"><stop stop-color="#a78bfa"/><stop offset="1" stop-color="#22d3ee"/></linearGradient><linearGradient id="gw" x1="0" y1="0" x2="1" y2="0"><stop stop-color="#5eead4"/><stop offset="1" stop-color="#c4b5fd"/></linearGradient></defs></svg>
 <div id="desk"><div id="icons"></div></div>
@@ -577,10 +584,17 @@ const c=MCOL[S.mc]||MCOL[0];r.style.setProperty('--cf',c[1]==='acc'?S.acc:c[1]);
 /* ---- native browser surface: shown only when nothing covers it ---- */
 function obscured(w,r){const hit=el=>{const b=el.getBoundingClientRect();return b.width>0&&b.left<r.right&&b.right>r.left&&b.top<r.bottom&&b.bottom>r.top};if((!document.body.classList.contains('fs')||document.body.classList.contains('peek'))&&hit($('#dock')))return true;const z=+w.el.style.zIndex||0;for(const k in W){const o=W[k];if(o===w||o.el.classList.contains('min'))continue;if((+o.el.style.zIndex||0)>z&&hit(o.el))return true}return false}
 function applySnap(){if(!BR)return;const v=$('.bview',BR.w.body);v.style.backgroundImage=BR.snap&&BR.snap.id===BR.cur?'url('+BR.snap.img+')':''}
-function sync(){if(!NB)return;const w=wins('browser')[0],t=BR&&BR.tabs.find(x=>x.id===BR.cur);let vis=false,r=null;
-if(w&&t&&t.made&&!t.page&&t.url&&!w.el.classList.contains('min')&&!/opening|minning|closing|\btr\b/.test(w.el.className)&&!menuOpen&&!dragging){r=$('.bview',w.body).getBoundingClientRect();vis=r.width>20&&r.height>20&&!obscured(w,r)}
-if(!vis){if(shown){const id=shownTab;shown=null;const q=++snapSeq;NB.hideAll({id}).then(res=>{if(q===snapSeq&&res&&res.img&&BR){BR.snap={id,img:res.img};applySnap()}}).catch(()=>{});vmCursor()}return}
-const key=[t.id,r.left|0,r.top|0,r.width|0,r.height|0,S.pw].join();if(shown===key)return;shown=key;shownTab=t.id;snapSeq++;if(BR.snap){BR.snap=null;applySnap()}NB.show({id:t.id,x:r.left,y:r.top,w:r.width,h:r.height,cw:innerWidth,ref:S.pw}).then(vmCursor).catch(()=>{})}
+let VSC=null;
+function natCands(){const c=[],w=wins('browser')[0],t=BR&&BR.tabs.find(x=>x.id===BR.cur);
+if(w&&t&&t.made&&!t.page&&t.url)c.push({id:t.id,w,el:$('.bview',w.body)});
+const v=VSC&&wins('vscode')[0];if(v&&VSC.made&&VSC.ready&&!VSC.err)c.push({id:'vsc',w:v,el:$('.vview',v.body)});return c}
+function natSnap(id,img){if(id==='vsc'){if(VSC){VSC.snap={id,img};const v=$('.vview',VSC.w.body);if(v)v.style.backgroundImage='url('+img+')'}}else if(BR){BR.snap={id,img};applySnap()}}
+function natUnsnap(id){if(id==='vsc'){if(VSC&&VSC.snap){VSC.snap=null;const v=$('.vview',VSC.w.body);if(v)v.style.backgroundImage=''}}else if(BR&&BR.snap){BR.snap=null;applySnap()}}
+function sync(){if(!NB)return;let best=null,r=null;
+if(!menuOpen&&!dragging)for(const c of natCands()){const w=c.w;if(!c.el||w.el.classList.contains('min')||/opening|minning|closing|\btr\b/.test(w.el.className))continue;const rr=c.el.getBoundingClientRect();if(!(rr.width>20&&rr.height>20)||obscured(w,rr))continue;if(!best||(+w.el.style.zIndex||0)>(+best.w.el.style.zIndex||0)){best=c;r=rr}}
+if(!best){if(shown){const id=shownTab;shown=null;const q=++snapSeq;NB.hideAll({id}).then(res=>{if(q===snapSeq&&res&&res.img)natSnap(id,res.img)}).catch(()=>{});vmCursor()}return}
+if(shown&&shownTab!==best.id){const id=shownTab;shown=null;const q=++snapSeq;NB.hideAll({id}).then(res=>{if(q===snapSeq&&res&&res.img)natSnap(id,res.img)}).catch(()=>{}).then(()=>sync());return}
+const key=[best.id,r.left|0,r.top|0,r.width|0,r.height|0,S.pw].join();if(shown===key)return;shown=key;shownTab=best.id;snapSeq++;natUnsnap(best.id);NB.show({id:best.id,x:r.left,y:r.top,w:r.width,h:r.height,cw:innerWidth,ref:S.pw}).then(vmCursor).catch(()=>{})}
 function startReset(){const s=$('#start'),q=$('#sq');if(!s||!q)return;q.value='';s.classList.remove('q')}
 const closeAll=()=>Object.keys(W).forEach(k=>closeW(k,true));
 function doShut(){closeMenus();closeAll();document.body.classList.add('shutting');const s=$('#shut');s.classList.add('on');setTimeout(()=>s.classList.add('off'),2400)}
@@ -661,7 +675,7 @@ if(n){toast(n===1?'Added to desktop: '+first.t:n+' programs added to desktop');i
 const low=String(path||'').toLowerCase();
 if(path&&/\.exe$/.test(low)&&!/\/\.wine\/drive_c\//.test(low)&&!/(setup|install|unins|update|redist)/.test(low.split('/').pop())&&!EXES.some(x=>x.p===path||x.l===path))await addExe({p:path},false,0)}catch(e){reportErr(e,'after-exe','Could not read the Start Menu')}finally{AuroraBusy.stop();AuroraBusy.stop()}}
 function buildUI(){buildIcons();const ic=$('#icons');
-Object.keys(A).filter(id=>id!=='dl'&&id!=='exew'&&id!=='win'&&id!=='inst').forEach((id,ix)=>{const p=h('button','',`<div class="t">${tile(id)}</div><span>${A[id].n}</span>`);p.style.setProperty('--i',ix);p.onclick=()=>openApp(id);$('#pins').appendChild(p)});dockUpdate();
+Object.keys(A).filter(id=>id!=='dl'&&id!=='exew'&&id!=='win'&&id!=='inst'&&!A[id].hid).forEach((id,ix)=>{const p=h('button','',`<div class="t">${tile(id)}</div><span>${A[id].n}</span>`);p.style.setProperty('--i',ix);p.onclick=()=>openApp(id);$('#pins').appendChild(p)});dockUpdate();
 $('#startBtn').innerHTML=`<div class="ico" style="--g:linear-gradient(150deg,#071a2b,#0d2a45 55%,#1a1a45)">${STAR}</div>`;
 $('#startBtn').onclick=e=>{e.stopPropagation();const o=!$('#start').classList.contains('show');closeMenus();if(o){$('#start').classList.add('show');menuOpen=true;sync()}};
 startInit();$('#pw').onclick=()=>location.reload();$('#mbtn').onclick=()=>vmSet(!VM.on);
@@ -712,7 +726,7 @@ let cst='arrow';function setCur(c){if(c===cst)return;curEl.classList.remove('c-'
 function curState(t){if(document.body.classList.contains('busy'))return'busy';if(!t||!t.closest)return'arrow';if(t.closest('textarea,[contenteditable=""],[contenteditable="true"],input:not([type=button]):not([type=checkbox]):not([type=radio]):not([type=range]):not([type=submit]):not([type=color])'))return'ibeam';if(t.closest(VH+',a[href],button,summary,select,label,[role=button]'))return'hand';let c='';try{c=getComputedStyle(t).cursor}catch(e){}return c==='pointer'?'hand':c==='text'?'ibeam':'arrow'}
 addEventListener('aurora-busy',()=>{if(VM.on)vhover()});
 const place=()=>{curEl.style.transform=`translate(${VM.x}px,${VM.y}px)`;if(!rafC)rafC=requestAnimationFrame(()=>{rafC=0;vmCursor();vhover()})};
-function bpos(){if(!NB||!shown||!BR)return null;const r=$('.bview',BR.w.body).getBoundingClientRect(),id=BR.cur;if(VM.x>=r.left&&VM.x<r.right&&VM.y>=r.top&&VM.y<r.bottom)return{id,x:VM.x-r.left,y:VM.y-r.top};return null}
+function bpos(){if(!NB||!shown)return null;let el,id;if(shownTab==='vsc'){if(!VSC)return null;el=$('.vview',VSC.w.body);id='vsc'}else{if(!BR)return null;el=$('.bview',BR.w.body);id=BR.cur}if(!el)return null;const r=el.getBoundingClientRect();if(VM.x>=r.left&&VM.x<r.right&&VM.y>=r.top&&VM.y<r.bottom)return{id,x:VM.x-r.left,y:VM.y-r.top};return null}
 /* native cursor updates: at most one call in flight, always the latest position (no backlog -> no lag) */
 let cBusy=0,cDirty=false;
 function vmCursor(){if(!NB||!VM.on)return;if(cBusy&&Date.now()-cBusy<120){cDirty=true;return}cBusy=Date.now();cDirty=false;const fin=()=>{cBusy=0;if(cDirty)vmCursor()};NB.cursor({x:VM.x,y:VM.y,visible:!!bpos(),cw:innerWidth,s:S.ms}).then(fin,fin)}
@@ -814,9 +828,9 @@ const L=[];if(NB){const on=(n,f)=>L.push(listen(n,f));
 on('nav',e=>{const t=st.tabs.find(x=>x.id===e.id);if(!t||t.page)return;const url=e.url&&e.url!=='about:blank'?e.url:t.url;const same=t.url===url&&(!e.title||t.title===e.title)&&t.back===e.canBack&&t.fwd===e.canFwd&&t.loading===e.loading;t.url=url;{const hh=hostOf(url);if(hh&&t.zh!==hh){t.zh=hh;const z=ZM[hh]||100;t.zoom=z;t.zdone=z===100?0:1;if(NB&&t.made)Promise.resolve(NB.act({id:t.id,a:'zset',v:z})).catch(()=>{});if(e.id===st.cur)zui()}}if(e.title)t.title=e.title;t.back=e.canBack;t.fwd=e.canFwd;t.loading=e.loading;t.progress=e.progress;if(same){if(e.id===st.cur){const bp=$('.bprog',B);bp.style.opacity=t.loading?1:0;bp.style.width=(t.loading?Math.max(8,t.progress||8):100)+'%'}return}
 if(!e.loading&&url&&(!HIS[0]||HIS[0].u!==url)){HIS.unshift({u:url,t:t.title,ts:Date.now()});saveH()}draw()});
 on('icon',e=>{const hs=hostOf(e.url||'');if(!hs||!e.img)return;const t=st.tabs.find(x=>x.id===e.id);if(t)t.ic={h:hs,img:e.img};const s=SITES.find(x=>!x.ic&&hostOf(x.u)===hs);if(s){s.ic=e.img;saveSites();buildIcons(true)}});
-on('popup',e=>newTab(e.url));
+on('popup',e=>{if(shownTab!=='vsc')newTab(e.url)});
 on('download',e=>{if(e.ok){DLS.unshift({n:e.name,ts:Date.now()});ls('aur.dl',JSON.stringify(DLS.slice(0,50)));dlBegin(e)}else toast(e.error||'Download failed')});
-on('tabtouch',()=>{if(topId!==w.id)focusW(w.id)})}
+on('tabtouch',()=>{if(shownTab!=='vsc'&&topId!==w.id)focusW(w.id)})}
 w.onclose=()=>{document.removeEventListener('keydown',kd);if(NB){st.tabs.forEach(t=>t.made&&NB.close({id:t.id}));shown=null;NB.hideAll({id:''}).catch(()=>{});L.forEach(l=>l.then(x=>x&&x.remove&&x.remove()).catch(()=>{}))}BR=null};
 w.open=u=>{if(u)newTab(u)};newTab();if(typeof arg==='string'&&arg)nav(arg)}
 /* ---------- File Explorer (Windows style) ---------- */
@@ -1837,6 +1851,32 @@ if(!(arg&&arg.bat)){PSM.on=true;psBanner()}
 prompt();setTimeout(()=>inp.focus(),380);
 if(arg&&arg.bat){ready.then(async()=>{const bp=arg.bat,bn=bp.split('/').pop();cwd=bp.slice(0,bp.lastIndexOf('/'))||'/';prompt();w.setTitle(bn+' - Terminal');put(esc(win(cwd)+'>'+bn));busy=true;stopBat=false;try{await runBat(bp,[])}catch(e){E(e&&e.message==='^C'?'^C':((e&&e.message)||String(e)))}busy=false;prompt();inp.focus()})}
 }
+/* VSC-3.0.10b Visual Studio Code (web edition inside a native view; no address bar, no tabs) */
+const VSC_URL='https://vscode.dev';
+const VSC_LOGO='<svg viewBox="0 0 24 24"><path fill-rule="evenodd" d="M17.5 2.2 21.5 4.1v15.8l-4 1.9-8.5-7.6-4.3 3.2-2.2-1.2V7.8l2.2-1.2L9 9.8zM17.5 7.2v9.6L11.5 12z"/></svg>';
+function appVsc(w){
+const B=w.body;w.el.classList.add('nat');
+const st=VSC={w,made:false,ready:false,loaded:false,err:false,snap:null};
+B.innerHTML='<div class="vsc"><div class="vview"><div class="vsl">'+VSC_LOGO+'<b>Visual Studio Code</b><i class="vsp"></i></div><div class="vse" style="display:none">'+VSC_LOGO+'<b>Visual Studio Code could not start</b><span>Check your internet connection and try again.</span><button class="vsr">Try again</button></div></div></div>';
+const view=$('.vview',B),ld=$('.vsl',B),er=$('.vse',B);let tm=0;
+const fail=()=>{if(VSC!==st)return;clearTimeout(tm);st.err=true;st.ready=false;if(NB&&st.made){try{Promise.resolve(NB.close({id:'vsc'})).catch(()=>{})}catch(e){}st.made=false}if(shownTab==='vsc'){shown=null;shownTab=null;try{NB&&NB.hideAll({id:''}).catch(()=>{})}catch(e){}}ld.style.display='none';er.style.display='';sync()};
+const start=()=>{st.err=false;st.loaded=false;st.ready=false;er.style.display='none';ld.style.display='';
+if(!NB||navigator.onLine===false){fail();return}
+clearTimeout(tm);tm=setTimeout(()=>{if(!st.loaded)fail()},30000);
+if(!st.made){st.made=true;NB.create({id:'vsc',url:VSC_URL,cw:innerWidth,ref:S.pw,vw:Math.round(view.getBoundingClientRect().width),z:100}).then(()=>{if(VSC===st&&st.made&&!st.err){st.ready=true;sync()}}).catch(fail)}};
+$('.vsr',B).onclick=start;
+const L=[];if(NB){const on=(n,f)=>L.push(listen(n,f));
+on('nav',e=>{if(VSC!==st||e.id!=='vsc')return;const t=e.title||'';
+if(!e.loading&&/webpage not available|^err_|can.t be reached|net::err/i.test(t)){fail();return}
+if(!e.loading&&e.url&&/^https?:/i.test(e.url)){if(!st.loaded){st.loaded=true;clearTimeout(tm);setTimeout(()=>{if(VSC===st&&!st.err)ld.style.display='none'},600)}}
+w.setTitle(/visual studio code/i.test(t)?t:'Visual Studio Code')});
+on('popup',e=>{if(VSC===st&&shownTab==='vsc'&&e.url)openApp('browser',e.url)});
+on('tabtouch',()=>{if(VSC===st&&shownTab==='vsc'&&topId!==w.id)focusW(w.id)});
+on('download',e=>{if(VSC===st&&shownTab==='vsc'&&!e.ok)toast(e.error||'Download failed')})}
+w.onclose=()=>{clearTimeout(tm);if(NB){try{Promise.resolve(NB.close({id:'vsc'})).catch(()=>{})}catch(e){}if(shownTab==='vsc'){shown=null;shownTab=null;try{NB.hideAll({id:''}).catch(()=>{})}catch(e){}}L.forEach(l=>l.then(x=>x&&x.remove&&x.remove()).catch(()=>{}))}VSC=null;setTimeout(sync,0)};
+setTimeout(start,60)}
+A.vscode={n:'Visual Studio Code',kw:'vscode vs code ide editor',hid:1,g:'linear-gradient(160deg,#2aa0f6,#0a5fb4)',w:1080,h:640,f:appVsc};
+IC.vscode=P('<g stroke="none"><path fill-rule="evenodd" fill="#fff" d="M17.5 2.2 21.5 4.1v15.8l-4 1.9-8.5-7.6-4.3 3.2-2.2-1.2V7.8l2.2-1.2L9 9.8zM17.5 7.2v9.6L11.5 12z"/></g>');
 /* ---------- Task Manager (v3-p07) ---------- */
 function appTask(w){
 const B=w.body,N=60,GB=1073741824;
@@ -2382,7 +2422,7 @@ pm.addEventListener('click',function(e){e.stopPropagation();var b=e.target.close
 st.addEventListener('click',function(e){if(!e.target.closest('#pwm,#pwb'))pm.classList.remove('on')});
 
 /* ---------- recent ---------- */
-function recent(){try{var a=JSON.parse(ls('aur.recent')||'[]');return Array.isArray(a)?a.filter(function(i){return A[i]&&!HIDE[i]&&i!=='trash'}):[]}catch(e){return[]}}
+function recent(){try{var a=JSON.parse(ls('aur.recent')||'[]');return Array.isArray(a)?a.filter(function(i){return A[i]&&!HIDE[i]&&!A[i].hid&&i!=='trash'}):[]}catch(e){return[]}}
 function drawRecent(){var a=recent().slice(0,6);rc.innerHTML='';a.forEach(function(id){var b=h('button','',tl(id)+'<span></span>');b.querySelector('span').textContent=A[id].n;b.onclick=function(){openApp(id)};rc.appendChild(b)});rh.style.display=rc.style.display=a.length?'':'none'}
 var _oa=openApp;openApp=function(id){var r=_oa.apply(this,arguments);try{if(A[id]&&!HIDE[id]&&id!=='trash'){var a=recent().filter(function(x){return x!==id});a.unshift(id);ls('aur.recent',JSON.stringify(a.slice(0,8)));drawRecent()}}catch(e){}return r};
 drawRecent();
@@ -2403,7 +2443,7 @@ function fileItem(it){var par=(it.path||'').split('/').slice(-2,-1)[0]||'';retur
 function collect(raw){var ql=raw.toLowerCase(),o={calc:null,apps:[],sets:[],acts:[],web:[]};
  if(/^[\d\s+\-*/().%]+$/.test(raw)&&/\d/.test(raw)&&/[+\-*/%]/.test(raw)){try{var v=Function('"use strict";return ('+raw.replace(/%/g,'/100')+')')();if(typeof v==='number'&&isFinite(v))o.calc={ic:tl('calc'),lb:'= '+(+v.toFixed(10)),tag:'Calculator',fn:function(){openApp('calc')}}}catch(e){}}
  var rk=function(n){n=n.toLowerCase();return n===ql?0:n.indexOf(ql)===0?1:2};
- Object.keys(A).filter(function(id){return !HIDE[id]&&A[id].n.toLowerCase().indexOf(ql)>-1}).sort(function(a,b){return rk(A[a].n)-rk(A[b].n)}).forEach(function(id){o.apps.push({ic:tl(id),lb:A[id].n,tag:'App',fn:function(){openApp(id)}})});
+ Object.keys(A).filter(function(id){return !HIDE[id]&&(A[id].n+' '+(A[id].kw||'')).toLowerCase().indexOf(ql)>-1}).sort(function(a,b){return rk(A[a].n)-rk(A[b].n)}).forEach(function(id){o.apps.push({ic:tl(id),lb:A[id].n,tag:'App',fn:function(){openApp(id)}})});
  SETS.filter(function(x){return(x[0]+' '+x[2]).toLowerCase().indexOf(ql)>-1}).sort(function(a,b){return rk(a[0])-rk(b[0])}).forEach(function(x){o.sets.push({ic:tl('set'),lb:x[0],tag:'Settings',fn:function(){openApp('set',x[1])}})});
  var cm=startCmds().filter(function(c){return c[0]!=='Settings'});[['Lock',doLock],['Sleep',doSleep]].forEach(function(c){cm.push(c)});
  cm.filter(function(c){return c[0].toLowerCase().indexOf(ql)>-1}).forEach(function(c){o.acts.push({ic:G.act,lb:c[0],tag:'Action',fn:c[1]})});
