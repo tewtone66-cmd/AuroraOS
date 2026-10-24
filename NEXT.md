@@ -13,3 +13,6 @@
 - با root، فایل‌های جدید داخل Android/data مالک پوشه‌ی والد میشن (chown)، ولی SELinux label دستی درست نمیشه.
 - «Open with VS Code» از فایل‌منیجر هنوز وصل نیست (openApp('vscode',{path}) آماده‌ست).
 - محدودیت‌های قبلی: VS Code بدون Extensions/Git/Debug؛ حذف توی VS Code دائمیه.
+
+## بعد از v3.1.8
+آیکن لانچر و اسپلش اندروید از assets/nexos-*.svg ساخته میشه (نیاز به بیلد کامل APK). appId همون com.auroraos.desktop موند تا آپدیت روی نصب قبلی انجام بشه.

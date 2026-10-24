@@ -1,4 +1,4 @@
-name: Build Aurora OS APK
+name: Build NexOS APK
 
 on:
   push:
@@ -60,7 +60,7 @@ jobs:
         run: ./gradlew assembleDebug --no-daemon
       - uses: actions/upload-artifact@v4
         with:
-          name: AuroraOS-APK
+          name: NexOS-APK
           path: android/app/build/outputs/apk/debug/app-debug.apk
           if-no-files-found: error
           retention-days: 30

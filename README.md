@@ -1,4 +1,4 @@
-# NexOS 2.1
+# NexOS 3.1.8
 
 Desktop-style OS shell packaged as an Android app (landscape). One theme, one icon set.
 

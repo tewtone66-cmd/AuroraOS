@@ -1,8 +1,8 @@
 {
-  "name": "aurora-os-android",
-  "version": "3.0.11",
+  "name": "nexos-android",
+  "version": "3.1.8",
   "private": true,
-  "description": "Aurora OS Android wrapper",
+  "description": "NexOS Android wrapper",
   "scripts": {
     "prepare:web": "node scripts/prepare-web.mjs",
     "android:sync": "npm run prepare:web && cap sync android"
