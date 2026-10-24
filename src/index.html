@@ -433,6 +433,42 @@ body.tb-light #tray{color:#111;text-shadow:none}body.no-tray #tray{display:none}
 #mnpc .sr{margin-top:12px}#mnpc .ct{margin-top:4px}#mnpc .ct button{width:42px;height:42px}#mnpc .ct .pp{width:50px;height:50px}
 #mnpc .r3{display:flex;align-items:center;gap:8px;margin-top:6px}#mnpc .r3 svg{width:18px;height:18px;flex:none;opacity:.8}#mnpc .r3 button{width:34px;height:34px}
 #mnpc .op{margin-top:8px;width:100%;height:36px;border-radius:12px;background:#ffffff1f;font-size:12.5px}
+/* START-3.0.8 */
+#start{width:min(94vw,560px);padding:16px 16px 12px;border-radius:22px}
+.sbox{position:relative}
+.sbox:before{content:"";position:absolute;left:14px;top:50%;width:16px;height:16px;margin-top:-8px;opacity:.55;pointer-events:none;background:no-repeat center/contain url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23888' stroke-width='2.4' stroke-linecap='round'%3E%3Ccircle cx='10.5' cy='10.5' r='6'/%3E%3Cpath d='M15.2 15.2l5.3 5.3'/%3E%3C/svg%3E")}
+.sbox input{padding-left:40px!important;border-radius:12px!important;height:42px!important}
+#pins,#rcnt{display:grid;grid-template-columns:repeat(6,1fr);gap:2px}
+#rcnt button{border:0;background:none;border-radius:12px;padding:8px 0;display:flex;flex-direction:column;align-items:center;gap:6px;font-size:11.5px;color:var(--txt);cursor:pointer}
+#rcnt button:hover{background:var(--hov)}#rcnt .t{width:40px;height:40px}
+#pins button span,#rcnt button span{max-width:100%;padding:0 2px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+#start h3{display:flex;align-items:center}
+.sflt{display:none;gap:6px;margin:10px 0 0;overflow-x:auto;scrollbar-width:none}.sflt::-webkit-scrollbar{display:none}
+#start.q .sflt{display:flex}
+.sflt button{flex:none;border:0;border-radius:999px;padding:6px 14px;font-size:12.5px;background:var(--hov);color:var(--txt);cursor:pointer}
+.sflt button.on{background:var(--acc);color:var(--accT,#fff)}
+#sres h4{margin:12px 6px 4px;font-size:12px;color:var(--mut);font-weight:600}
+#sres .sr{position:relative}#sres .sr.sel{background:var(--hov);box-shadow:inset 3px 0 0 var(--acc)}
+#sres .sr.bm{padding:11px 10px;gap:14px;font-size:15px;font-weight:600;border-radius:14px}#sres .sr.bm .t,#sres .sr.bm .gi{width:44px;height:44px}
+#sres .sr span{min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.gi{width:30px;height:30px;flex:none;border-radius:9px;display:grid;place-items:center}.gi svg{width:60%;height:60%}
+.sem{padding:22px 10px;text-align:center;color:var(--mut);font-size:13px}
+.sfoot{align-items:center}
+.sfoot .usr{display:flex;align-items:center;gap:10px;font-size:13px}.sfoot .usr i{width:32px;height:32px;border-radius:50%;display:grid;place-items:center;font-style:normal;font-weight:700;background:linear-gradient(150deg,var(--acc),#7c3aed);color:#fff}
+.sfoot #pwb{width:40px;height:40px;padding:0;margin:0;border-radius:12px;display:grid;place-items:center;cursor:pointer;color:var(--txt)}.sfoot #pwb svg{width:19px;height:19px;fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
+#pwm{position:absolute;right:12px;bottom:66px;min-width:176px;padding:6px;border-radius:14px;background:var(--pn,var(--surf));border:1px solid var(--line);box-shadow:0 16px 40px #0006;display:none;flex-direction:column;z-index:3}
+#pwm.on{display:flex;animation:pwin .18s ease-out}@keyframes pwin{from{opacity:0;transform:translateY(8px) scale(.97)}}
+#pwm button{display:flex;align-items:center;gap:12px;width:100%;border:0;background:none;color:var(--txt);text-align:left;padding:10px 12px;border-radius:9px;font-size:13.5px;cursor:pointer}
+#pwm button:hover,#pwm button.vh{background:var(--hov)}#pwm button svg{width:18px;height:18px;flex:none;fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
+#slp{position:fixed;inset:0;z-index:99996;background:#000;opacity:0;visibility:hidden;transition:opacity .7s ease,visibility 0s .7s;cursor:none}
+#slp.on{opacity:1;visibility:visible;transition:opacity .7s ease}
+#lck{position:fixed;inset:0;z-index:99995;display:flex;flex-direction:column;align-items:center;justify-content:flex-end;padding-bottom:12vh;color:#fff;text-align:center;opacity:0;visibility:hidden;transition:opacity .45s ease,visibility 0s .45s;background:linear-gradient(rgba(0,0,0,.22),rgba(0,0,0,.4)),var(--wall);background-size:cover;background-position:center}
+#lck.on{opacity:1;visibility:visible;transition:opacity .45s ease}
+#lck .lt{font-size:min(96px,18vw);font-weight:300;line-height:1;letter-spacing:-.02em;text-shadow:0 4px 30px #0007;position:absolute;top:16vh;left:0;right:0}
+#lck .ld{font-size:20px;position:absolute;top:calc(16vh + min(104px,20vw));left:0;right:0;text-shadow:0 2px 12px #0007}
+#lck .lh{font-size:13px;opacity:.85;padding:9px 18px;border-radius:999px;background:#ffffff26;backdrop-filter:blur(8px);animation:lckp 2.4s ease-in-out infinite}@keyframes lckp{50%{opacity:.45}}
+body.perf #lck .lh{backdrop-filter:none;animation:none}
+#srchBtn .ico svg{width:60%;height:60%}
 </style><!--NEXOS-END--></head><body class="booting"><div id="boot"><!--NEXOS-START--><div id="nxb"><svg viewBox="0 0 512 512"><defs><linearGradient id="g" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#22d3ee"/><stop offset="1" stop-color="#8b5cf6"/></linearGradient></defs><path class="p" pathLength="100" d="M168 368V144l176 224V144" fill="none" stroke="url(#g)" stroke-width="40" stroke-linecap="round" stroke-linejoin="round"/></svg><h1>NEXOS</h1><div class="bar"><i></i></div></div><!--NEXOS-END--><svg class="bl" viewBox="0 0 1024 1024"><path d="M262 800C340 560 430 380 512 214" stroke="url(#gl)" stroke-width="156" stroke-linecap="round" fill="none" opacity="0.1"/><path d="M762 800C684 560 594 380 512 214" stroke="url(#gr)" stroke-width="156" stroke-linecap="round" fill="none" opacity="0.1"/><path d="M262 800C340 560 430 380 512 214" stroke="url(#gl)" stroke-width="124" stroke-linecap="round" fill="none" opacity="0.14"/><path d="M762 800C684 560 594 380 512 214" stroke="url(#gr)" stroke-width="124" stroke-linecap="round" fill="none" opacity="0.14"/><path d="M262 800C340 560 430 380 512 214" stroke="url(#gl)" stroke-width="96" stroke-linecap="round" fill="none"/><path d="M762 800C684 560 594 380 512 214" stroke="url(#gr)" stroke-width="96" stroke-linecap="round" fill="none"/><path d="M352 640C420 584 462 704 512 640S604 584 672 640" stroke="url(#gw)" stroke-width="44" stroke-linecap="round" fill="none"/><g fill="#e0f2fe"><circle cx="812" cy="262" r="13"/><circle cx="226" cy="318" r="9"/><circle cx="716" cy="140" r="7"/></g></svg><div class="bd"><i></i><i></i><i></i></div></div><div id="shut"><svg class="lg" viewBox="0 0 1024 1024"><path d="M262 800C340 560 430 380 512 214" stroke="url(#gl)" stroke-width="156" stroke-linecap="round" fill="none" opacity="0.1"/><path d="M762 800C684 560 594 380 512 214" stroke="url(#gr)" stroke-width="156" stroke-linecap="round" fill="none" opacity="0.1"/><path d="M262 800C340 560 430 380 512 214" stroke="url(#gl)" stroke-width="124" stroke-linecap="round" fill="none" opacity="0.14"/><path d="M762 800C684 560 594 380 512 214" stroke="url(#gr)" stroke-width="124" stroke-linecap="round" fill="none" opacity="0.14"/><path d="M262 800C340 560 430 380 512 214" stroke="url(#gl)" stroke-width="96" stroke-linecap="round" fill="none"/><path d="M762 800C684 560 594 380 512 214" stroke="url(#gr)" stroke-width="96" stroke-linecap="round" fill="none"/><path d="M352 640C420 584 462 704 512 640S604 584 672 640" stroke="url(#gw)" stroke-width="44" stroke-linecap="round" fill="none"/><g fill="#e0f2fe"><circle cx="812" cy="262" r="13"/><circle cx="226" cy="318" r="9"/><circle cx="716" cy="140" r="7"/></g></svg><div class="slot"><div class="sm"><span>Shutting down</span><div class="bd"><i></i><i></i><i></i></div></div><button id="pw" aria-label="Power on"><svg viewBox="0 0 24 24"><path d="M12 3v8M6.6 6.8a8 8 0 1 0 10.8 0"/></svg></button></div><div class="hint">Tap to power on</div></div><script>(function(){var t0=Date.now(),d=0;function go(){if(d)return;d=1;var b=document.getElementById("boot");document.body.classList.remove("booting");if(b){b.classList.add("out");setTimeout(function(){b.remove()},800)}}function chk(){setTimeout(go,Math.max(0,1700-(Date.now()-t0)))}if(document.readyState==="complete")chk();else addEventListener("load",chk);setTimeout(go,5000)})();</script>
 <svg width="0" height="0" style="position:absolute"><defs><linearGradient id="gs" x1="0" y1="0" x2="1" y2="1"><stop stop-color="#8f9bff"/><stop offset="1" stop-color="#c26bff"/></linearGradient><linearGradient id="gl" x1="0" y1="1" x2="1" y2="0"><stop stop-color="#34d399"/><stop offset="1" stop-color="#22d3ee"/></linearGradient><linearGradient id="gr" x1="1" y1="1" x2="0" y2="0"><stop stop-color="#a78bfa"/><stop offset="1" stop-color="#22d3ee"/></linearGradient><linearGradient id="gw" x1="0" y1="0" x2="1" y2="0"><stop stop-color="#5eead4"/><stop offset="1" stop-color="#c4b5fd"/></linearGradient></defs></svg>
 <div id="desk"><div id="icons"></div></div>
@@ -1147,7 +1183,7 @@ if(/^[a-z]:$/i.test(c)){if(c.toLowerCase()!=='c:')E('The system cannot find the 
 switch(c){
 case'help':case'?':HELP.forEach(T);break;
 case'cls':case'clear':out.innerHTML='';break;
-case'ver':T('');T('NexOS [Version 3.0.7 alpha]');T('');break;
+case'ver':T('');T('NexOS [Version 3.0.8 alpha]');T('');break;
 case'date':{const d=new Date();T('The current date is: '+['Sun','Mon','Tue','Wed','Thu','Fri','Sat'][d.getDay()]+' '+pad2(d.getMonth()+1)+'/'+pad2(d.getDate())+'/'+d.getFullYear());break}
 case'time':{const d=new Date();T('The current time is: '+pad2(d.getHours())+':'+pad2(d.getMinutes())+':'+pad2(d.getSeconds())+'.'+pad2(Math.floor(d.getMilliseconds()/10)));break}
 case'pwd':T(win(cwd));break;
@@ -1172,7 +1208,7 @@ if(line.trim()){hist.push(line);if(hist.length>100)hist.shift()}hi=hist.length;b
 else if(e.key==='ArrowUp'){e.preventDefault();if(hi>0){hi--;inp.value=hist[hi]}}
 else if(e.key==='ArrowDown'){e.preventDefault();if(hi<hist.length-1){hi++;inp.value=hist[hi]}else{hi=hist.length;inp.value=''}}};
 tm.onclick=()=>{if(!String(getSelection()))inp.focus()};
-T('NexOS [Version 3.0.7 alpha]');T('Commands run on the NexOS file system (C:\\ = internal storage). Type HELP.');T('');
+T('NexOS [Version 3.0.8 alpha]');T('Commands run on the NexOS file system (C:\\ = internal storage). Type HELP.');T('');
 prompt();setTimeout(()=>inp.focus(),380);
 }
 /* ---------- Task Manager (v3-p07) ---------- */
@@ -1225,8 +1261,8 @@ const kv=a=>a.map(([k,v])=>`<div class="kv"><span>${k}</span><b>${esc(String(v))
 const REPO='https://github.com/tewtone66-cmd/NexOS';
 const PGS={
 about(){const ua=navigator.userAgent,and=(/Android ([\d.]+)/.exec(ua)||[])[1]||'?',mod=(/;\s*([^;)]+?)\s+Build/.exec(ua)||/Android [\d.]+;\s*([^;)]+)/.exec(ua)||[])[1]||'Unknown',chr=(/Chrome\/([\d.]+)/.exec(ua)||[])[1]||'?';
-return `<h3>About</h3><div class="abh"><div class="abl">${STAR}</div><div><h2>NexOS</h2><p>Version 3.0.7 alpha</p></div></div>${kv([['Edition','NexOS Alpha'],['Version','3.0.0 (alpha)'],['Device',mod],['Android',and],['WebView (Chrome)',chr],['Screen',innerWidth+' × '+innerHeight+' (UI '+Math.round(S.ui*100)+'%)'],['CPU cores',navigator.hardwareConcurrency||'?'],['Memory',navigator.deviceMemory?'≥ '+navigator.deviceMemory+' GB':'?'],['Storage access',granted===null?'…':granted?'Allowed':'Not allowed']])}<h4>Update</h4>${kv([['Channel','Alpha'],['Installed version','3.0.7 alpha'],['Updates','Installed manually from GitHub']])}<button class="pgb" data-k="go" data-v="${REPO}">Open GitHub</button><h4>What is new in 3.0.0</h4><ul><li>New virtual mouse with cursor states and motion blur</li><li>New taskbar and Start menu with search</li><li>Recycle Bin that really keeps deleted items</li><li>Settings with categories and search</li></ul>`},
-update(){return `<h3>Update</h3>${kv([['Channel','Alpha'],['Installed version','3.0.7 alpha'],['Status','Updates are installed manually: rebuild the app from GitHub']])}<button class="pgb" data-k="go" data-v="${REPO}">Open GitHub</button>`},
+return `<h3>About</h3><div class="abh"><div class="abl">${STAR}</div><div><h2>NexOS</h2><p>Version 3.0.8 alpha</p></div></div>${kv([['Edition','NexOS Alpha'],['Version','3.0.0 (alpha)'],['Device',mod],['Android',and],['WebView (Chrome)',chr],['Screen',innerWidth+' × '+innerHeight+' (UI '+Math.round(S.ui*100)+'%)'],['CPU cores',navigator.hardwareConcurrency||'?'],['Memory',navigator.deviceMemory?'≥ '+navigator.deviceMemory+' GB':'?'],['Storage access',granted===null?'…':granted?'Allowed':'Not allowed']])}<h4>Update</h4>${kv([['Channel','Alpha'],['Installed version','3.0.8 alpha'],['Updates','Installed manually from GitHub']])}<button class="pgb" data-k="go" data-v="${REPO}">Open GitHub</button><h4>What is new in 3.0.0</h4><ul><li>New virtual mouse with cursor states and motion blur</li><li>New taskbar and Start menu with search</li><li>Recycle Bin that really keeps deleted items</li><li>Settings with categories and search</li></ul>`},
+update(){return `<h3>Update</h3>${kv([['Channel','Alpha'],['Installed version','3.0.8 alpha'],['Status','Updates are installed manually: rebuild the app from GitHub']])}<button class="pgb" data-k="go" data-v="${REPO}">Open GitHub</button>`},
 display(){return `<h3>Display & size</h3><h4>App size (whole interface)</h4><div class="step"><button data-k="ui" data-v="-1">&#8722;</button><b>${Math.round(S.ui*100)}%</b><button data-k="ui" data-v="1">+</button><button data-k="ui" data-v="0">Reset</button></div><h4>Desktop icon size</h4>${chips('is',[36,48,60,72],S.is,v=>({36:'Small',48:'Medium',60:'Large',72:'Extra large'})[v])}`},
 storage(){return `<h3>Storage</h3><h4>Access to your files</h4><div class="seg"><button data-k="perm" class="${granted?'sel':''}">${granted===null?'Checking…':granted?'Allowed':'Allow access to files'}</button></div>`},
 bg(){return `<h3>Background</h3><div class="walls">${WALL.map((g,i)=>`<button data-k="wall" data-v="${i}" class="${!S.wc&&i===S.wall?'sel':''}" style="background:${g}"></button>`).join('')}</div><h4>Solid color</h4><div class="sw">${['#0b1d3a','#111827','#1f3b2d','#3b1f3a','#3a2a1f','#475569','#e5e7eb'].map(c=>`<button data-k="wc" data-v="${c}" class="${S.wc===c?'sel':''}" style="background:${c}"></button>`).join('')}</div>`},
@@ -1670,5 +1706,108 @@ appMusic=function(w,arg){var B=w.body;MU.w=w;
  w.open(arg)};
 var _cm=closeMenus;closeMenus=function(){if(MU.card)MU.card.classList.remove('on');return _cm.apply(this,arguments)};
 if(MU.list.length)muUI(true);
+}catch(e){try{console.error(e)}catch(x){}}})();
+</script><script>/* START-3.0.8 */
+(function(){try{
+var st=$('#start'),q=$('#sq'),res=$('#sres'),dock=$('#dock'),sbtn=$('#startBtn');
+var FL='all',SEL=0,lastFiles=[],fTok=0,fTm=0,fBusy=false;
+var HIDE={about:1,dl:1,exew:1,win:1,inst:1};
+var SETS=[['About','about','version device info system'],['Update','update','version alpha channel'],['Display & size','display','interface scale app size desktop icon size'],['Storage','storage','files permission access'],['Background','bg','wallpaper solid color'],['Colors','color','theme dark light accent'],['Taskbar','task','icon size transparency magnify clock pinned shape layout tray previews'],['Mouse','mouse','pointer size color speed scroll motion blur cursor virtual hold to drag'],['Browser','browser','search engine page size']];
+var SV=function(p,c){return '<div class="gi" style="background:'+c+'"><svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">'+p+'</svg></div>'};
+var G={act:SV('<path d="M12 3v8"/><path d="M6.4 6.6a8 8 0 1 0 11.2 0"/>','#64748b'),file:SV('<path d="M14 3H7a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V8z"/><path d="M14 3v5h5"/>','#3b82f6'),dir:SV('<path d="M3 7a2 2 0 0 1 2-2h4l2 2h8a2 2 0 0 1 2 2v8a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/>','#f59e0b'),web:SV('<circle cx="12" cy="12" r="9"/><path d="M3 12h18M12 3a14 14 0 0 1 0 18M12 3a14 14 0 0 0 0 18"/>','#10b981')};
+var tl=function(id){return '<div class="t">'+tile(id)+'</div>'};
+var IP={lock:'<rect x="4" y="11" width="16" height="10" rx="2"/><path d="M8 11V8a4 4 0 0 1 8 0v3"/>',sleep:'<path d="M21 13A9 9 0 1 1 11 3a7 7 0 0 0 10 10z"/>',restart:'<path d="M20 11a8 8 0 1 0-2.3 5.7"/><path d="M20 4v7h-7"/>',shut:'<path d="M12 3v9"/><path d="M6.4 6.6a8 8 0 1 0 11.2 0"/>'};
+var ico=function(k){return '<svg viewBox="0 0 24 24">'+IP[k]+'</svg>'};
+
+/* ---------- lock + sleep ---------- */
+var slp=h('div','','');slp.id='slp';
+var lck=h('div','','<div class="lt"></div><div class="ld"></div><div class="lh">Click or press any key to unlock</div>');lck.id='lck';
+document.body.appendChild(slp);document.body.appendChild(lck);
+var lt=0;
+function lckTick(){var d=new Date();lck.querySelector('.lt').textContent=d.toLocaleTimeString([],{hour:'2-digit',minute:'2-digit'});lck.querySelector('.ld').textContent=d.toLocaleDateString([],{weekday:'long',month:'long',day:'numeric'})}
+function doLock(){closeMenus();try{lck.style.setProperty('--wall',$('#desk').style.getPropertyValue('--wall'))}catch(e){}lckTick();clearInterval(lt);lt=setInterval(lckTick,1000);lck.classList.add('on');sync()}
+function unlock(){if(!lck.classList.contains('on'))return;lck.classList.remove('on');clearInterval(lt);lt=0;setTimeout(sync,480)}
+function doSleep(){closeMenus();try{MU.au.pause()}catch(e){}slp.classList.add('on');sync()}
+function wake(){if(!slp.classList.contains('on'))return;slp.classList.remove('on');setTimeout(sync,720)}
+lck.addEventListener('pointerdown',function(e){e.preventDefault();unlock()});
+slp.addEventListener('pointerdown',function(e){e.preventDefault();wake()});
+addEventListener('keydown',function(e){if(lck.classList.contains('on')){e.preventDefault();e.stopPropagation();unlock()}else if(slp.classList.contains('on')){e.preventDefault();e.stopPropagation();wake()}},true);
+window.doLock=doLock;window.doSleep=doSleep;
+
+/* ---------- start layout ---------- */
+q.placeholder='Search for apps, settings, files and the web';
+var fl=h('div','sflt','<button data-f="all" class="on">All</button><button data-f="apps">Apps</button><button data-f="settings">Settings</button><button data-f="files">Files</button><button data-f="web">Web</button>');
+st.insertBefore(fl,res);
+var h3=st.querySelector('#sbody h3');if(h3)h3.textContent='Pinned';
+var pins=$('#pins'),rh=h('h3','','Recent'),rc=h('div','','');rh.style.marginTop='12px';rc.id='rcnt';pins.parentNode.insertBefore(rh,pins.nextSibling);rh.parentNode.insertBefore(rc,rh.nextSibling);
+var ft=st.querySelector('.sfoot'),keep=h('span','','');keep.style.display='none';keep.appendChild($('#rst'));keep.appendChild($('#off'));
+ft.innerHTML='';ft.appendChild(h('span','usr','<i>N</i><b>NexOS</b>'));ft.appendChild(h('span','','<button id="pwb" aria-label="Power" title="Power">'+ico('shut')+'</button>'));ft.appendChild(keep);
+var pm=h('div','','<button data-p="lock">'+ico('lock')+'Lock</button><button data-p="sleep">'+ico('sleep')+'Sleep</button><button data-p="restart">'+ico('restart')+'Restart</button><button data-p="shut">'+ico('shut')+'Shut down</button>');pm.id='pwm';st.appendChild(pm);
+$('#pwb').addEventListener('click',function(e){e.stopPropagation();pm.classList.toggle('on')});
+pm.addEventListener('click',function(e){e.stopPropagation();var b=e.target.closest('[data-p]');if(!b)return;var k=b.dataset.p;closeMenus();if(k==='lock')doLock();else if(k==='sleep')doSleep();else if(k==='restart')doRestart();else doShut()});
+st.addEventListener('click',function(e){if(!e.target.closest('#pwm,#pwb'))pm.classList.remove('on')});
+
+/* ---------- recent ---------- */
+function recent(){try{var a=JSON.parse(ls('aur.recent')||'[]');return Array.isArray(a)?a.filter(function(i){return A[i]&&!HIDE[i]&&i!=='trash'}):[]}catch(e){return[]}}
+function drawRecent(){var a=recent().slice(0,6);rc.innerHTML='';a.forEach(function(id){var b=h('button','',tl(id)+'<span></span>');b.querySelector('span').textContent=A[id].n;b.onclick=function(){openApp(id)};rc.appendChild(b)});rh.style.display=rc.style.display=a.length?'':'none'}
+var _oa=openApp;openApp=function(id){var r=_oa.apply(this,arguments);try{if(A[id]&&!HIDE[id]&&id!=='trash'){var a=recent().filter(function(x){return x!==id});a.unshift(id);ls('aur.recent',JSON.stringify(a.slice(0,8)));drawRecent()}}catch(e){}return r};
+drawRecent();
+
+/* ---------- search ---------- */
+function openFile(it){var e=(it.name.split('.').pop()||'').toLowerCase(),p=it.path,a={path:p,list:[p]};
+ if(it.isDirectory)openApp('files',p);
+ else if(/^(jpe?g|png|gif|webp|bmp|svg)$/.test(e))openApp('photos',a);
+ else if(/^(mp4|mkv|webm|avi|mov|3gp|m4v)$/.test(e))openApp('media',a);
+ else if(/^(mp3|m4a|aac|wav|flac|ogg|opus)$/.test(e))openApp('music',a);
+ else if(/^(txt|md|log|ini|cfg|csv)$/.test(e))openApp('notes',{path:p});
+ else if(/^(js|json|html?|css|java|kt|py|xml|sh|bat|c|cpp|h|ts)$/.test(e))openApp('code',{path:p});
+ else if(/^(zip|rar|7z)$/.test(e))openApp('zip',{path:p});
+ else if(e==='exe'&&window.aurora&&aurora.openExe)aurora.openExe(p);
+ else if(NF)NF.open({path:p,mimeType:it.mimeType}).catch(function(){})}
+function fileItem(it){var par=(it.path||'').split('/').slice(-2,-1)[0]||'';return{ic:it.isDirectory?G.dir:G.file,lb:it.name,tag:par,fn:function(){openFile(it)}}}
+function collect(raw){var ql=raw.toLowerCase(),o={calc:null,apps:[],sets:[],acts:[],web:[]};
+ if(/^[\d\s+\-*/().%]+$/.test(raw)&&/\d/.test(raw)&&/[+\-*/%]/.test(raw)){try{var v=Function('"use strict";return ('+raw.replace(/%/g,'/100')+')')();if(typeof v==='number'&&isFinite(v))o.calc={ic:tl('calc'),lb:'= '+(+v.toFixed(10)),tag:'Calculator',fn:function(){openApp('calc')}}}catch(e){}}
+ var rk=function(n){n=n.toLowerCase();return n===ql?0:n.indexOf(ql)===0?1:2};
+ Object.keys(A).filter(function(id){return !HIDE[id]&&A[id].n.toLowerCase().indexOf(ql)>-1}).sort(function(a,b){return rk(A[a].n)-rk(A[b].n)}).forEach(function(id){o.apps.push({ic:tl(id),lb:A[id].n,tag:'App',fn:function(){openApp(id)}})});
+ SETS.filter(function(x){return(x[0]+' '+x[2]).toLowerCase().indexOf(ql)>-1}).sort(function(a,b){return rk(a[0])-rk(b[0])}).forEach(function(x){o.sets.push({ic:tl('set'),lb:x[0],tag:'Settings',fn:function(){openApp('set',x[1])}})});
+ var cm=startCmds().filter(function(c){return c[0]!=='Settings'});[['Lock',doLock],['Sleep',doSleep]].forEach(function(c){cm.push(c)});
+ cm.filter(function(c){return c[0].toLowerCase().indexOf(ql)>-1}).forEach(function(c){o.acts.push({ic:G.act,lb:c[0],tag:'Action',fn:c[1]})});
+ if(/^\S+\.[a-z]{2,}(\/\S*)?$/i.test(raw))o.web.push({ic:G.web,lb:'Open '+raw,tag:'Web',fn:function(){openApp('browser',/^https?:/i.test(raw)?raw:'https://'+raw)}});
+ o.web.push({ic:G.web,lb:'Search the web for "'+raw+'"',tag:'Web',fn:function(){openApp('browser',(SE[S.se]||SE.google)[1]+encodeURIComponent(raw))}});
+ return o}
+function sec(title,arr,big){if(!arr.length)return;var hd=h('h4','','');hd.textContent=title;res.appendChild(hd);arr.forEach(function(it){var b=h('button','sr'+(big?' bm':''),it.ic+'<span></span><small></small>');b.querySelector('span').textContent=it.lb;b.querySelector('small').textContent=it.tag;b.onclick=function(){closeMenus();it.fn()};res.appendChild(b)})}
+function rows(){return[].slice.call(res.querySelectorAll('.sr'))}
+function select(i){var r=rows();if(!r.length){SEL=-1;return}SEL=Math.max(0,Math.min(r.length-1,i));r.forEach(function(b,k){b.classList.toggle('sel',k===SEL)});try{r[SEL].scrollIntoView({block:'nearest'})}catch(e){}}
+function render(keepSel){var raw=q.value.trim(),prev=SEL;if(!raw){st.classList.remove('q');return}st.classList.add('q');res.innerHTML='';var o=collect(raw),F=FL,n=0;
+ if(F==='all'){var best=o.calc||o.apps[0]||o.sets[0]||o.acts[0]||null;if(best)sec('Best match',[best],true);
+  var not=function(x){return x!==best};sec('Apps',o.apps.filter(not));sec('Settings',o.sets.filter(not));sec('Actions',o.acts.filter(not))}
+ else if(F==='apps')sec('Apps',o.apps);else if(F==='settings')sec('Settings',o.sets);
+ if(F==='all'||F==='files'){if(lastFiles.length)sec('Files',lastFiles);else if(fBusy&&raw.length>=2){var hd=h('h4','','');hd.textContent='Files · searching…';res.appendChild(hd)}}
+ if(F==='all'||F==='web')sec('Web',o.web);
+ if(!rows().length){var e=h('div','sem','');e.textContent=F==='files'?(fBusy?'Searching…':'No files found'):'No results';res.appendChild(e)}
+ select(keepSel?prev:0)}
+function fileSearch(raw){clearTimeout(fTm);lastFiles=[];fBusy=false;var t=++fTok;if(!NF||raw.length<2)return;fBusy=true;
+ fTm=setTimeout(function(){NF.search({path:'',q:raw,max:40}).then(function(r){if(t!==fTok||q.value.trim()!==raw)return;lastFiles=((r&&r.items)||[]).slice(0,10).map(fileItem);fBusy=false;render(true)}).catch(function(){if(t===fTok){fBusy=false;render(true)}})},350)}
+q.oninput=function(){var raw=q.value.trim();if(!raw){fTok++;lastFiles=[];fBusy=false;st.classList.remove('q');return}fileSearch(raw);render(false)};
+q.onkeydown=function(e){var k=e.key;if(k==='Enter'){var r=rows();if(r[SEL])r[SEL].click();else if(r[0])r[0].click()}else if(k==='ArrowDown'){e.preventDefault();select(SEL+1)}else if(k==='ArrowUp'){e.preventDefault();select(SEL-1)}else if(k==='Escape'){if(q.value){e.stopPropagation();q.value='';q.oninput()}else closeMenus()}};
+fl.addEventListener('click',function(e){var b=e.target.closest('[data-f]');if(!b)return;e.stopPropagation();FL=b.dataset.f;fl.querySelectorAll('button').forEach(function(x){x.classList.toggle('on',x===b)});render(false);try{q.focus({preventScroll:true})}catch(x){}});
+
+/* ---------- close handling ---------- */
+var _cm=closeMenus;closeMenus=function(){pm.classList.remove('on');FL='all';fTok++;lastFiles=[];fBusy=false;fl.querySelectorAll('button').forEach(function(x){x.classList.toggle('on',x.dataset.f==='all')});return _cm.apply(this,arguments)};
+sbtn.addEventListener('click',function(){drawRecent()});
+
+/* ---------- taskbar search button ---------- */
+var sb=h('button','dk','');sb.id='srchBtn';sb.setAttribute('aria-label','Search');
+sb.innerHTML='<div class="ico" style="--g:linear-gradient(150deg,#2563eb,#7c3aed)">'+P('<g fill="none" stroke="#fff" stroke-width="2.4" stroke-linecap="round"><circle cx="10.5" cy="10.5" r="5.6"/><path d="M15 15l5.2 5.2"/></g>')+'</div>';
+dock.insertBefore(sb,sbtn.nextSibling);
+function openSearch(){closeMenus();st.classList.add('show');menuOpen=true;sync();drawRecent();setTimeout(function(){try{q.focus({preventScroll:true})}catch(x){q.focus()}try{kbShow(q)}catch(x){}},90)}
+sb.addEventListener('click',function(e){e.stopPropagation();var was=st.classList.contains('show')&&document.activeElement===q;if(was){closeMenus();return}openSearch()});
+window.openSearch=openSearch;
+
+/* ---------- right-click / long-press on Start (power user menu) ---------- */
+function pmenu(){var it=[['Search',openSearch],['File Explorer',function(){openApp('files')}],['Terminal',function(){openApp('term')}],['Task Manager',function(){openApp('taskmgr')}],['Settings',function(){openApp('set')}],null,['Lock',doLock],['Sleep',doSleep],['Restart',doRestart],['Shut down',doShut]];
+ var r=sbtn.getBoundingClientRect(),hh=it.reduce(function(a,i){return a+(i?36:9)},10);ctx(Math.max(4,r.left),Math.max(4,r.top-hh-8),it)}
+sbtn.addEventListener('contextmenu',function(e){e.preventDefault();e.stopPropagation();pmenu()});
+if(typeof onLong==='function')onLong(sbtn,function(){pmenu()});
 }catch(e){try{console.error(e)}catch(x){}}})();
 </script><!--NEXOS-END--></body></html>
