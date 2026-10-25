@@ -1,0 +1,18 @@
+93d6c30 3.2.6: terminal
+Installed version','3.2.6'
+46:#cur svg{display:block;width:100%;height:100%}#cur{position:fixed;left:0;top:0;width:26px;height:28px;z-index:9600;pointer-events:none;display:none;filter:drop-shadow(0 2px 3px #0008);will-change:transform}body.vm #cur{display:block}
+164:#cur.grab svg{transform:scale(.9);transform-origin:0 0}#cur.grab svg path{fill:var(--acc)}
+296:#cur.c-arrow .sa,#cur.c-hand .sh,#cur.c-ibeam .si,#cur.c-busy .sb{display:block}
+593:#cur.c-ew .sew,#cur.c-ns .sns,#cur.c-nwse .snwse,#cur.c-nesw .snesw,#cur.c-move .smove,#cur.c-grab .sgrab,#cur.c-grabbing .sgg,#cur.c-no .sno{display:block}
+596:#cur.grab .sr{transform:translate(-50%,-50%) scale(.9);transform-origin:50% 50%}
+796:<div id="cur" class="c-arrow"><svg width="0" height="0" style="position:absolute"><defs><filter id="mbfl" x="-60%" y="-60%" width="220%" height="220%"><feGaussianBlur id="mbf" stdDeviation="0 0"/></filter></defs></svg><svg class="cs sa" viewBox="0 0 26 28"
+849:const S={wall:+ls('aur.wall')||0,theme:ls('aur.theme')||'auto',acc:ls('aur.acc')||ACC[0],sp:+ls('aur.sp2')||1.6,se:SE[ls('aur.se')]?ls('aur.se'):'google',ms:(v=>v>=.3&&v<=3?v:.6)(+ls('aur.ms2')),ui:(v=>v>=.5&&v<=1.5?v:.8)(+ls('aur.ui')),hd:(v=>[100,300,500
+1020:function ev(t,type,o){const p=type.startsWith('pointer');t.dispatchEvent(new(p?PointerEvent:MouseEvent)(type,Object.assign({bubbles:true,cancelable:true,composed:true,view:window,clientX:VM.x,clientY:VM.y,button:0,buttons:0},p?{pointerId:99,pointerType:'m
+2370:async function pushCursor(){if(!NW||!NW.setExeCursor)return;const sa=document.querySelector('#cur .sa');if(!sa)return;const cs=getComputedStyle(curEl),cf=(cs.getPropertyValue('--cf')||'').trim()||'#fff',ck=(cs.getPropertyValue('--cs')||'').trim()||'#111',
+2373:const c=document.createElement('canvas');c.width=W2*k;c.height=H2*k;c.getContext('2d').drawImage(img,0,0);await NW.setExeCursor({png:c.toDataURL('image/png'),w:W2,h:H2,vw:innerWidth})}
+2376:function appExe(w,arg){w.path=(arg&&arg.path)||'';w.setTitle(String(w.path).split('/').pop()||'Program');
+2394:const push=fin=>{if(!w.owns||!W[w.id]||w.el.classList.contains('min')||w.el.classList.contains('minning'))return;let r;try{r=exeRect(w)}catch(e){return}const k=[r.x|0,r.y|0,r.w|0,r.h|0].join();if(k===last&&!fin)return;last=k;NW.setExeRect(r).catch(()=>{})
+2396:let vis=true;const vi=setInterval(()=>{if(!w.owns)return;const mn=w.el.classList.contains('min')||w.el.classList.contains('minning'),want=!mn&&topId===w.id&&!menuOpen&&!document.body.classList.contains('shutting')&&!document.body.classList.contains('bsod'
+2419:catch(e){if(ew&&W[ew.id]){ew.err=(e&&e.message)||'Could not start the program';ew.exeStatus(ew.err,true)}if(ew&&exeW===ew&&!ew.owns)exeW=null;reportErr(e,'openExe','Could not start the program')}
+2434:lw('progress',e=>{const t=e.step==='container'?'Creating Windows container…':'Installing Windows runtime… '+(e.pct|0)+'%';toast(t);if(exeW&&W[exeW.id]&&!exeW.owns){exeW.exeStatus(t);if(e.step==='container')exeW.exeStep(1,t);else if(e.step==='rootfs')exeW.
+2437:lw('exeExited',async e=>{const name=String(e.path||'').split('/').pop();const ew=exeW;instRun=!!(ew&&ew.inst);if(ew&&W[ew.id]){ew.owns=false;if(ew.err)ew.exeStatus(ew.err,true);else closeW(ew.id)}exeW=null;try{const r=await NW.getLastError();if(r&&r.error

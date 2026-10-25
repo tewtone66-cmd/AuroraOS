@@ -467,6 +467,11 @@ public class AuroraWinePlugin extends Plugin {
     private static volatile android.graphics.Bitmap cursorBmp;
     private static volatile int cursorW = 26, cursorH = 28;
     private static volatile boolean overlayOk = false;
+    // aurora-fill-3.2.7: Fill/Keep aspect + mouse injection state (set by cursorOverlay)
+    private static volatile boolean exeFill = true;
+    private static volatile Object xsRef;
+    private static volatile android.widget.FrameLayout fitRoot;
+    private static volatile int xsW = 0, xsH = 0;
     private final android.os.Handler bgH = new android.os.Handler(android.os.Looper.getMainLooper());
     private Runnable bgR;
 
@@ -488,6 +493,8 @@ public class AuroraWinePlugin extends Plugin {
             Object po = xs.getClass().getField("pointer").get(xs);
             if (!(po instanceof com.winlator.xserver.Pointer)) return;
             final com.winlator.xserver.Pointer pt = (com.winlator.xserver.Pointer) po;
+            xsRef = xs; fitRoot = root; xsW = sw; xsH = sh; // aurora-fill-3.2.7
+            if (!applyFit(root)) exeFill = true;
             final android.widget.ImageView iv = new android.widget.ImageView(a);
             iv.setImageBitmap(bmp);
             iv.setScaleType(android.widget.ImageView.ScaleType.FIT_XY);
@@ -499,13 +506,15 @@ public class AuroraWinePlugin extends Plugin {
                 @Override
                 public void doFrame(long t) {
                     if (a.isFinishing() || a.isDestroyed()) {
+                        fitRoot = null; xsRef = null;
                         overlayOk = false;
                         return;
                     }
                     int vw = root.getWidth(), vh = root.getHeight();
                     if (vw > 0 && vh > 0) {
-                        iv.setTranslationX(pt.getClampedX() * (float) vw / sw);
-                        iv.setTranslationY(pt.getClampedY() * (float) vh / sh);
+                        float[] fm = fitMap(vw, vh, sw, sh);
+                        iv.setTranslationX(fm[0] + pt.getClampedX() * fm[1]);
+                        iv.setTranslationY(fm[2] + pt.getClampedY() * fm[3]);
                     }
                     android.view.Choreographer.getInstance().postFrameCallback(this);
                 }
@@ -559,6 +568,144 @@ public class AuroraWinePlugin extends Plugin {
                 w.getDecorView().setVisibility(v ? android.view.View.VISIBLE : android.view.View.INVISIBLE);
             } catch (Throwable ignored) { }
             call.resolve();
+        });
+    }
+
+    /** aurora-fill-3.2.7: {offX, scaleX, offY, scaleY}: X-screen pixel -> pixel inside the program view. */
+    private static float[] fitMap(int vw, int vh, int sw, int sh) {
+        if (exeFill) return new float[]{0f, vw / (float) sw, 0f, vh / (float) sh};
+        float s = Math.min(vw / (float) sw, vh / (float) sh);
+        return new float[]{(vw - sw * s) / 2f, s, (vh - sh * s) / 2f, s};
+    }
+
+    /** Asks Winlator's renderer to stretch (Fill) or letterbox (Keep). Reflection: false when this build has no such switch. */
+    private static boolean applyFit(android.widget.FrameLayout root) {
+        try {
+            for (int i = 0; i < root.getChildCount(); i++) {
+                android.view.View c = root.getChildAt(i);
+                if (!c.getClass().getSimpleName().contains("XServerView")) continue;
+                Object rd = c.getClass().getMethod("getRenderer").invoke(c);
+                if (rd == null) return false;
+                java.lang.reflect.Method m = null;
+                for (java.lang.reflect.Method x : rd.getClass().getMethods()) {
+                    if (x.getName().equals("setFullscreen") && x.getParameterTypes().length == 1 && x.getParameterTypes()[0] == boolean.class) m = x;
+                }
+                if (m == null) return false;
+                m.invoke(rd, exeFill);
+                try { c.getClass().getMethod("requestRender").invoke(c); } catch (Throwable ignored) { }
+                return true;
+            }
+        } catch (Throwable ignored) { }
+        return false;
+    }
+
+    /** Calls a method of the X server by name (int args are converted to short/long when needed). */
+    private static boolean xCall(Object o, String name, Object... args) {
+        try {
+            for (java.lang.reflect.Method m : o.getClass().getMethods()) {
+                Class<?>[] pt = m.getParameterTypes();
+                if (!m.getName().equals(name) || pt.length != args.length) continue;
+                Object[] cv = new Object[args.length];
+                for (int i = 0; i < args.length; i++) {
+                    Object v = args[i];
+                    if (v instanceof Integer) {
+                        int n = (Integer) v;
+                        if (pt[i] == short.class) v = (short) n;
+                        else if (pt[i] == long.class) v = (long) n;
+                        else if (pt[i] == float.class) v = (float) n;
+                    }
+                    cv[i] = v;
+                }
+                m.invoke(o, cv);
+                return true;
+            }
+        } catch (Throwable ignored) { }
+        return false;
+    }
+
+    private static Object xButton(String name) {
+        try {
+            for (Object c : Class.forName("com.winlator.xserver.Pointer$Button").getEnumConstants()) {
+                if (c.toString().equals(name)) return c;
+            }
+        } catch (Throwable ignored) { }
+        return null;
+    }
+
+    private static boolean xClick(Object xs, String btn) {
+        Object b = xButton(btn);
+        return b != null && xCall(xs, "injectPointerButtonPress", b) && xCall(xs, "injectPointerButtonRelease", b);
+    }
+
+    /** {fill}: Fill (stretch, no black bars) or Keep aspect. Resolves {ok}; ok=false = this Wine build cannot do Keep. */
+    @PluginMethod
+    public void setExeFit(final PluginCall call) {
+        Boolean f = call.getBoolean("fill", true);
+        exeFill = f == null || f;
+        final android.widget.FrameLayout root = fitRoot;
+        final Activity a = curActivity;
+        if (root == null || a == null) {
+            JSObject o = new JSObject();
+            o.put("ok", true);
+            call.resolve(o);
+            return;
+        }
+        a.runOnUiThread(() -> {
+            boolean ok = applyFit(root);
+            if (!ok) exeFill = true;
+            JSObject o = new JSObject();
+            o.put("ok", ok || exeFill);
+            call.resolve(o);
+        });
+    }
+
+    /**
+     * Virtual mouse -> Wine. {a: move|hover|down|up|rclick|scroll, x, y (CSS px inside the program rect), rw, rh (rect size, CSS px), dy}.
+     * Moves the X pointer and presses/releases buttons on the X server (same path as a finger). Resolves {ok:false} when the server has no such calls.
+     */
+    @PluginMethod
+    public void exePointer(final PluginCall call) {
+        final Activity a = curActivity;
+        final Object xs = xsRef;
+        final android.widget.FrameLayout root = fitRoot;
+        if (a == null || xs == null || root == null || xsW <= 0 || xsH <= 0) {
+            call.resolve();
+            return;
+        }
+        final String act = call.getString("a", "move");
+        final double x = call.getDouble("x", 0.0), y = call.getDouble("y", 0.0);
+        final double rw = call.getDouble("rw", 0.0), rh = call.getDouble("rh", 0.0);
+        final double dy = call.getDouble("dy", 0.0);
+        a.runOnUiThread(() -> {
+            boolean ok = true;
+            try {
+                int vw = root.getWidth(), vh = root.getHeight();
+                if (vw > 0 && vh > 0 && rw > 0 && rh > 0) {
+                    float[] fm = fitMap(vw, vh, xsW, xsH);
+                    int px = (int) Math.round((x / rw * vw - fm[0]) / fm[1]);
+                    int py = (int) Math.round((y / rh * vh - fm[2]) / fm[3]);
+                    px = Math.max(0, Math.min(xsW - 1, px));
+                    py = Math.max(0, Math.min(xsH - 1, py));
+                    if (!"scroll".equals(act)) ok = xCall(xs, "injectPointerMove", px, py);
+                    if ("down".equals(act)) {
+                        Object b = xButton("BUTTON_LEFT");
+                        ok = ok && b != null && xCall(xs, "injectPointerButtonPress", b);
+                    } else if ("up".equals(act)) {
+                        Object b = xButton("BUTTON_LEFT");
+                        ok = ok && b != null && xCall(xs, "injectPointerButtonRelease", b);
+                    } else if ("rclick".equals(act)) {
+                        ok = ok && xClick(xs, "BUTTON_RIGHT");
+                    } else if ("scroll".equals(act) && dy != 0) {
+                        int n = (int) Math.max(1, Math.min(6, Math.round(Math.abs(dy) / 40.0)));
+                        for (int i = 0; i < n && ok; i++) ok = xClick(xs, dy > 0 ? "BUTTON_SCROLL_DOWN" : "BUTTON_SCROLL_UP");
+                    }
+                }
+            } catch (Throwable e) {
+                ok = false;
+            }
+            JSObject o = new JSObject();
+            o.put("ok", ok);
+            call.resolve(o);
         });
     }
 
@@ -862,7 +1009,7 @@ public class AuroraWinePlugin extends Plugin {
         final JSObject data = call.getData();
         getActivity().runOnUiThread(() -> {
             int[] r = rectToScreen(data);
-            if (r != null) queueRect(r);
+            if (r != null) applyRect(curActivity, r); // aurora-fill-3.2.7: apply at once (JS already sends one per frame)
             call.resolve();
         });
     }

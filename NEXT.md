@@ -37,3 +37,7 @@
 
 ## بعد از v3.2.6
 Claude Code واقعی داخل شبیه‌ساز اجرا نمیشه (برنامه‌ی واقعی Node/ویندوز لازم داره): از Termux (pkg install nodejs; npm i -g @anthropic-ai/claude-code) استفاده شود. اگر خطای شبکه ادامه داشت، متن داخل پرانتز خطا را بفرست.
+
+## Done in 3.2.7
+- Exe: virtual mouse reaches Wine, Fill/Keep aspect, rAF rect sync. Only phone-testable. Not done: moving Wine into the main Activity (high risk), clipping the exe window behind other Aurora windows (currently it is hidden completely when another window is on top), cursor shapes other than the arrow inside Wine.
+

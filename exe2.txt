@@ -1,0 +1,43 @@
+function ev(t,type,o){const p=type.startsWith('pointer');t.dispatchEvent(new(p?PointerEvent:MouseEvent)(type,Object.assign({bubbles:true,cancelable:true,composed:true,view:window,clientX:VM.x,clientY:VM.y,button:0,buttons:0},p?{pointerId:99,pointerType:'mouse',isPrimary:true}:{},o||{})))}
+/* ---------- download window (Windows-style green progress bar) ---------- */
+window.aurora=window.aurora||{};
+let wineBusy=false;
+let exeW=null;
+async function pushCursor(){if(!NW||!NW.setExeCursor)return;const sa=document.querySelector('#cur .sa');if(!sa)return;const cs=getComputedStyle(curEl),cf=(cs.getPropertyValue('--cf')||'').trim()||'#fff',ck=(cs.getPropertyValue('--cs')||'').trim()||'#111',sw=(typeof S!=='undefined'&&S.ms)||1,W2=Math.round(26*sw),H2=Math.round(28*sw),k=2;
+const svg='<svg xmlns="http://www.w3.org/2000/svg" width="'+W2*k+'" height="'+H2*k+'" viewBox="0 0 26 28"><style>path{fill:'+cf+';stroke:'+ck+'}</style>'+sa.innerHTML+'</svg>';
+const img=new Image();await new Promise((ok,no)=>{img.onload=ok;img.onerror=no;img.src='data:image/svg+xml;charset=utf-8,'+encodeURIComponent(svg)});
+const c=document.createElement('canvas');c.width=W2*k;c.height=H2*k;c.getContext('2d').drawImage(img,0,0);await NW.setExeCursor({png:c.toDataURL('image/png'),w:W2,h:H2,vw:innerWidth})}
+let instRun=false;
+const exeRect=w=>{const r=w.body.getBoundingClientRect(),o=w.inst?8:0;let hh=r.height-o;try{const dk=$('#dock'),d=dk&&dk.getBoundingClientRect();if(d&&d.height>0&&d.top<innerHeight-2&&d.top>r.top+64&&d.left<r.right&&d.right>r.left&&r.top+r.height>d.top)hh=d.top-r.top-o}catch(e){}return{x:r.left,y:r.top+o,w:r.width,h:Math.max(64,hh),vw:innerWidth,vh:innerHeight}};
+function appExe(w,arg){w.path=(arg&&arg.path)||'';w.setTitle(String(w.path).split('/').pop()||'Program');
+if(!$('#exestyle')){const st=h('style');st.id='exestyle';st.textContent='@keyframes exspin{to{transform:rotate(360deg)}}';document.head.appendChild(st)}
+const u=h('div','exes','<div class="exsp" style="width:30px;height:30px;border:3px solid #ffffff33;border-top-color:#60a5fa;border-radius:50%;animation:exspin 1s linear infinite"></div><div class="ext" style="font-size:14px;white-space:pre-wrap;max-width:92%;word-break:break-word"></div><button class="ib pri exb" style="display:none">Close</button>');
+u.style.cssText='position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:12px;background:#111827;color:#fff;text-align:center;padding:16px;overflow:auto;box-sizing:border-box';
+w.body.appendChild(u);
+{/* EXE-3.0.9 progress card */const card=h('div','exc','<div class="exh"><b></b><span>Windows program</span></div><ol class="exst"><li><i></i>Download runtime</li><li><i></i>Install</li><li><i></i>Setup</li><li><i></i>Open window</li></ol><div class="exbar"><i></i></div><div class="exsub"></div>');
+$('.exh b',card).textContent=String(w.path).split('/').pop()||'Program';
+u.insertBefore(card,$('.ext',u));
+const lis=[...card.querySelectorAll('li')],bar=$('.exbar i',card),sub=$('.exsub',card);
+w.exeSub=t=>{sub.textContent=t==null?'':String(t)};
+w.exeStep=(i,t,f)=>{w.exst=i;lis.forEach((l,k)=>{l.classList.toggle('done',k<i);l.classList.toggle('act',k===i)});bar.style.width=Math.min(100,Math.round((Math.min(i,4)+(f>0&&f<1?f:0))/4*100))+'%';if(t!=null)sub.textContent=String(t)};
+w.exeStep(0,'')}
+{const nm=String(w.path).split('/').pop();w.inst=/(setup|install)/i.test(nm)&&!/unins/i.test(nm);if(w.inst){u.classList.add('inst');w.setTitle('Installing '+nm);w.body.appendChild(h('div','exinst','<i></i>'))}}
+$('.exb',u).onclick=()=>closeW(w.id);
+w.exeStatus=(t,err)=>{u.classList.toggle('exerr',!!err);$('.ext',u).textContent=t;if(!err&&w.exeSub)w.exeSub(t);$('.exsp',u).style.display=err?'none':'';$('.exb',u).style.display=err?'':'none';u.style.display='flex'};
+w.exeHide=()=>{u.style.display='none'};
+w.exeStatus('Starting…');
+let last='',t1=0,wasMin=false;
+const push=fin=>{if(!w.owns||!W[w.id]||w.el.classList.contains('min')||w.el.classList.contains('minning'))return;let r;try{r=exeRect(w)}catch(e){return}const k=[r.x|0,r.y|0,r.w|0,r.h|0].join();if(k===last&&!fin)return;last=k;NW.setExeRect(r).catch(()=>{})};
+w.sched=()=>{if(!t1)t1=setTimeout(()=>{t1=0;push()},16);clearTimeout(w.tf);w.tf=setTimeout(()=>push(true),420)};w.forcePush=()=>{last='';push(true)};
+let vis=true;const vi=setInterval(()=>{if(!w.owns)return;const mn=w.el.classList.contains('min')||w.el.classList.contains('minning'),want=!mn&&topId===w.id&&!menuOpen&&!document.body.classList.contains('shutting')&&!document.body.classList.contains('bsod');if(want!==vis){vis=want;w.body.classList.toggle('exbehind',!want);NW.setExeVisible({v:want}).catch(()=>{});if(want)setTimeout(()=>{if(w.forcePush)w.forcePush()},60)}},120);
+const mo=new MutationObserver(()=>{const m=w.el.classList.contains('min')||w.el.classList.contains('minning');if(m!==wasMin){wasMin=m;if(w.owns){if(m)NW.minimizeExe().catch(()=>{});else setTimeout(()=>{if(W[w.id]&&w.owns)NW.restoreExe(exeRect(w)).catch(()=>{})},380)}}w.sched()});
+mo.observe(w.el,{attributes:true,attributeFilter:['style','class']});
+const ro=new ResizeObserver(()=>w.sched());ro.observe(w.body);
+w.onclose=()=>{clearInterval(vi);mo.disconnect();ro.disconnect();clearTimeout(t1);clearTimeout(w.tf);if(w.owns){w.owns=false;NW.stopExe().catch(()=>{})}if(exeW===w)exeW=null}}
+----
+1003:const VM={on:false,x:innerWidth/2,y:innerHeight/2,L:false},curEl=$('#cur'),pad=$('#pad');let LC={t:0,x:0,y:0},rafC=0,lastHover=0,Lnat=null;
+1017:function vmCursor(){if(!NB||!VM.on)return;if(cBusy&&Date.now()-cBusy<120){cDirty=true;return}cBusy=Date.now();cDirty=false;const fin=()=>{cBusy=0;if(cDirty)vmCursor()};NB.cursor({x:VM.x,y:VM.y,visible:!!bpos(),cw:innerWidth,s:S.ms}).then(fin,fin)}
+2375:const exeRect=w=>{const r=w.body.getBoundingClientRect(),o=w.inst?8:0;let hh=r.height-o;try{const dk=$('#dock'),d=dk&&dk.getBoundingClientRect();if(d&&d.height>0&&d.top<innerHeight-2&&d.top>r.top+64&&d.left<r.right&&d.right>r.left&&r.top+r.height>d.top)hh=d.top-r.top-o}catch(e){}return{x:r.left
+2394:const push=fin=>{if(!w.owns||!W[w.id]||w.el.classList.contains('min')||w.el.classList.contains('minning'))return;let r;try{r=exeRect(w)}catch(e){return}const k=[r.x|0,r.y|0,r.w|0,r.h|0].join();if(k===last&&!fin)return;last=k;NW.setExeRect(r).catch(()=>{})};
+2397:const mo=new MutationObserver(()=>{const m=w.el.classList.contains('min')||w.el.classList.contains('minning');if(m!==wasMin){wasMin=m;if(w.owns){if(m)NW.minimizeExe().catch(()=>{});else setTimeout(()=>{if(W[w.id]&&w.owns)NW.restoreExe(exeRect(w)).catch(()=>{})},380)}}w.sched()});
+2416:const go=f=>{let r=null;try{r=exeRect(ew)}catch(e){}return NW.runExe(r?{path:f,rect:r}:{path:f})};

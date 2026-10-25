@@ -1,0 +1,37 @@
+const VM={on:false,x:innerWidth/2,y:innerHeight/2,L:false},curEl=$('#cur'),pad=$('#pad');let LC={t:0,x:0,y:0},rafC=0,lastHover=0,Lnat=null;
+const VH='.di,.tbar button,.ib,.row:not(.hd),.ni,.ftile,.drive,.btab,.btab i,.tile,.hp .it,.crumb b,#pins button,#ctx button,.sr,.sqk button,.sfoot button';let vhEl=null;
+function vhover(){let n=null,t=null;if(VM.on&&!bpos()){t=tgt();n=t&&t.closest?t.closest(VH):null}if(VM.on)setCur(bpos()?'arrow':curState(t));if(n===vhEl)return;if(vhEl)vhEl.classList.remove('vh');vhEl=n;if(n)n.classList.add('vh')}
+const applyMouse=()=>{curEl.style.width=26*S.ms+'px';curEl.style.height=28*S.ms+'px';document.body.classList.toggle('mb',!!S.mb)};
+let mbT=0;function mbSet(x,y){const f=document.getElementById('mbf');if(f)f.setAttribute('stdDeviation',x.toFixed(2)+' '+y.toFixed(2))}
+function mbMove(dx,dy){if(!S.mb)return;mbSet(Math.min(5,Math.abs(dx)*.3),Math.min(5,Math.abs(dy)*.3));clearTimeout(mbT);mbT=setTimeout(()=>mbSet(0,0),70)}
+function setPerf(on){S.perf=!!on;ls('aur.perf',on?'1':'0');document.body.classList.toggle('perf',!!on)}function setMB(on){S.mb=!!on;ls('aur.mb',on?'1':'0');document.body.classList.toggle('mb',!!on);if(!on)mbSet(0,0);const b=document.getElementById('mblur');if(b)b.classList.toggle('on',!!on)}
+let cst='arrow';function setCur(c){if(c===cst)return;curEl.classList.remove('c-'+cst);cst=c;curEl.classList.add('c-'+c)}
+function curState(t){if(document.body.classList.contains('busy'))return'busy';if(!t||!t.closest)return'arrow';if(t.closest('textarea,[contenteditable=""],[contenteditable="true"],input:not([type=button]):not([type=checkbox]):not([type=radio]):not([type=range]):not([type=submit]):not([type=color])'))return'ibeam';if(t.closest(VH+',a[href],button,summary,select,label,[role=button]'))return'hand';let c='';try{c=getComputedStyle(t).cursor}catch(e){}return c==='pointer'?'hand':c==='text'?'ibeam':'arrow'}
+addEventListener('aurora-busy',()=>{if(VM.on)vhover()});
+const place=()=>{curEl.style.transform=`translate(${VM.x}px,${VM.y}px)`;if(!rafC)rafC=requestAnimationFrame(()=>{rafC=0;vmCursor();vhover()})};
+function bpos(){if(!NB||!shown)return null;let el,id;if(shownTab==='vsc'){if(!VSC)return null;el=$('.vview',VSC.w.body);id='vsc'}else{if(!BR)return null;el=$('.bview',BR.w.body);id=BR.cur}if(!el)return null;const r=el.getBoundingClientRect();if(VM.x>=r.left&&VM.x<r.right&&VM.y>=r.top&&VM.y<r.bottom)return{id,x:VM.x-r.left,y:VM.y-r.top};return null}
+/* native cursor updates: at most one call in flight, always the latest position (no backlog -> no lag) */
+let cBusy=0,cDirty=false;
+function vmSet(on){VM.on=on;VM.L=false;document.body.classList.toggle('vm',on);ls('aur.vm',on?'1':'0');$('#mbtn').classList.toggle('on',on);NB&&NB.setVirtual({on}).catch(()=>{});if(!on)vhover();if(on){place();toast('Virtual mouse: drag = move, tap = click, 2 fingers = scroll, hold L + drag = drag')}else vmCursor()}
+const tgt=()=>document.elementsFromPoint(VM.x,VM.y).find(e=>!e.closest('#pad,#cur,#vbtns,.rip'))||document.body;
+function ripple(){if(!S.rp)return;const r=h('div','rip');r.style.left=VM.x+'px';r.style.top=VM.y+'px';document.body.appendChild(r);setTimeout(()=>r.remove(),500)}
+/* native pointer calls: move/hover = latest wins, scroll = summed; one frame flush, one call in flight */
+const nrw=(b,a,o)=>NB.pointer(Object.assign({id:b.id,action:a,x:b.x,y:b.y,cw:innerWidth},o||{})).catch(()=>{});
+let nq={m:null,s:null},nbusy=0,nraf=0;
+function nflush(){nraf=0;if(nbusy&&Date.now()-nbusy<150)return;const m=nq.m,s=nq.s;nq={m:null,s:null};if(!m&&!s)return;nbusy=Date.now();const fin=()=>{nbusy=0;if((nq.m||nq.s)&&!nraf)nraf=requestAnimationFrame(nflush)};const ps=[];if(m)ps.push(nrw(m.b,m.a));if(s)ps.push(nrw(s.b,'scroll',{dx:s.dx,dy:s.dy}));Promise.all(ps).then(fin,fin)}
+const nqueue=()=>{if(!nraf)nraf=requestAnimationFrame(nflush)};
+const npt=(b,a,o)=>{if(a==='move'||a==='hover'){nq.m={b:{id:b.id,x:b.x,y:b.y},a};nqueue();return}if(a==='scroll'){const s=nq.s;if(s&&s.b.id===b.id){s.dx+=o.dx;s.dy+=o.dy;s.b=b}else nq.s={b,dx:o.dx,dy:o.dy};nqueue();return}nq.m=null;nrw(b,a,o)};
+const press=()=>{const b=bpos();if(b){Lnat=b;npt(b,'down');return b}const t=tgt();ev(t,'pointerdown',{buttons:1});ev(t,'mousedown',{buttons:1});return t},release=t=>{if(t&&t.id&&Lnat){const b=bpos()||Lnat;npt(b,'up');Lnat=null;return}ev(t,'pointerup');ev(t,'mouseup')};
+const kbShow=f=>{if(!S.kb)return;try{NB&&NB.showKeyboard().catch(()=>{})}catch(e){}[60,200].forEach(ms=>setTimeout(()=>{if(f&&f.isConnected&&document.activeElement!==f)try{f.focus({preventScroll:true})}catch(e){}},ms))};const focusEl=t=>{const f=t.closest&&t.closest('input,textarea,select');if(f){try{f.focus({preventScroll:true})}catch(e){f.focus()}kbShow(f)}};addEventListener('focusin',e=>{const t=e.target;if(t&&t.matches&&t.matches('input:not([type=color]):not([type=checkbox]):not([type=range]):not([type=radio]),textarea'))kbShow(t)});addEventListener('keydown',e=>{if(e.ctrlKey||e.metaKey||e.altKey||!e.key||e.key.length!==1)return;const st=$('#start');if(st&&st.classList.contains('show')){
+document.addEventListener('focusout',()=>setTimeout(()=>{const a=document.activeElement;if(NB&&!(a&&a.closest&&a.closest('input,textarea,select')))Promise.resolve(NB.hideKeyboard()).catch(()=>{})},80));
+----
+1267:stage.onpointerup=stage.onpointercancel=e=>pp.delete(e.pointerId);stage.onwheel=e=>{e.preventDefault();zoom(e.deltaY<0?1.15:.87)};stage.ondblclick=()=>st.s>1?reset():zoom(2.5);
+2370:async function pushCursor(){if(!NW||!NW.setExeCursor)return;const sa=document.querySelector('#cur .sa');if(!sa)return;const cs=getComputedStyle(curEl),cf=(cs.getPropertyValue('--cf')||'').trim()||'#fff',ck=(cs.getPropertyValue('--cs')|
+2417:try{await pushCursor()}catch(e){}let run=p;try{await go(p)}catch(e){if(o&&o.alt&&/not found/i.test((e&&e.message)||'')){run=o.alt;await go(run)}else throw e}
+----
+1006:const applyMouse=()=>{curEl.style.width=26*S.ms+'px';curEl.style.height=28*S.ms+'px';document.body.classList.toggle('mb',!!S.mb)};
+1017:function vmCursor(){if(!NB||!VM.on)return;if(cBusy&&Date.now()-cBusy<120){cDirty=true;return}cBusy=Date.now();cDirty=false;const fin=()=>{cBusy=0;if(cDirty)vmCursor()};NB.cursor({x:VM.x,y:VM.y,visible:!!bpos(),cw:innerWidth,s:S.ms}).then(fin,fin)}
+2266:mouse(){const sw=S.ms,W2=26*sw,H2=28*sw,cl=c=>`<svg class="cs ${c}" viewBox="0 0 26 28">${document.querySelector('#cur .'+c).innerHTML}</svg>`;
+2269:<h4>Size</h4>${chips('ms',[.3,.4,.5,.6,.8,1,1.4],S.ms,v=>Math.round(v*100)+'%'+(v===.6?' (default)':''))}
+2313:else if(k==='ms'){S.ms=+v;ls('aur.ms2',S.ms);applyMouse();vmCursor()}
+2370:async function pushCursor(){if(!NW||!NW.setExeCursor)return;const sa=document.querySelector('#cur .sa');if(!sa)return;const cs=getComputedStyle(curEl),cf=(cs.getPropertyValue('--cf')||'').trim()||'#fff',ck=(cs.getPropertyValue('--cs')||'').trim()||'#111',sw=(typeof S!=='undefined'&&S.ms)||1,W2=
