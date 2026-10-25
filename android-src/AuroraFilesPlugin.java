@@ -51,6 +51,24 @@ public class AuroraFilesPlugin extends Plugin {
             r.put("appPss", dm.getTotalPss() * 1024L);
             r.put("cpuMs", android.os.Process.getElapsedCpuTime());
             r.put("cores", Runtime.getRuntime().availableProcessors());
+            try { /* SET-3.2.4 battery details */
+                android.content.Intent bi = getContext().registerReceiver(null, new android.content.IntentFilter(Intent.ACTION_BATTERY_CHANGED));
+                if (bi != null) {
+                    r.put("batLevel", bi.getIntExtra("level", -1));
+                    r.put("batScale", bi.getIntExtra("scale", 100));
+                    r.put("batTemp", bi.getIntExtra("temperature", 0) / 10.0);
+                    r.put("batVolt", bi.getIntExtra("voltage", 0));
+                    r.put("batHealth", bi.getIntExtra("health", 1));
+                    r.put("batPlug", bi.getIntExtra("plugged", 0));
+                    String bt = bi.getStringExtra("technology");
+                    r.put("batTech", bt == null ? "" : bt);
+                }
+                android.os.BatteryManager bm = (android.os.BatteryManager) getContext().getSystemService(Context.BATTERY_SERVICE);
+                if (bm != null) {
+                    r.put("batCounter", bm.getLongProperty(android.os.BatteryManager.BATTERY_PROPERTY_CHARGE_COUNTER));
+                    r.put("batCurrent", bm.getLongProperty(android.os.BatteryManager.BATTERY_PROPERTY_CURRENT_NOW));
+                }
+            } catch (Exception ignored) { }
             call.resolve(r);
         } catch (Exception e) {
             call.reject("sysInfo failed: " + e.getMessage());

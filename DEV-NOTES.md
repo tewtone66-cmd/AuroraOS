@@ -71,3 +71,5 @@
 - v3.2.2 (ZOOM-3.2.2، بخش G): زوم مرورگر ۱۰..۲۵۰٪، پیش‌فرض DZ=50، مقدار 0 = «Auto/Fit» (دکمه‌ی Auto)، فلگ zx (انتخاب صریح کاربر/سایت ذخیره‌شده). Java: cssWidth در حالت پنجره‌ای (<۸۵٪ عرض صفحه) و zoom پیش‌فرض یا Auto، عرض layout = w/PAGE_K (شبیه موبایل) و سقف عرض ۱۰۰۰۰. نیاز به build جدید APK.
 
 - v3.2.3 (TBX-3.2.3، بخش B): حالت tb-full با grid بازچینی شد (استارت+برنامه‌ها وسط یا چپ، tray و ساعت راست؛ جداکننده‌ها مخفی). taskFit: اگه dock سرریز کنه gap و سایز آیکن کم میشه (کلاس fit و --tbg/--tbk). will-change فقط هنگام hover. فلای‌اوت tray کامل بازنویسی شد (کاشی‌های Network/Performance/Dark/VM، کارت باتری با انیمیشن شارژ، دکمه All settings). fly/flyPos/handler داخل IIFE تعویض متنی شدن.
+
+- v3.2.4 (SET-3.2.4، بخش C): Settings: حالت موبایل (کلاس nar وقتی عرض<560: اول لیست، بعد صفحه با دکمه‌ی back، حالت sch برای جستجو)، صفحه‌ی Battery (NX3.bat با getBattery و NF.sysInfo؛ فیلدهای batLevel/batTemp/batVolt/batHealth/batPlug/batTech/batCounter/batCurrent در AuroraFilesPlugin.sysInfo)، صفحه‌ی Performance، Night light/Dim (#nlx/#dmx)، Reduce motion (body.rm)، Auto performance در ۱۵٪ (S.ap). رشته‌ی ورژن در About/Update درست شد. NX3 در window.
