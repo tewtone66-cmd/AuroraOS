@@ -1,0 +1,22 @@
+/* DND-3.2.0 */
+#icons{display:block}
+#icons .di{position:absolute;width:84px;height:92px;box-sizing:border-box;margin:0;touch-action:none}
+#icons .di.pl{transition:left .26s var(--ease),top .26s var(--ease),background .18s}
+.dcell{position:absolute;width:84px;height:92px;border-radius:10px;background:#ffffff1c;outline:1px dashed #ffffff80;outline-offset:-1px;pointer-events:none;display:none}
+.di.ghost.bad{opacity:.5!important}
+.di.dndt{background:#ffffff40!important;outline:2px solid var(--acc,#fff);outline-offset:-2px}
+#icons.dndt{box-shadow:inset 0 0 0 2px var(--acc,#fff);border-radius:14px;background:#ffffff0f}
+.win.dndt{outline:2px solid var(--acc);outline-offset:-2px}
+.di .t .sc{position:absolute;left:-4px;bottom:-4px;width:17px;height:17px;border-radius:6px;background:#fff url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 12 12'%3E%3Cpath d='M3 9L9 3M4.5 3H9V7.5' fill='none' stroke='%23111' stroke-width='1.6' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E") center/11px no-repeat;box-shadow:0 1px 5px #0007}
+#tasks .dk.dkdrag{opacity:.28}
+.dkgh{position:fixed;z-index:9450;pointer-events:none;margin:0;padding:0;border:0;background:none;filter:drop-shadow(0 8px 14px #0008);transform-origin:center}
+#tasks .dk.dkins{box-shadow:inset 3px 0 0 var(--acc,#6aa2ff);border-radius:12px}
+#tasks .dk.dkins.after{box-shadow:inset -3px 0 0 var(--acc,#6aa2ff)}
+.dkm{position:fixed;inset:0;z-index:9850;display:grid;place-items:center;background:#0007;animation:wnbg .15s ease-out forwards;opacity:0}
+.dkm .dkb{width:min(88vw,340px);padding:18px;border-radius:18px;background:var(--surf);color:var(--txt);border:1px solid var(--line);box-shadow:0 20px 60px #000a;display:flex;flex-direction:column;gap:12px}
+.dkm input{height:40px;border-radius:10px;border:1px solid var(--line);background:var(--surf2);color:var(--txt);padding:0 12px;font-size:14px}
+.dkm .r{display:flex;gap:8px;justify-content:flex-end}
+#cur.c-ew .sew,#cur.c-ns .sns,#cur.c-nwse .snwse,#cur.c-nesw .snesw,#cur.c-move .smove,#cur.c-grab .sgrab,#cur.c-grabbing .sgg,#cur.c-no .sno{display:block}
+#cur .sr{transform:translate(-50%,-50%)}
+#cur .sr path{fill:var(--cf,#fff);stroke:var(--cs,#111)}
+#cur.grab .sr{transform:translate(-50%,-50%) scale(.9);transform-origin:50% 50%}
