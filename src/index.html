@@ -699,6 +699,89 @@ body.perf .bhero.ch .bfill::after,body.perf .bhero.ch .bfill::before,body.perf .
 .bc.ok b{color:#2fbf71}.bc.warn b{color:#e0a030}.bc.bad b{color:#e5484d}
 .bnote{margin-top:12px;font-size:12px;color:var(--mut);line-height:1.5}
 
+/*SYS-3.2.5*/
+/* SYS-3.2.5: shutdown animation, lock/login screen, first-run setup, account page */
+body.shutting #desk,body.shutting #dock,body.shutting #start{transition:transform .6s var(--ease),opacity .5s,filter .6s;transform:scale(.97);opacity:0;filter:blur(8px)}
+.win.shdn{animation:shdn .38s cubic-bezier(.5,0,.8,.4) forwards}
+@keyframes shdn{to{transform:scale(.86) translateY(24px);opacity:0}}
+#shut{background:radial-gradient(90% 70% at 50% 40%,#0d1b3d 0,#03060f 70%)!important}
+#shut .lw{position:relative;width:150px;height:150px;display:grid;place-items:center}
+#shut .lw .lg{position:relative;z-index:1;width:92px;height:92px;animation:none}
+#shut .rg{position:absolute;inset:0;transition:opacity .6s}
+#shut .rg svg{width:100%;height:100%;transform:rotate(-90deg)}
+#shut .rg circle{fill:none;stroke:url(#nxg);stroke-width:3;stroke-linecap:round;stroke-dasharray:339;stroke-dashoffset:339}
+#shut .rg .bk{stroke:#ffffff18;stroke-dashoffset:0}
+#shut.on .rg circle:not(.bk){animation:shring 2.5s cubic-bezier(.4,0,.2,1) .2s forwards}
+@keyframes shring{to{stroke-dashoffset:0}}
+#shut.off .rg{opacity:0}
+#shut.on:not(.off) .lw{animation:shpulse 2.4s ease-in-out infinite}
+@keyframes shpulse{50%{transform:scale(1.04)}}
+/* lock + login */
+#lck{padding-bottom:0;justify-content:center;background:linear-gradient(rgba(5,8,20,.25),rgba(5,8,20,.55)),var(--wall);background-size:cover;background-position:center;overflow:hidden;transition:opacity .45s ease,transform .45s var(--ease),visibility 0s .45s}
+#lck:not(.on){transform:scale(1.05)}
+#lck::before{content:"";position:absolute;inset:-30px;background:inherit;filter:blur(28px) saturate(1.2);opacity:0;transition:opacity .45s;z-index:-1}
+#lck.pin::before{opacity:1}
+#lck .lt{top:15vh;font-weight:200;transition:transform .5s var(--ease),opacity .4s}
+#lck .ld{top:calc(15vh + min(104px,20vw));transition:transform .5s var(--ease),opacity .4s}
+#lck.pin .lt,#lck.pin .ld{transform:translateY(-40px) scale(.8);opacity:0}
+#lck .lh{position:absolute;bottom:7vh;left:50%;transform:translateX(-50%);display:flex;flex-direction:column;align-items:center;gap:6px;background:none;backdrop-filter:none;padding:0;animation:none;transition:opacity .3s}
+#lck .lh i{width:12px;height:12px;border-left:2.5px solid #fff;border-top:2.5px solid #fff;transform:rotate(45deg);animation:lckup 1.6s ease-in-out infinite}
+@keyframes lckup{0%,100%{transform:translateY(4px) rotate(45deg);opacity:.4}50%{transform:translateY(-3px) rotate(45deg);opacity:1}}
+#lck.pin .lh{opacity:0;pointer-events:none}
+body.perf #lck::before{display:none}body.perf #lck .lh i{animation:none}
+#lck .lgn{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:12px;opacity:0;pointer-events:none;transform:translateY(40px);transition:opacity .4s,transform .5s var(--ease)}
+#lck.pin .lgn{opacity:1;pointer-events:auto;transform:none}
+#lck .av{width:92px;height:92px;border-radius:50%;display:grid;place-items:center;font-size:40px;font-weight:600;color:#fff;background:linear-gradient(135deg,var(--acc,#4f7cff),#8b5cf6);box-shadow:0 10px 36px #0006,inset 0 0 0 2px #ffffff40}
+#lck .un{font-size:22px;font-weight:600;text-shadow:0 2px 12px #0008}
+#lck .pd{display:flex;gap:14px;height:18px;margin-top:6px}
+#lck .pd i{width:14px;height:14px;border-radius:50%;border:2px solid #fff;box-sizing:border-box;transition:background .15s,transform .15s}
+#lck .pd i.on{background:#fff;transform:scale(1.1)}
+#lck .lm{min-height:18px;font-size:13px;opacity:.9;text-shadow:0 1px 8px #0008}
+#lck .kp{display:grid;grid-template-columns:repeat(3,68px);gap:12px;margin-top:6px}
+#lck .kp button{width:68px;height:68px;border-radius:50%;border:0;background:#ffffff26;color:#fff;font:500 26px system-ui,sans-serif;backdrop-filter:blur(8px);cursor:pointer;transition:background .12s,transform .1s}
+#lck .kp button:active{background:#ffffff55;transform:scale(.93)}
+#lck .kp button.e{background:none;font-size:14px;backdrop-filter:none}
+#lck .lgn.shake{animation:lshake .42s}
+@keyframes lshake{20%,60%{transform:translateX(-12px)}40%,80%{transform:translateX(12px)}}
+/* first-run setup */
+#oobe{position:fixed;inset:0;z-index:99994;display:flex;align-items:center;justify-content:center;padding:16px;box-sizing:border-box;color:#fff;background:radial-gradient(80% 60% at 20% 90%,#22d3ee33,transparent 60%),radial-gradient(70% 60% at 85% 10%,#8b5cf655,transparent 60%),linear-gradient(160deg,#0a1030,#050816);opacity:0;transition:opacity .5s}
+#oobe.on{opacity:1}
+#oobe.out{opacity:0;transform:scale(1.05);transition:opacity .6s,transform .6s}
+#oobe .oc{width:min(460px,100%);max-height:100%;overflow:auto;padding:28px 26px 22px;border-radius:28px;background:#ffffff14;border:1px solid #ffffff22;backdrop-filter:blur(24px);box-shadow:0 30px 80px #0008;text-align:center;scrollbar-width:none}
+#oobe .oc::-webkit-scrollbar{display:none}
+#oobe .os{animation:oin .45s var(--ease)}
+@keyframes oin{from{opacity:0;transform:translateX(30px)}to{opacity:1;transform:none}}
+#oobe svg.ol{width:96px;height:96px;filter:drop-shadow(0 0 22px #6366f199)}
+#oobe h2{margin:14px 0 6px;font-size:26px;font-weight:650}
+#oobe p{margin:0 0 14px;font-size:14px;opacity:.78;line-height:1.5}
+#oobe input{width:100%;box-sizing:border-box;height:46px;border-radius:14px;border:1px solid #ffffff33;background:#ffffff14;color:#fff;font-size:16px;padding:0 16px;outline:none;text-align:center;margin-top:4px}
+#oobe input:focus{border-color:var(--acc,#4f7cff);background:#ffffff1f}
+#oobe input::placeholder{color:#ffffff80}
+#oobe h4{margin:14px 0 8px;font-size:12px;text-transform:uppercase;letter-spacing:.06em;opacity:.65;font-weight:600}
+#oobe .oseg{display:flex;gap:6px;justify-content:center;flex-wrap:wrap}
+#oobe .oseg button{border:1px solid #ffffff2e;background:#ffffff12;color:#fff;border-radius:12px;padding:9px 16px;font:inherit;font-size:13px;cursor:pointer}
+#oobe .oseg button.sel{background:var(--acc,#4f7cff);border-color:transparent}
+#oobe .osw{display:flex;gap:10px;justify-content:center;flex-wrap:wrap}
+#oobe .osw button{width:34px;height:34px;border-radius:50%;border:2px solid transparent;cursor:pointer}
+#oobe .osw button.sel{border-color:#fff;box-shadow:0 0 0 3px #ffffff33}
+#oobe .owl{display:grid;grid-template-columns:repeat(3,1fr);gap:8px}
+#oobe .owl button{height:62px;border-radius:12px;border:2px solid transparent;background-size:cover;background-position:center;cursor:pointer}
+#oobe .owl button.sel{border-color:#fff}
+#oobe .of{display:flex;align-items:center;justify-content:space-between;gap:10px;margin-top:20px}
+#oobe .of button{border:0;border-radius:14px;padding:12px 22px;font:inherit;font-size:14.5px;font-weight:600;cursor:pointer;color:#fff;background:#ffffff1f}
+#oobe .of button.pri{background:linear-gradient(135deg,var(--acc,#4f7cff),#8b5cf6)}
+#oobe .of button:disabled{opacity:.4}
+#oobe .od{display:flex;gap:6px;justify-content:center;margin-top:16px}
+#oobe .od i{width:7px;height:7px;border-radius:50%;background:#ffffff40;transition:all .25s}
+#oobe .od i.on{width:20px;border-radius:4px;background:#fff}
+#oobe .osk{position:absolute;top:14px;right:18px;border:0;background:none;color:#fff;opacity:.6;font:inherit;font-size:13px;cursor:pointer}
+#oobe .ost{font-size:13px;margin-top:10px;min-height:18px;opacity:.85}
+.sinp{width:100%;max-width:320px;box-sizing:border-box;height:38px;border-radius:10px;border:1px solid var(--line);background:var(--surf2);color:var(--txt);padding:0 12px;font:inherit;outline:none;display:block}
+.sinp:focus{border-color:var(--acc)}
+.acc0{display:flex;align-items:center;gap:14px;padding:14px;border-radius:16px;background:var(--surf2);border:1px solid var(--line)}
+.acc0 b{display:block;font-size:16px}.acc0 small{color:var(--mut)}
+.av2{width:56px;height:56px;border-radius:50%;display:grid;place-items:center;font-size:24px;font-weight:600;color:#fff;background:linear-gradient(135deg,var(--acc),#8b5cf6)}
+
 </style><!--NEXOS-END--></head><body class="booting"><svg width="0" height="0" style="position:absolute" aria-hidden="true"><defs><linearGradient id="nxg" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#22d3ee"/><stop offset="1" stop-color="#8b5cf6"/></linearGradient></defs></svg><div id="boot"><!--NEXOS-START--><div id="nxb"><div class="halo"></div><svg viewBox="0 0 512 512"><path class="p" pathLength="100" d="M168 368V144l176 224V144" fill="none" stroke="url(#nxg)" stroke-width="40" stroke-linecap="round" stroke-linejoin="round"/></svg><h1><span>N</span><span>e</span><span>x</span><span>O</span><span>S</span></h1><div class="bar"><i></i></div></div><!--NEXOS-END--><div class="bd"><i></i><i></i><i></i></div></div><div id="shut"><svg class="lg" viewBox="0 0 512 512"><path d="M168 368V144l176 224V144" fill="none" stroke="url(#nxg)" stroke-width="40" stroke-linecap="round" stroke-linejoin="round"/></svg><div class="slot"><div class="sm"><span>Shutting down</span><div class="bd"><i></i><i></i><i></i></div></div><button id="pw" aria-label="Power on"><svg viewBox="0 0 24 24"><path d="M12 3v8M6.6 6.8a8 8 0 1 0 10.8 0"/></svg></button></div><div class="hint">Tap to power on</div></div><script>(function(){var t0=Date.now(),d=0;function go(){if(d)return;d=1;var b=document.getElementById("boot");document.body.classList.remove("booting");if(b){b.classList.add("out");setTimeout(function(){b.remove()},800)}}function chk(){setTimeout(go,Math.max(0,1700-(Date.now()-t0)))}if(document.readyState==="complete")chk();else addEventListener("load",chk);setTimeout(go,5000)})();</script>
 <svg width="0" height="0" style="position:absolute"><defs><linearGradient id="gs" x1="0" y1="0" x2="1" y2="1"><stop stop-color="#8f9bff"/><stop offset="1" stop-color="#c26bff"/></linearGradient><linearGradient id="gl" x1="0" y1="1" x2="1" y2="0"><stop stop-color="#34d399"/><stop offset="1" stop-color="#22d3ee"/></linearGradient><linearGradient id="gr" x1="1" y1="1" x2="0" y2="0"><stop stop-color="#a78bfa"/><stop offset="1" stop-color="#22d3ee"/></linearGradient><linearGradient id="gw" x1="0" y1="0" x2="1" y2="0"><stop stop-color="#5eead4"/><stop offset="1" stop-color="#c4b5fd"/></linearGradient></defs></svg>
 <div id="desk"><div id="icons"></div></div>
@@ -794,7 +877,7 @@ if(shown&&shownTab!==best.id){const id=shownTab;shown=null;const q=++snapSeq;NB.
 const key=[best.id,r.left|0,r.top|0,r.width|0,r.height|0,S.pw].join();if(shown===key)return;shown=key;shownTab=best.id;snapSeq++;natUnsnap(best.id);NB.show({id:best.id,x:r.left,y:r.top,w:r.width,h:r.height,cw:innerWidth,ref:S.pw}).then(vmCursor).catch(()=>{})}
 function startReset(){const s=$('#start'),q=$('#sq');if(!s||!q)return;q.value='';s.classList.remove('q')}
 const closeAll=()=>Object.keys(W).forEach(k=>closeW(k,true));
-function doShut(){closeMenus();closeAll();document.body.classList.add('shutting');const s=$('#shut');s.classList.add('on');setTimeout(()=>s.classList.add('off'),2400)}
+function doShut(){closeMenus();document.body.classList.add('shutting');const ws=$$('.win');ws.forEach((w,i)=>{w.style.animationDelay=(i*70)+'ms';w.classList.add('shdn')});const s=$('#shut'),t=380+ws.length*70;setTimeout(()=>{closeAll();s.classList.add('on')},t);setTimeout(()=>s.classList.add('off'),t+2900)}
 function doRestart(){closeMenus();closeAll();document.body.classList.add('booting');setTimeout(()=>location.reload(),900)}
 function togTheme(){S.theme=document.documentElement.dataset.theme==='dark'?'light':'dark';ls('aur.theme',S.theme);applyTheme()}
 function startCmds(){const dk=document.documentElement.dataset.theme==='dark';return[['Shut down',doShut],['Restart',doRestart],['Close all apps',closeAll],['Virtual mouse: '+(VM.on?'turn off':'turn on'),()=>vmSet(!VM.on)],['Mouse motion blur: '+(S.mb?'turn off':'turn on'),()=>setMB(!S.mb)],['Theme: '+(dk?'light':'dark'),togTheme],['Settings',()=>openApp('set')]]}
@@ -1977,7 +2060,7 @@ for(const k of Object.keys(W)){let a='',t='';try{t=$('.tbar span',W[k].el).textC
 if(!hit)throw psErr('Cannot find a process with the specified name or Id.');return[]};
 PSCMD['start-process']=async c=>{const nm=psLo(psStr(psAval(c,0,'filepath','name'))).replace(/\.exe$/,'');const id=PSAPPS[nm]||(A[nm]?nm:null);if(!id||!A[id])throw psErr('This command cannot be run due to the error: The system cannot find the file specified.');
 const rest=c.pos.slice(1).map(psStr);let arg;if(id==='code'&&rest.length){try{const r=await rp(rest[0]);if(r.it&&!r.it.isDirectory)arg={path:r.path}}catch(e){}}openApp(id,arg);return[]};
-PSCMD.cmd=c=>{PSM.on=false;PSM.nested=false;w.setTitle('Terminal');T('NexOS [Version 3.2.4]');return[]};
+PSCMD.cmd=c=>{PSM.on=false;PSM.nested=false;w.setTitle('Terminal');T('NexOS [Version 3.2.5]');return[]};
 PSCMD.exit=c=>{if(PSM.nested){PSM.on=false;PSM.nested=false;w.setTitle('Terminal')}else closeW(w.id,true);return[]};
 PSCMD.hostname=c=>['NEXOS-PC'];PSCMD.whoami=c=>['nexos-pc\\user'];
 PSCMD.systeminfo=async c=>{let m='';try{const s=await NF.sysInfo();const GB=1073741824;m='Total Physical Memory:     '+Math.round(s.total/1048576).toLocaleString('en-US')+' MB\nAvailable Physical Memory: '+Math.round(s.avail/1048576).toLocaleString('en-US')+' MB\nProcessors:                '+(s.cores||'?')+' core(s)'}catch(e){}
@@ -2024,7 +2107,7 @@ if(/^[a-z]:$/i.test(c)){if(c.toLowerCase()!=='c:')E('The system cannot find the 
 switch(c){
 case'help':case'?':HELP.forEach(T);break;
 case'cls':case'clear':out.innerHTML='';break;
-case'ver':T('');T('NexOS [Version 3.2.4]');T('');break;
+case'ver':T('');T('NexOS [Version 3.2.5]');T('');break;
 case'date':{const d=new Date();T('The current date is: '+['Sun','Mon','Tue','Wed','Thu','Fri','Sat'][d.getDay()]+' '+pad2(d.getMonth()+1)+'/'+pad2(d.getDate())+'/'+d.getFullYear());break}
 case'time':{const d=new Date();T('The current time is: '+pad2(d.getHours())+':'+pad2(d.getMinutes())+':'+pad2(d.getSeconds())+'.'+pad2(Math.floor(d.getMilliseconds()/10)));break}
 case'pwd':T(win(cwd));break;
@@ -2052,7 +2135,7 @@ if(line.trim()){hist.push(line);if(hist.length>100)hist.shift()}hi=hist.length;b
 else if(e.key==='ArrowUp'){e.preventDefault();if(hi>0){hi--;inp.value=hist[hi]}}
 else if(e.key==='ArrowDown'){e.preventDefault();if(hi<hist.length-1){hi++;inp.value=hist[hi]}else{hi=hist.length;inp.value=''}}};
 tm.onclick=()=>{if(!String(getSelection()))inp.focus()};
-T('NexOS [Version 3.2.4]');T('Commands run on the NexOS file system (C:\\ = internal storage). Type HELP.');T('');
+T('NexOS [Version 3.2.5]');T('Commands run on the NexOS file system (C:\\ = internal storage). Type HELP.');T('');
 if(!(arg&&arg.bat)){PSM.on=true;psBanner()}
 prompt();setTimeout(()=>inp.focus(),380);
 if(arg&&arg.bat){ready.then(async()=>{const bp=arg.bat,bn=bp.split('/').pop();cwd=bp.slice(0,bp.lastIndexOf('/'))||'/';prompt();w.setTitle(bn+' - Terminal');put(esc(win(cwd)+'>'+bn));busy=true;stopBat=false;try{await runBat(bp,[])}catch(e){E(e&&e.message==='^C'?'^C':((e&&e.message)||String(e)))}busy=false;prompt();inp.focus()})}
@@ -2124,8 +2207,8 @@ document.addEventListener('keydown',e=>{if(e.ctrlKey&&e.shiftKey&&e.key==='Escap
 
 /* ---------- Settings ---------- */
 function appSet(w,arg){const B=w.body;let pg=arg||'about',q='';
-const NAV=[['System',[['about','About'],['display','Display & size'],['battery','Battery'],['perf','Performance'],['storage','Storage'],['update','Update']]],['Personalization',[['bg','Background'],['color','Colors'],['task','Taskbar']]],['Devices',[['mouse','Mouse']]],['Apps',[['browser','Browser']]]];
-const IDX=[['Battery, charge, health, temperature','battery'],['Battery saver, auto performance','perf'],['Performance mode, reduce motion','perf'],['Night light, warm colors','display'],['Dim screen, brightness','display'],['About this system, version, device','about'],['Update, version, alpha','update'],['App size, interface scale','display'],['Desktop icon size','display'],['Storage access, files permission','storage'],['Wallpaper, background, solid color','bg'],['Theme, dark, light','color'],['Accent color','color'],['Taskbar icon size','task'],['Taskbar transparency, color','task'],['Taskbar magnify effect, clock, pinned apps','task'],['Mouse size','mouse'],['Mouse color','mouse'],['Mouse speed','mouse'],['Scroll speed','mouse'],['Motion blur','mouse'],['Cursor states: loading, hand, text','mouse'],['Virtual mouse on/off','mouse'],['Hold to drag','mouse'],['Search engine','browser']];
+const NAV=[['System',[['about','About'],['display','Display & size'],['battery','Battery'],['perf','Performance'],['storage','Storage'],['update','Update']]],['Personalization',[['account','Account'],['bg','Background'],['color','Colors'],['task','Taskbar']]],['Devices',[['mouse','Mouse']]],['Apps',[['browser','Browser']]]];
+const IDX=[['Account, name, PIN, lock screen','account'],['Run setup again, welcome','account'],['Battery, charge, health, temperature','battery'],['Battery saver, auto performance','perf'],['Performance mode, reduce motion','perf'],['Night light, warm colors','display'],['Dim screen, brightness','display'],['About this system, version, device','about'],['Update, version, alpha','update'],['App size, interface scale','display'],['Desktop icon size','display'],['Storage access, files permission','storage'],['Wallpaper, background, solid color','bg'],['Theme, dark, light','color'],['Accent color','color'],['Taskbar icon size','task'],['Taskbar transparency, color','task'],['Taskbar magnify effect, clock, pinned apps','task'],['Mouse size','mouse'],['Mouse color','mouse'],['Mouse speed','mouse'],['Scroll speed','mouse'],['Motion blur','mouse'],['Cursor states: loading, hand, text','mouse'],['Virtual mouse on/off','mouse'],['Hold to drag','mouse'],['Search engine','browser']];
 let granted=null;NF&&NF.status().then(x=>{granted=x.granted;show()}).catch(()=>{});
 const chips=(k,arr,cur,fmt)=>`<div class="seg">${arr.map(v=>`<button data-k="${k}" data-v="${v}" class="${cur===v?'sel':''}">${fmt?fmt(v):v}</button>`).join('')}</div>`;
 const onoff=(k,on)=>`<div class="seg"><button data-k="${k}" data-v="1" class="${on?'sel':''}">On</button><button data-k="${k}" data-v="0" class="${on?'':'sel'}">Off</button></div>`;
@@ -2133,8 +2216,8 @@ const kv=a=>a.map(([k,v])=>`<div class="kv"><span>${k}</span><b>${esc(String(v))
 const REPO='https://github.com/tewtone66-cmd/NexOS';
 const PGS={
 about(){const ua=navigator.userAgent,and=(/Android ([\d.]+)/.exec(ua)||[])[1]||'?',mod=(/;\s*([^;)]+?)\s+Build/.exec(ua)||/Android [\d.]+;\s*([^;)]+)/.exec(ua)||[])[1]||'Unknown',chr=(/Chrome\/([\d.]+)/.exec(ua)||[])[1]||'?';
-return `<h3>About</h3><div class="abh"><div class="abl">${STAR}</div><div><h2>NexOS</h2><p>Version 3.2.4</p></div></div>${kv([['Edition','NexOS Alpha'],['Version','3.2.4'],['Device',mod],['Android',and],['WebView (Chrome)',chr],['Screen',innerWidth+' × '+innerHeight+' (UI '+Math.round(S.ui*100)+'%)'],['CPU cores',navigator.hardwareConcurrency||'?'],['Memory',navigator.deviceMemory?'≥ '+navigator.deviceMemory+' GB':'?'],['Storage access',granted===null?'…':granted?'Allowed':'Not allowed']])}<h4>Update</h4>${kv([['Channel','Alpha'],['Installed version','3.2.4'],['Updates','Installed manually from GitHub']])}<button class="pgb" data-k="go" data-v="${REPO}">Open GitHub</button><h4>What is new in 3.0.0</h4><ul><li>New virtual mouse with cursor states and motion blur</li><li>New taskbar and Start menu with search</li><li>Recycle Bin that really keeps deleted items</li><li>Settings with categories and search</li></ul>`},
-update(){return `<h3>Update</h3>${kv([['Channel','Alpha'],['Installed version','3.2.4'],['Status','Updates are installed manually: rebuild the app from GitHub']])}<button class="pgb" data-k="go" data-v="${REPO}">Open GitHub</button>`},
+return `<h3>About</h3><div class="abh"><div class="abl">${STAR}</div><div><h2>NexOS</h2><p>Version 3.2.5</p></div></div>${kv([['Edition','NexOS Alpha'],['Version','3.2.5'],['Device',mod],['Android',and],['WebView (Chrome)',chr],['Screen',innerWidth+' × '+innerHeight+' (UI '+Math.round(S.ui*100)+'%)'],['CPU cores',navigator.hardwareConcurrency||'?'],['Memory',navigator.deviceMemory?'≥ '+navigator.deviceMemory+' GB':'?'],['Storage access',granted===null?'…':granted?'Allowed':'Not allowed']])}<h4>Update</h4>${kv([['Channel','Alpha'],['Installed version','3.2.5'],['Updates','Installed manually from GitHub']])}<button class="pgb" data-k="go" data-v="${REPO}">Open GitHub</button><h4>What is new in 3.0.0</h4><ul><li>New virtual mouse with cursor states and motion blur</li><li>New taskbar and Start menu with search</li><li>Recycle Bin that really keeps deleted items</li><li>Settings with categories and search</li></ul>`},
+update(){return `<h3>Update</h3>${kv([['Channel','Alpha'],['Installed version','3.2.5'],['Status','Updates are installed manually: rebuild the app from GitHub']])}<button class="pgb" data-k="go" data-v="${REPO}">Open GitHub</button>`},
 display(){return `<h3>Display & size</h3><h4>App size (whole interface)</h4><div class="step"><button data-k="ui" data-v="-1">&#8722;</button><b>${Math.round(S.ui*100)}%</b><button data-k="ui" data-v="1">+</button><button data-k="ui" data-v="0">Reset</button></div><h4>Desktop icon size</h4>${chips('is',[36,48,60,72],S.is,v=>({36:'Small',48:'Medium',60:'Large',72:'Extra large'})[v])}`},
 storage(){return `<h3>Storage</h3><h4>Access to your files</h4><div class="seg"><button data-k="perm" class="${granted?'sel':''}">${granted===null?'Checking…':granted?'Allowed':'Allow access to files'}</button></div>`},
 bg(){return `<h3>Background</h3><div class="walls">${WALL.map((g,i)=>`<button data-k="wall" data-v="${i}" class="${!S.wc&&i===S.wall?'sel':''}" style="background:${g}"></button>`).join('')}</div><h4>Solid color</h4><div class="sw">${['#0b1d3a','#111827','#1f3b2d','#3b1f3a','#3a2a1f','#475569','#e5e7eb'].map(c=>`<button data-k="wc" data-v="${c}" class="${S.wc===c?'sel':''}" style="background:${c}"></button>`).join('')}</div>`},
@@ -2155,6 +2238,7 @@ const pgEl=$('#spg',B),sxEl=$('.sx',B);/*SET-3.2.4*/
 new ResizeObserver(()=>sxEl.classList.toggle('nar',sxEl.clientWidth<560)).observe(sxEl);sxEl.classList.toggle('nar',sxEl.clientWidth<560);if(arg)sxEl.classList.add('det');
 const _pd=PGS.display;PGS.display=()=>_pd()+`<h4>Night light (warm screen color)</h4>${chips('nl',[0,10,18,28],S.nl,v=>v?({10:'Low',18:'Medium',28:'High'})[v]:'Off')}<h4>Dim screen (software brightness)</h4>${chips('dm',[0,10,20,30,45],S.dm,v=>v?v+'%':'Off')}<p class="bnote">Android does not let apps change the real screen brightness, so this darkens the picture on top.</p>`;
 PGS.battery=()=>`<h3>Battery</h3><div id="batx"><div class="bnote">Reading battery…</div></div><h4>Battery saving</h4><h4 style="margin-top:6px">Performance mode</h4>${onoff('perf',S.perf)}<h4>Turn on Performance mode automatically at 15%</h4>${onoff('ap',S.ap)}`;
+PGS.account=()=>`<h3>Account</h3><div class="acc0"><div class="av2">${esc((NX4.name().charAt(0)||'U').toUpperCase())}</div><div><b>${esc(NX4.name())}</b><small>Local account</small></div></div><h4>Display name</h4><input id="unm" class="sinp" value="${esc(NX4.name())}" maxlength="24"><h4>Lock PIN</h4>${NX4.hasPin()?`<p class="bnote">A PIN is set (${NX4.pinLen()} digits).</p><button class="pgb" data-k="clrpin">Remove PIN</button>`:`<input id="pin1" class="sinp" inputmode="numeric" maxlength="8" placeholder="New PIN (4 to 8 digits)"><input id="pin2" class="sinp" inputmode="numeric" maxlength="8" placeholder="Repeat PIN" style="margin-top:8px"><button class="pgb" data-k="setpin">Set PIN</button>`}<h4>Ask for the PIN when NexOS starts</h4>${onoff('lockboot',NX4.lockBoot())}<h4>More</h4><button class="pgb" data-k="locknow">Lock now</button> <button class="pgb" data-k="oobe">Run setup again</button><p class="bnote">This is NexOS's own screen lock. It keeps the desktop private, but it does not protect your phone or its files.</p>`;
 PGS.perf=()=>`<h3>Performance</h3><h4>Performance mode (no blur, shadows or heavy animations)</h4>${onoff('perf',S.perf)}<h4>Reduce motion (almost no animations)</h4>${onoff('rm',S.rm)}<h4>Turn on Performance mode automatically at 15% battery</h4>${onoff('ap',S.ap)}<h4>Check what is using memory</h4><button class="pgb" data-k="app" data-v="taskmgr">Open Task Manager</button>`;
 function nav(){$('#snv',B).innerHTML=NAV.map(([g,l])=>`<h5>${g}</h5>`+l.map(([id,n])=>`<button data-k="pg" data-v="${id}" class="${id===pg&&!q?'sel':''}">${n}</button>`).join('')).join('')}
 function show(keep){const top=keep?pgEl.scrollTop:0;if(!PGS[pg])pg='about';nav();if(q){const ql=q.toLowerCase(),r=IDX.filter(x=>x[0].toLowerCase().includes(ql));pgEl.innerHTML=`<h3>Search</h3><div class="sres">${r.length?r.map(x=>`<button data-k="pg" data-v="${x[1]}">${x[0]}</button>`).join(''):'<p style="color:var(--mut)">No settings found</p>'}</div>`}else pgEl.innerHTML='<button class="sbk" data-k="back">&#8249; Settings</button>'+PGS[pg]();pgEl.scrollTop=top;if(!q&&pg==='mouse')bindPrev();if(!q&&pg==='battery'&&window.NX3)NX3.bat($('#batx',B))}
@@ -2166,6 +2250,11 @@ B.onclick=e=>{const b=e.target.closest('button');if(!b||!b.dataset.k)return;cons
 if(k==='pg'){pg=v;q='';$('#sq2',B).value='';keep=false;sxEl.classList.add('det');sxEl.classList.remove('sch')}
 else if(k==='back'){sxEl.classList.remove('det','sch');q='';$('#sq2',B).value='';keep=false}
 else if(k==='app')openApp(v)
+else if(k==='setpin'){const m=NX4.setPin($('#pin1',B).value,$('#pin2',B).value);toast(m||'PIN set');setTimeout(()=>show(true),120);return}
+else if(k==='clrpin'){NX4.clearPin();toast('PIN removed')}
+else if(k==='lockboot')NX4.setLockBoot(v==='1')
+else if(k==='locknow'){doLock();return}
+else if(k==='oobe'){NX4.oobe();return}
 else if(k==='ap'||k==='rm'){S[k]=v==='1';ls('aur.'+k,v);NX3.apply()}
 else if(k==='nl'||k==='dm'){S[k]=+v;ls('aur.'+k,v);NX3.apply()}
 else if(k==='go')openApp('browser',v);
@@ -2191,7 +2280,7 @@ else if(k==='hd'){S.hd=+v;ls('aur.hd3',S.hd)}
 else if(k==='se'){S.se=v;ls('aur.se',v)}
 else if(k==='perm'){if(NF&&!granted)NF.requestAccess().catch(()=>{})}
 show(keep)};
-B.onchange=e=>{const t=e.target;if(t.dataset&&t.dataset.k==='accc'){S.acc=t.value;ls('aur.acc',S.acc);applyTheme();applyTb();show(true)}};
+B.onchange=e=>{const t=e.target;if(t.id==='unm'){NX4.setName(t.value);show(true);return}if(t.dataset&&t.dataset.k==='accc'){S.acc=t.value;ls('aur.acc',S.acc);applyTheme();applyTb();show(true)}};
 $('#sq2',B).oninput=e=>{q=e.target.value.trim();sxEl.classList.toggle('sch',!!q);if(q)sxEl.classList.remove('det');show()};
 w.open=a=>{pg=a||'about';q='';$('#sq2',B).value='';sxEl.classList.remove('sch');if(a)sxEl.classList.add('det');show()};
 show()}
@@ -2618,17 +2707,17 @@ var ico=function(k){return '<svg viewBox="0 0 24 24">'+IP[k]+'</svg>'};
 
 /* ---------- lock + sleep ---------- */
 var slp=h('div','','');slp.id='slp';
-var lck=h('div','','<div class="lt"></div><div class="ld"></div><div class="lh">Click or press any key to unlock</div>');lck.id='lck';
+var lck=h('div','','<div class="lt"></div><div class="ld"></div><div class="lh"><i></i>Swipe up or tap to unlock</div><div class="lgn"><div class="av"></div><div class="un"></div><div class="pd"></div><div class="lm"></div><div class="kp"></div></div>');lck.id='lck';
 document.body.appendChild(slp);document.body.appendChild(lck);
 var lt=0;
 function lckTick(){var d=new Date();lck.querySelector('.lt').textContent=d.toLocaleTimeString([],{hour:'2-digit',minute:'2-digit'});lck.querySelector('.ld').textContent=d.toLocaleDateString([],{weekday:'long',month:'long',day:'numeric'})}
-function doLock(){closeMenus();try{lck.style.setProperty('--wall',$('#desk').style.getPropertyValue('--wall'))}catch(e){}lckTick();clearInterval(lt);lt=setInterval(lckTick,1000);lck.classList.add('on');sync()}
-function unlock(){if(!lck.classList.contains('on'))return;lck.classList.remove('on');clearInterval(lt);lt=0;setTimeout(sync,480)}
+function doLock(){closeMenus();try{lck.style.setProperty('--wall',$('#desk').style.getPropertyValue('--wall'))}catch(e){}lckTick();clearInterval(lt);lt=setInterval(lckTick,1000);lck.classList.add('on');lck.classList.remove('pin');if(window.NX4)NX4.lockReset();sync()}
+function unlock(){if(!lck.classList.contains('on'))return;lck.classList.remove('on','pin');clearInterval(lt);lt=0;setTimeout(sync,480)}
 function doSleep(){closeMenus();try{MU.au.pause()}catch(e){}slp.classList.add('on');sync()}
 function wake(){if(!slp.classList.contains('on'))return;slp.classList.remove('on');setTimeout(sync,720)}
-lck.addEventListener('pointerdown',function(e){e.preventDefault();unlock()});
+window.__unlock=unlock;lck.addEventListener('pointerdown',function(e){NX4.lockDown(e)});lck.addEventListener('pointerup',function(e){NX4.lockUp(e)});
 slp.addEventListener('pointerdown',function(e){e.preventDefault();wake()});
-addEventListener('keydown',function(e){if(lck.classList.contains('on')){e.preventDefault();e.stopPropagation();unlock()}else if(slp.classList.contains('on')){e.preventDefault();e.stopPropagation();wake()}},true);
+addEventListener('keydown',function(e){if(lck.classList.contains('on')){e.preventDefault();e.stopPropagation();NX4.lockKey(e)}else if(slp.classList.contains('on')){e.preventDefault();e.stopPropagation();wake()}},true);
 window.doLock=doLock;window.doSleep=doSleep;
 
 /* ---------- start layout ---------- */
@@ -2712,7 +2801,7 @@ if(typeof onLong==='function')onLong(sbtn,function(){pmenu()});
 (function(){try{document.body.classList.add('intro');setTimeout(function(){document.body.classList.remove('intro')},4200);var pw=document.getElementById('pw');if(pw)pw.onclick=function(){var sh=document.getElementById('shut');if(sh)sh.classList.add('wake');setTimeout(function(){location.reload()},520)}}catch(e){console.error(e)}})();
 /* WN-3.1.8b */
 (function(){
-var VER='3.2.4',B=document.body;
+var VER='3.2.5',B=document.body;
 /* ---- pause CSS animations while the app is in the background ---- */
 function vis(){B.classList.toggle('hid',document.hidden)}
 document.addEventListener('visibilitychange',vis);vis();
@@ -2732,11 +2821,11 @@ function sample(){
 addEventListener('pointerdown',function(){setTimeout(sample,60)},{passive:true,capture:true});
 /* ---- What's New ---- */
 var ITEMS=[
-['🔋','Battery page','Big charge bar with animation, health, temperature, voltage and power source'],
-['📱','Settings on phones','On a narrow window Settings shows a list first, then the page with a back button'],
-['⚙️','Performance page','Performance mode, reduce motion and auto power saving at 15%'],
-['🌙','Night light and dim','Warm tint and software brightness in Display & size'],
-['🧭','Correct version info','About and Update now show the real version']
+['🎨','New app icon','A new N icon with aurora colors (shows after you install the new APK)'],
+['⏻','Shutdown animation','Windows fold away, then a progress ring around the logo'],
+['👋','First-run setup','Name, theme, wallpaper, optional PIN and file access'],
+['🔒','New lock and login screen','Big clock, swipe up, PIN pad with shake and wait time'],
+['👤','Account page','Change your name or PIN, lock now, run setup again in Settings']
 ];
 function nlogo(){return '<svg viewBox="0 0 512 512"><path d="M168 368V144l176 224V144" fill="none" stroke="url(#nxg)" stroke-width="46" stroke-linecap="round" stroke-linejoin="round"/></svg>'}
 function showWN(force){
@@ -3050,6 +3139,79 @@ function bat(el){if(!el)return;
    el.innerHTML=h;setTimeout(tick,2500)})}
  tick()}
 window.NX3={apply:apply,bat:bat};apply();
+})();
+
+/* SYS-3.2.5 - lock/login, first-run setup, account */
+(function(){'use strict';
+var K={user:'aur.user',pinh:'aur.pinh',pinl:'aur.pinl',lb:'aur.lockboot',oobe:'aur.oobe'};
+function name(){return ls(K.user)||'User'}
+function setName(v){v=String(v||'').trim().slice(0,24);ls(K.user,v||'User');refreshLock()}
+function hasPin(){return !!ls(K.pinh)}
+function pinLen(){return +ls(K.pinl)||4}
+function hash(p){var s='nexos:'+p;try{if(window.crypto&&crypto.subtle&&window.TextEncoder){return crypto.subtle.digest('SHA-256',new TextEncoder().encode(s)).then(function(b){return Array.prototype.map.call(new Uint8Array(b),function(x){return('0'+x.toString(16)).slice(-2)}).join('')})}}catch(e){}
+ var a=5381,c=52711;for(var i=0;i<s.length;i++){a=((a<<5)+a+s.charCodeAt(i))|0;c=((c<<4)^(c>>>3)^s.charCodeAt(i))|0}return Promise.resolve('f'+(a>>>0).toString(16)+(c>>>0).toString(16))}
+function setPin(a,b){a=String(a||'').trim();b=String(b||'').trim();if(!/^\d{4,8}$/.test(a))return 'The PIN must be 4 to 8 digits';if(a!==b)return 'The two PINs are different';
+ hash(a).then(function(h){ls(K.pinh,h);ls(K.pinl,String(a.length))});return ''}
+function clearPin(){ls(K.pinh,'');ls(K.pinl,'')}
+function lockBoot(){return ls(K.lb)!=='0'}
+function setLockBoot(on){ls(K.lb,on?'1':'0')}
+/* ---- lock screen ---- */
+var lck=document.getElementById('lck'),ent='',fails=0,until=0,tmr=0,busy=false,sw=null;
+function q(s){return lck&&lck.querySelector(s)}
+function buildKp(){var kp=q('.kp');if(!kp||kp.childNodes.length)return;var h='';[1,2,3,4,5,6,7,8,9].forEach(function(n){h+='<button data-n="'+n+'">'+n+'</button>'});h+='<button class="e" data-n="x">Cancel</button><button data-n="0">0</button><button class="e" data-n="b">&#9003;</button>';kp.innerHTML=h;
+ kp.addEventListener('click',function(e){var b=e.target.closest('button');if(!b)return;e.stopPropagation();var n=b.dataset.n;if(n==='x')back();else if(n==='b'){ent=ent.slice(0,-1);dots()}else push(n)})}
+function refreshLock(){if(!lck)return;var n=name();q('.un').textContent=n;q('.av').textContent=(n.charAt(0)||'U').toUpperCase()}
+function dots(){var L=pinLen(),h='';for(var i=0;i<L;i++)h+='<i'+(i<ent.length?' class="on"':'')+'></i>';q('.pd').innerHTML=h}
+function msg(t){q('.lm').textContent=t||''}
+function left(){return Math.max(0,Math.ceil((until-Date.now())/1000))}
+function tickCool(){var s=left();if(s>0){msg('Too many tries. Wait '+s+' s');tmr=setTimeout(tickCool,500)}else{msg('');fails=0}}
+function push(d){if(busy||left()>0)return;if(ent.length>=pinLen())return;ent+=d;dots();if(ent.length===pinLen())check()}
+function check(){busy=true;var e=ent;hash(e).then(function(h){busy=false;if(h===ls(K.pinh)){ent='';fails=0;msg('');window.__unlock&&window.__unlock()}else{fails++;ent='';dots();var g=q('.lgn');g.classList.remove('shake');void g.offsetWidth;g.classList.add('shake');try{navigator.vibrate&&navigator.vibrate(60)}catch(_){}
+  if(fails>=5){until=Date.now()+30000;clearTimeout(tmr);tickCool()}else msg('Wrong PIN')}})}
+function back(){lck.classList.remove('pin');ent='';msg('')}
+function proceed(){if(!hasPin()){window.__unlock&&window.__unlock();return}refreshLock();buildKp();ent='';dots();lck.classList.add('pin');if(left()>0)tickCool()}
+function lockReset(){ent='';msg('');refreshLock();buildKp();dots()}
+function lockDown(e){if(e.target.closest&&e.target.closest('.lgn')&&lck.classList.contains('pin'))return;e.preventDefault();sw={x:e.clientX,y:e.clientY}}
+function lockUp(e){if(!sw)return;var s=sw;sw=null;if(lck.classList.contains('pin')){if(!e.target.closest('.lgn')&&Math.abs(e.clientY-s.y)<12)back();return}
+ var dy=s.y-e.clientY;if(dy>-30)proceed()}
+function lockKey(e){if(!lck.classList.contains('pin')){if(e.key==='Escape')return;proceed();if(!hasPin())return}
+ if(/^\d$/.test(e.key))push(e.key);else if(e.key==='Backspace'){ent=ent.slice(0,-1);dots()}else if(e.key==='Escape')back()}
+/* ---- first-run setup ---- */
+function oobe(){if(document.getElementById('oobe'))return;var O={name:ls(K.user)&&ls(K.user)!=='User'?ls(K.user):'',pin:'',step:0},st=document.createElement('div');st.id='oobe';
+ st.innerHTML='<button class="osk">Skip setup</button><div class="oc"></div>';document.body.appendChild(st);var oc=st.querySelector('.oc'),N=6;
+ function esc2(t){return String(t).replace(/[&<>"]/g,function(c){return({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'})[c]})}
+ function logo(){return '<svg class="ol" viewBox="0 0 512 512"><path d="M168 368V144l176 224V144" fill="none" stroke="url(#nxg)" stroke-width="40" stroke-linecap="round" stroke-linejoin="round"/></svg>'}
+ function dotsH(){var h='<div class="od">';for(var i=0;i<N;i++)h+='<i'+(i===O.step?' class="on"':'')+'></i>';return h+'</div>'}
+ function foot(next,back){return '<div class="of">'+(back?'<button data-o="back">Back</button>':'<span></span>')+'<button class="pri" data-o="next">'+next+'</button></div>'+dotsH()}
+ function render(){var s=O.step,h='<div class="os">';
+  if(s===0)h+=logo()+'<h2>Welcome to NexOS</h2><p>Let\'s set up your desktop. It takes less than a minute and you can change everything later in Settings.</p>'+foot('Get started',false);
+  else if(s===1)h+='<h2>What should we call you?</h2><p>Your name is shown on the lock screen.</p><input id="oo-n" maxlength="24" placeholder="Your name" value="'+esc2(O.name)+'" autocomplete="off">'+foot('Next',true);
+  else if(s===2){h+='<h2>Make it yours</h2><h4>Theme</h4><div class="oseg">'+['auto','light','dark'].map(function(t){return '<button data-t="'+t+'" class="'+(S.theme===t?'sel':'')+'">'+t.charAt(0).toUpperCase()+t.slice(1)+'</button>'}).join('')+'</div><h4>Accent color</h4><div class="osw">'+ACC.map(function(c){return '<button data-a="'+c+'" class="'+(S.acc===c?'sel':'')+'" style="background:'+c+'"></button>'}).join('')+'</div><h4>Wallpaper</h4><div class="owl">'+WALL.slice(0,6).map(function(w,i){return '<button data-w="'+i+'" class="'+(!S.wc&&S.wall===i?'sel':'')+'" style="background-image:'+w.replace(/"/g,'&quot;')+'"></button>'}).join('')+'</div>'+foot('Next',true)}
+  else if(s===3)h+='<h2>Lock screen PIN</h2><p>Optional. Choose 4 to 8 digits to lock NexOS. Leave it empty to skip.</p><input id="oo-p" inputmode="numeric" maxlength="8" placeholder="PIN (optional)" autocomplete="off"><input id="oo-p2" inputmode="numeric" maxlength="8" placeholder="Repeat PIN" autocomplete="off"><div class="ost" id="oo-m"></div>'+foot('Next',true);
+  else if(s===4)h+='<h2>Your files</h2><p>File Explorer needs access to your phone\'s storage to show and manage your files.</p><div class="oseg"><button id="oo-f" data-o="files">Allow access to files</button></div><div class="ost" id="oo-fm"></div>'+foot('Next',true);
+  else h+=logo()+'<h2>You\'re all set'+(O.name?', '+esc2(O.name):'')+'</h2><p>NexOS is ready. Enjoy your desktop.</p>'+foot('Open desktop',false);
+  oc.innerHTML=h+'</div>';var i=oc.querySelector('input');if(i&&s!==3)setTimeout(function(){try{i.focus()}catch(e){}},300);
+  if(s===4&&typeof NF!=='undefined'&&NF&&NF.status)NF.status().then(function(x){var m=document.getElementById('oo-fm');if(m&&x.granted)m.textContent='Access is allowed'}).catch(function(){})}
+ function finish(){setName(O.name||'User');ls(K.oobe,'1');st.classList.add('out');setTimeout(function(){st.remove()},650);try{toast('Welcome to NexOS')}catch(e){}}
+ function next(){var s=O.step;
+  if(s===1){var n=document.getElementById('oo-n');O.name=n?n.value.trim():O.name}
+  if(s===3){var a=document.getElementById('oo-p').value.trim(),b=document.getElementById('oo-p2').value.trim();if(a||b){var m=setPin(a,b);if(m){document.getElementById('oo-m').textContent=m;return}}}
+  if(s>=N-1){finish();return}O.step++;render()}
+ oc.addEventListener('click',function(e){var b=e.target.closest('button');if(!b)return;var d=b.dataset;
+  if(d.o==='next')next();else if(d.o==='back'){O.step--;render()}
+  else if(d.o==='files'){try{NF.requestAccess().catch(function(){})}catch(x){}var m=document.getElementById('oo-fm');if(m)m.textContent='Choose "Allow" in the Android screen, then come back'}
+  else if(d.t){S.theme=d.t;ls('aur.theme',d.t);applyTheme();applyTb();render()}
+  else if(d.a){S.acc=d.a;ls('aur.acc',d.a);applyTheme();applyTb();render()}
+  else if(d.w!=null){S.wall=+d.w;S.wc='';ls('aur.wall',S.wall);ls('aur.wc','');applyWall();render()}});
+ oc.addEventListener('keydown',function(e){if(e.key==='Enter'){e.preventDefault();next()}});
+ st.querySelector('.osk').onclick=function(){ls(K.oobe,'1');st.classList.add('out');setTimeout(function(){st.remove()},650)};
+ render();requestAnimationFrame(function(){st.classList.add('on')})}
+function whenBooted(cb){var n=0,iv=setInterval(function(){n++;if(!document.getElementById('boot')||n>80){clearInterval(iv);setTimeout(cb,350)}},250)}
+/* ---- shutdown extras: ring around the logo ---- */
+(function(){var s=document.getElementById('shut');if(!s)return;var lg=s.querySelector('.lg');if(!lg||s.querySelector('.lw'))return;var w=document.createElement('div');w.className='lw';w.innerHTML='<div class="rg"><svg viewBox="0 0 120 120"><circle class="bk" cx="60" cy="60" r="54"/><circle cx="60" cy="60" r="54"/></svg></div>';lg.parentNode.insertBefore(w,lg);w.appendChild(lg)})();
+refreshLock();if(lck){buildKp();dots()}
+window.NX4={name:name,setName:setName,hasPin:hasPin,pinLen:pinLen,setPin:setPin,clearPin:clearPin,lockBoot:lockBoot,setLockBoot:setLockBoot,oobe:oobe,lockDown:lockDown,lockUp:lockUp,lockKey:lockKey,lockReset:lockReset};
+whenBooted(function(){if(ls(K.oobe)!=='1')oobe();else if(hasPin()&&lockBoot()&&typeof doLock==='function'){doLock();proceed()}});
 })();
 
 </script><!--NEXOS-END--></body></html>
