@@ -97,3 +97,8 @@
 - Wine inside the main Activity: NOT done. XServerView is a GLSurfaceView: a SurfaceView is either under the WebView (hole) or over it, so NexOS windows could still not be drawn over a program; needs a TextureView renderer rewrite.
 - Cursor shapes: Winlator keeps only bitmap + hotspot (no shape name). New cursors are written to Download/aurora-cursors.txt; map them by crc in the next update.
 
+## 3.2.10 - NexOS cursor shapes for Wine (aurora-shapes-3.2.10)
+- NexOS has 4 cursor shapes in #cur: arrow (.sa), hand (.sh), I-beam (.si), busy (.sb, static frame). pushShapes sends hand/ibeam/busy with their hotspot (fractions of the 26x28 box).
+- Java shapeOf(cursor): hotspot (0,0) = arrow; else crc lookup in Download/aurora-cursor-map.txt ("crc=hand|ibeam|busy|arrow|wine"), else guessShape (hand + I-beam only, geometry, UNVERIFIED). null = Wine's own cursor. aurora-cursors.txt now shows guess= per cursor: compare with the real shape, then add exact crc lines / a built-in table.
+- Setting aur.exs (default on); off = 3.2.9 behaviour.
+

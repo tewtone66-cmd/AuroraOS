@@ -515,14 +515,21 @@ public class AuroraWinePlugin extends Plugin {
                     int vw = vwOf(root), vh = vhOf(root);
                     if (vw > 0 && vh > 0) {
                         float[] fm = fitMap(vw, vh, sw, sh);
-                        iv.setTranslationX(xvTx(root) + fm[0] + pt.getClampedX() * fm[1]);
-                        iv.setTranslationY(xvTy(root) + fm[2] + pt.getClampedY() * fm[3]);
+                        iv.setTranslationX(xvTx(root) + fm[0] + pt.getClampedX() * fm[1] - curHx);
+                        iv.setTranslationY(xvTy(root) + fm[2] + pt.getClampedY() * fm[3] - curHy);
                         try { // aurora-fill-3.2.8: arrow = NexOS cursor, other shapes = Wine's own, hidden stays hidden
                             com.winlator.xserver.Window pw = ((com.winlator.xserver.XServer) xs).inputDeviceManager.getPointWindow();
                             com.winlator.xserver.Cursor cu = pw != null ? pw.attributes.getCursor() : null;
                             if (cu != null && cu != lastCu) { lastCu = cu; logCursor(cu); }
                             boolean hide = cu != null && !cu.isVisible();
-                            boolean own = cu != null && cu.isVisible() && (cu.hotSpotX != 0 || cu.hotSpotY != 0);
+                            String shp = (cu != null && cu.isVisible()) ? shapeOf(cu) : null;
+                            android.graphics.Bitmap sbm = shp == null ? null : shapeBmp.get(shp);
+                            float[] sht = sbm == null ? null : shapeHot.get(shp);
+                            curHx = sht != null ? sht[0] : 0f;
+                            curHy = sht != null ? sht[1] : 0f;
+                            android.graphics.Bitmap wantB = sbm != null ? sbm : bmp;
+                            if (iv.getTag() != wantB) { iv.setImageBitmap(wantB); iv.setTag(wantB); }
+                            boolean own = cu != null && cu.isVisible() && (cu.hotSpotX != 0 || cu.hotSpotY != 0) && sbm == null && !"arrow".equals(shp);
                             int vis = (hide || own) ? android.view.View.INVISIBLE : android.view.View.VISIBLE;
                             if (iv.getVisibility() != vis) iv.setVisibility(vis);
                             com.winlator.renderer.GLRenderer rr = fitRend;
@@ -544,6 +551,8 @@ public class AuroraWinePlugin extends Plugin {
         final double cw = call.getDouble("w", 26.0);
         final double ch = call.getDouble("h", 28.0);
         final double vw = call.getDouble("vw", 0.0);
+        final String shape = call.getString("shape");
+        final double shx = call.getDouble("hx", 0.0), shy = call.getDouble("hy", 0.0);
         new Thread(() -> {
             try {
                 if (png != null) {
@@ -556,7 +565,8 @@ public class AuroraWinePlugin extends Plugin {
                             : getContext().getResources().getDisplayMetrics().density;
                         cursorW = Math.max(8, (int) Math.round(cw * k));
                         cursorH = Math.max(8, (int) Math.round(ch * k));
-                        cursorBmp = bm;
+                        if (shape == null) cursorBmp = bm;
+                        else { shapeBmp.put(shape, bm); shapeHot.put(shape, new float[]{(float) (shx * cursorW), (float) (shy * cursorH)}); }
                     }
                 }
             } catch (Throwable ignored) { }
@@ -790,7 +800,7 @@ public class AuroraWinePlugin extends Plugin {
             bb.get(b);
             java.util.zip.CRC32 crc = new java.util.zip.CRC32();
             crc.update(b);
-            String sig = W + "x" + H + " hot=" + cu.hotSpotX + "," + cu.hotSpotY + " crc=" + Long.toHexString(crc.getValue());
+            String sig = W + "x" + H + " hot=" + cu.hotSpotX + "," + cu.hotSpotY + " crc=" + Long.toHexString(crc.getValue()) + " guess=" + guessShape(b, W, H, cu.hotSpotX, cu.hotSpotY);
             if (!cuSeen.add(sig)) return;
             StringBuilder sb = new StringBuilder(sig).append('\n');
             int gw = Math.min(W, 24), gh = Math.min(H, 16);
@@ -808,6 +818,101 @@ public class AuroraWinePlugin extends Plugin {
                 fo.write(sb.toString().getBytes(java.nio.charset.StandardCharsets.UTF_8));
             }
         } catch (Throwable ignored) { }
+    }
+
+    /** aurora-shapes-3.2.10 */
+    private static volatile boolean shapesOn = true;
+    private static volatile float curHx = 0f, curHy = 0f;
+    private static final java.util.concurrent.ConcurrentHashMap<String, android.graphics.Bitmap> shapeBmp = new java.util.concurrent.ConcurrentHashMap<>();
+    private static final java.util.concurrent.ConcurrentHashMap<String, float[]> shapeHot = new java.util.concurrent.ConcurrentHashMap<>();
+    private static volatile com.winlator.xserver.Cursor shapeCu;
+    private static volatile String shapeVal;
+
+    /** {on}: NexOS shapes for known Wine cursors (false = Wine draws every shape except the arrow). */
+    @PluginMethod
+    public void setExeShapes(final PluginCall call) {
+        Boolean on = call.getBoolean("on", true);
+        shapesOn = on == null || on;
+        shapeCu = null;
+        call.resolve();
+    }
+
+    /** Geometric GUESS (unverified on real devices): "hand", "ibeam" or null. */
+    static String guessShape(byte[] b, int W, int H, int hx, int hy) {
+        int x0 = W, y0 = H, x1 = -1, y1 = -1, cnt = 0;
+        for (int y = 0; y < H; y++) {
+            for (int x = 0; x < W; x++) {
+                int i = (y * W + x) * 4 + 3;
+                if (i < b.length && (b[i] & 0xff) > 127) {
+                    cnt++;
+                    if (x < x0) x0 = x;
+                    if (x > x1) x1 = x;
+                    if (y < y0) y0 = y;
+                    if (y > y1) y1 = y;
+                }
+            }
+        }
+        if (cnt == 0) return null;
+        int bw = x1 - x0 + 1, bh = y1 - y0 + 1;
+        if (bh >= 12 && bh >= bw * 1.6f && Math.abs(hx - (x0 + bw / 2)) <= bw && Math.abs(hy - (y0 + bh / 2)) <= bh / 4 + 2) {
+            int top = Math.max(rowCnt(b, W, y0, x0, x1), rowCnt(b, W, y0 + 1, x0, x1));
+            int bot = Math.max(rowCnt(b, W, y1, x0, x1), rowCnt(b, W, y1 - 1, x0, x1));
+            int mid = 0;
+            for (int y = y0 + bh / 2 - 1; y <= y0 + bh / 2 + 1; y++) mid = Math.max(mid, rowCnt(b, W, y, x0, x1));
+            if (top >= mid + 2 && bot >= mid + 2 && mid <= Math.max(4, bw / 3)) return "ibeam";
+        }
+        float asp = bw / (float) bh, fill = cnt / (float) (bw * bh);
+        if (hy <= 2 && hx > 0 && bw >= 10 && bh >= 12 && asp >= 0.65f && asp <= 1.35f && fill >= 0.35f && fill <= 0.85f && hx <= x0 + bw * 0.6f) return "hand";
+        return null;
+    }
+
+    private static int rowCnt(byte[] b, int W, int y, int x0, int x1) {
+        int n = 0;
+        if (y < 0) return 0;
+        for (int x = x0; x <= x1; x++) {
+            int i = (y * W + x) * 4 + 3;
+            if (i < b.length && (b[i] & 0xff) > 127) n++;
+        }
+        return n;
+    }
+
+    private static String tabLookup(String crc) {
+        try {
+            File dl = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS);
+            File f = dl == null ? null : new File(dl, "aurora-cursor-map.txt");
+            if (f == null || !f.isFile() || f.length() > 20000) return null;
+            for (String line : new String(java.nio.file.Files.readAllBytes(f.toPath()), java.nio.charset.StandardCharsets.UTF_8).split("\\r?\\n")) {
+                String t = line.trim();
+                int e = t.indexOf('=');
+                if (t.startsWith("#") || e <= 0) continue;
+                if (t.substring(0, e).trim().equalsIgnoreCase(crc)) return t.substring(e + 1).trim().toLowerCase();
+            }
+        } catch (Throwable ignored) { }
+        return null;
+    }
+
+    /** Shape name of a visible Wine cursor, or null = no NexOS shape (arrow handled by hotspot, everything else = Wine's own). Cached per cursor. */
+    private static String shapeOf(com.winlator.xserver.Cursor cu) {
+        if (!shapesOn || shapeBmp.isEmpty()) return null;
+        if (cu == shapeCu) return shapeVal;
+        String r = null;
+        try {
+            com.winlator.xserver.Drawable d = cu.cursorImage;
+            if (!(cu.hotSpotX == 0 && cu.hotSpotY == 0) && d != null && d.getData() != null && d.width > 0 && d.height > 0) {
+                int W = d.width, H = d.height;
+                java.nio.ByteBuffer bb = d.getData().duplicate();
+                bb.rewind();
+                byte[] b = new byte[Math.min(bb.remaining(), W * H * 4)];
+                bb.get(b);
+                java.util.zip.CRC32 crc = new java.util.zip.CRC32();
+                crc.update(b);
+                String t = tabLookup(Long.toHexString(crc.getValue()));
+                r = t != null ? t : guessShape(b, W, H, cu.hotSpotX, cu.hotSpotY);
+            }
+        } catch (Throwable ignored) { }
+        shapeVal = r;
+        shapeCu = cu;
+        return r;
     }
 
     /** Sends the whole app to the background (programs keep running). */
