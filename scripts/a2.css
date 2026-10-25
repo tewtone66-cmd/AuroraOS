@@ -1,0 +1,12 @@
+/* A2 3.2.1: Windows-like text selection + floating copy bar + file manager perf */
+::selection{background:#0078d4;color:#fff}
+.body{-webkit-touch-callout:none}
+.row,.di,.dk,.tbar,.ni,.ib,button,svg,img,.ftile,.drive,.btab,#dock,#start,#ctx,#selbar{-webkit-user-select:none;user-select:none}
+.row:not(.hd){content-visibility:auto;contain-intrinsic-size:auto 32px}
+.ic .row:not(.hd){contain-intrinsic-size:auto 104px 118px}
+.elist{contain:layout paint style;overscroll-behavior:contain}
+#selbar{position:fixed;z-index:99990;display:none;gap:2px;padding:4px;border-radius:10px;background:var(--surf,#222);color:var(--txt,#fff);border:1px solid var(--line,#444);box-shadow:0 8px 24px #0006;touch-action:none}
+#selbar.show{display:flex;animation:selbin .14s ease-out}
+#selbar button{border:0;background:none;color:inherit;font:600 12.5px "Segoe UI",system-ui,sans-serif;padding:7px 12px;border-radius:7px;cursor:default}
+#selbar button:hover,#selbar button:active{background:var(--hov,#ffffff1a)}
+@keyframes selbin{from{opacity:0;transform:translateY(4px) scale(.96)}to{opacity:1;transform:none}}

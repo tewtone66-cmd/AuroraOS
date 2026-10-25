@@ -594,6 +594,20 @@ body.lite .win{border-color:var(--line)}
 #cur .sr{transform:translate(-50%,-50%)}
 #cur .sr path{fill:var(--cf,#fff);stroke:var(--cs,#111)}
 #cur.grab .sr{transform:translate(-50%,-50%) scale(.9);transform-origin:50% 50%}
+/*SEL-3.2.1*/
+/* A2 3.2.1: Windows-like text selection + floating copy bar + file manager perf */
+::selection{background:#0078d4;color:#fff}
+.body{-webkit-touch-callout:none}
+.row,.di,.dk,.tbar,.ni,.ib,button,svg,img,.ftile,.drive,.btab,#dock,#start,#ctx,#selbar{-webkit-user-select:none;user-select:none}
+.row:not(.hd){content-visibility:auto;contain-intrinsic-size:auto 32px}
+.ic .row:not(.hd){contain-intrinsic-size:auto 104px 118px}
+.elist{contain:layout paint style;overscroll-behavior:contain}
+#selbar{position:fixed;z-index:99990;display:none;gap:2px;padding:4px;border-radius:10px;background:var(--surf,#222);color:var(--txt,#fff);border:1px solid var(--line,#444);box-shadow:0 8px 24px #0006;touch-action:none}
+#selbar.show{display:flex;animation:selbin .14s ease-out}
+#selbar button{border:0;background:none;color:inherit;font:600 12.5px "Segoe UI",system-ui,sans-serif;padding:7px 12px;border-radius:7px;cursor:default}
+#selbar button:hover,#selbar button:active{background:var(--hov,#ffffff1a)}
+@keyframes selbin{from{opacity:0;transform:translateY(4px) scale(.96)}to{opacity:1;transform:none}}
+
 </style><!--NEXOS-END--></head><body class="booting"><svg width="0" height="0" style="position:absolute" aria-hidden="true"><defs><linearGradient id="nxg" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#22d3ee"/><stop offset="1" stop-color="#8b5cf6"/></linearGradient></defs></svg><div id="boot"><!--NEXOS-START--><div id="nxb"><div class="halo"></div><svg viewBox="0 0 512 512"><path class="p" pathLength="100" d="M168 368V144l176 224V144" fill="none" stroke="url(#nxg)" stroke-width="40" stroke-linecap="round" stroke-linejoin="round"/></svg><h1><span>N</span><span>e</span><span>x</span><span>O</span><span>S</span></h1><div class="bar"><i></i></div></div><!--NEXOS-END--><div class="bd"><i></i><i></i><i></i></div></div><div id="shut"><svg class="lg" viewBox="0 0 512 512"><path d="M168 368V144l176 224V144" fill="none" stroke="url(#nxg)" stroke-width="40" stroke-linecap="round" stroke-linejoin="round"/></svg><div class="slot"><div class="sm"><span>Shutting down</span><div class="bd"><i></i><i></i><i></i></div></div><button id="pw" aria-label="Power on"><svg viewBox="0 0 24 24"><path d="M12 3v8M6.6 6.8a8 8 0 1 0 10.8 0"/></svg></button></div><div class="hint">Tap to power on</div></div><script>(function(){var t0=Date.now(),d=0;function go(){if(d)return;d=1;var b=document.getElementById("boot");document.body.classList.remove("booting");if(b){b.classList.add("out");setTimeout(function(){b.remove()},800)}}function chk(){setTimeout(go,Math.max(0,1700-(Date.now()-t0)))}if(document.readyState==="complete")chk();else addEventListener("load",chk);setTimeout(go,5000)})();</script>
 <svg width="0" height="0" style="position:absolute"><defs><linearGradient id="gs" x1="0" y1="0" x2="1" y2="1"><stop stop-color="#8f9bff"/><stop offset="1" stop-color="#c26bff"/></linearGradient><linearGradient id="gl" x1="0" y1="1" x2="1" y2="0"><stop stop-color="#34d399"/><stop offset="1" stop-color="#22d3ee"/></linearGradient><linearGradient id="gr" x1="1" y1="1" x2="0" y2="0"><stop stop-color="#a78bfa"/><stop offset="1" stop-color="#22d3ee"/></linearGradient><linearGradient id="gw" x1="0" y1="0" x2="1" y2="0"><stop stop-color="#5eead4"/><stop offset="1" stop-color="#c4b5fd"/></linearGradient></defs></svg>
 <div id="desk"><div id="icons"></div></div>
@@ -961,7 +975,7 @@ function paint(){$$('.row[data-p]',L).forEach(r=>{r.classList.toggle('sel',E.sel
 b('cut').disabled=b('copy').disabled=b('del').disabled=!s.length;b('ren').disabled=s.length!==1;b('paste').disabled=!(here&&CLIP.paths.length);b('new').disabled=!here;b('multi').classList.toggle('pri',E.multi);
 b('back').disabled=E.hi<1;b('fwd').disabled=E.hi>=E.hist.length-1;b('up').disabled=E.path==null;$$('[data-v]',B).forEach(x=>x.classList.toggle('on',x.dataset.v===E.view));
 const n=E.path==null&&!E.sr?E.roots.length:vis().length;$('.sc',B).textContent=n+' item'+(n===1?'':'s')+(s.length?'  ·  '+s.length+' selected'+(s.length===1&&!s[0].isDirectory?' ('+fsz(s[0].size)+')':''):'')}
-function mk(it){const k=kind(it),th=k==='img'&&it.size>0&&it.size<8e6;const r=h('div','row'+(E.sel.has(it.path)?' sel':''),`<div class="nm">${th?`<img class="th" loading="lazy" decoding="async" alt="" src="${fsrc(it.path)}">`:ficon(it)}<span></span></div><span>${fdate(it.lastModified)}</span><span>${esc(ftype(it))}</span><span>${it.isDirectory?'':fsz(it.size)}</span>`);r.dataset.p=it.path;if(E.sr)r.title=it.path;$('.nm span',r).textContent=it.name;const im=$('img.th',r);if(im)im.onerror=()=>{im.outerHTML=ficon(it)};
+function mk(it){const k=kind(it),th=k==='img'&&it.size>0&&it.size<2.5e6;const r=h('div','row'+(E.sel.has(it.path)?' sel':''),`<div class="nm">${th?`<img class="th" loading="lazy" decoding="async" fetchpriority="low" alt="" src="${fsrc(it.path)}">`:ficon(it)}<span></span></div><span>${fdate(it.lastModified)}</span><span>${esc(ftype(it))}</span><span>${it.isDirectory?'':fsz(it.size)}</span>`);r.dataset.p=it.path;if(E.sr)r.title=it.path;$('.nm span',r).textContent=it.name;const im=$('img.th',r);if(im)im.onerror=()=>{im.outerHTML=ficon(it)};
 r.onclick=e=>{L.focus();if(e.shiftKey||e.ctrlKey||e.metaKey||E.multi){pick(it,e);return}if(act(r,()=>open(it),e))return;pick(it,e)};
 r.oncontextmenu=e=>{e.preventDefault();e.stopPropagation();if(!E.sel.has(it.path)){E.sel=new Set([it.path]);E.anchor=it;paint()}const one=E.sel.size===1;ctx(e.clientX,e.clientY,[['Open',()=>open(it),'',!one],...(E.sr&&one?[['Open file location',()=>go(dirname(it.path))]]:[]),...(one&&!it.isDirectory?[['Open with Notepad',()=>openApp('notes',{path:it.path})],['Open with Code Editor',()=>openApp('code',{path:it.path})],...(kind(it)==='zip'?[['Extract here',()=>cmd('unzip')],['Extract to…',()=>cmd('unzipto')]]:[])]:[]),['Compress to ZIP',()=>cmd('zip')],...(one&&!it.isDirectory&&kind(it)==='exe'?[['Add to Desktop',()=>addExe({p:it.path})]]:[]),null,['Cut',()=>cmd('cut'),'Ctrl+X'],['Copy',()=>cmd('copy'),'Ctrl+C'],null,['Rename',()=>cmd('ren'),'F2',!one],['Delete',()=>cmd('del'),'Del'],null,['Properties',()=>cmd('props')]])};return r}
 function draw(){const v=vis();L.className='elist'+(E.view==='i'&&(E.path!=null||E.sr)?' ic':'')+(E.view==='l'&&(E.path!=null||E.sr)?' lt':'');
@@ -976,7 +990,7 @@ if(!E.ok){L.innerHTML='';return paint()}
 if(E.path==null&&!E.sr){L.innerHTML='';L.appendChild(h('div','sec','Folders'));const g1=h('div','fgrid');E.quick.forEach(q=>{const t=h('div','ftile',ficon({isDirectory:1,name:q.n})+'<span></span>');$('span',t).textContent=q.n;t.onclick=e=>{if(act(t,()=>go(q.path),e))return;$$('.sel',L).forEach(x=>x.classList.remove('sel'));t.classList.add('sel')};g1.appendChild(t)});if(!E.quick.length)g1.textContent='No folders yet';L.appendChild(g1);
 L.appendChild(h('div','sec','Devices and drives'));const g2=h('div','fgrid');E.roots.forEach(r=>{const used=r.total?Math.round((r.total-r.free)/r.total*100):0;const d=h('div','drive','<svg viewBox="0 0 24 24"><rect x="2" y="7" width="20" height="10" rx="2.5" fill="#8e98a8"/><circle cx="18" cy="12" r="1.4" fill="#3fdc83"/></svg><div class="di2"><b></b><div class="bar'+(used>90?' full':'')+'"><i style="width:'+used+'%"></i></div><small>'+fsz(r.free)+' free of '+fsz(r.total)+'</small></div>');$('b',d).textContent=rlabel(r);d.onclick=e=>{if(act(d,()=>go(r.path),e))return;$$('.sel',L).forEach(x=>x.classList.remove('sel'));d.classList.add('sel')};g2.appendChild(d)});L.appendChild(g2);return paint()}
 L.innerHTML=E.view==='d'?`<div class="row hd"><span data-k="name">Name${E.sk==='name'?E.asc?' ▴':' ▾':''}</span><span data-k="date">Date modified${E.sk==='date'?E.asc?' ▴':' ▾':''}</span><span data-k="type">Type${E.sk==='type'?E.asc?' ▴':' ▾':''}</span><span data-k="size">Size${E.sk==='size'?E.asc?' ▴':' ▾':''}</span></div>`:'';
-v.forEach(i=>L.appendChild(mk(i)));if(!v.length)L.insertAdjacentHTML('beforeend','<div class="eempty">'+(E.q?'No items match your search.':'This folder is empty.')+'</div>');paint()}
+{const fr=document.createDocumentFragment();v.forEach(i=>fr.appendChild(mk(i)));L.appendChild(fr)}if(!v.length)L.insertAdjacentHTML('beforeend','<div class="eempty">'+(E.q?'No items match your search.':'This folder is empty.')+'</div>');paint()}
 const uniq=(base,ext)=>{const names=new Set(E.items.map(i=>i.name));let n=base+ext,c=2;while(names.has(n))n=base+' ('+c++ +')'+ext;return n};
 function cmd(k){const s=selItems(),here=E.path!=null;
 if(k==='zip'){if(!s.length)return;const nm=s.length===1?s[0].name.replace(/\.[^.]*$/,''):'Archive';pstart('Compressing…');return NF.zipCreate({paths:s.map(i=>i.path),dest:dirname(s[0].path),name:uniq(nm,'.zip')}).then(()=>{toast('ZIP created');if(!E.sr)load()}).catch(err).finally(pend)}
@@ -1027,7 +1041,7 @@ addEventListener('pointerup',end);addEventListener('pointercancel',end);
 L.addEventListener('click',e=>{if(sup){e.stopPropagation();e.preventDefault()}},true)})();
 abar.addEventListener('click',e=>{if(e.target.closest('.crumb b')||abar.classList.contains('edit'))return;abar.classList.add('edit');apath.value=E.path==null?'This PC':E.path;apath.focus();apath.select()});
 apath.onkeydown=e=>{if(e.key==='Enter'){const v=apath.value.trim();abar.classList.remove('edit');if(!v||/^this pc$/i.test(v))go(null);else NF.list({path:v}).then(()=>go(v.replace(/\/+$/,'')||'/')).catch(err)}else if(e.key==='Escape'){abar.classList.remove('edit');L.focus()}};apath.onblur=()=>abar.classList.remove('edit');
-srch.oninput=()=>{E.q=srch.value;draw()};
+let sq=0;srch.oninput=()=>{E.q=srch.value;clearTimeout(sq);sq=setTimeout(draw,140)};
 async function deep(){const q=srch.value.trim();if(!q)return;toast('Searching…',1500);try{const r=await NF.search({path:E.path||'',q,max:400});E.items=r.items||[];E.sr=1;E.sel.clear();E.q='';draw();toast(E.items.length+' result'+(E.items.length===1?'':'s')+(r.partial?' (partial list)':''))}catch(e){err(e)}}
 srch.onkeydown=e=>{if(e.key==='Enter')deep();else if(e.key==='Escape'){srch.value='';E.q='';E.sr?load():draw()}};
 B.addEventListener('keydown',e=>{if(e.target.closest('input'))return;const c=e.ctrlKey||e.metaKey,k=e.key.toLowerCase();if(c&&k==='c')cmd('copy');else if(c&&k==='x')cmd('cut');else if(c&&k==='v')cmd('paste');else if(c&&k==='a'){e.preventDefault();E.sel=new Set(vis().map(i=>i.path));paint()}else if(e.key==='Delete')cmd('del');else if(e.key==='F2')cmd('ren');else if(e.key==='Enter'&&selItems().length===1)open(selItems()[0]);else if(e.key==='Backspace')up();else if(e.key==='F5')load();else if(e.key==='Escape'){E.sel.clear();paint()}else return;e.preventDefault()});
@@ -1872,7 +1886,7 @@ for(const k of Object.keys(W)){let a='',t='';try{t=$('.tbar span',W[k].el).textC
 if(!hit)throw psErr('Cannot find a process with the specified name or Id.');return[]};
 PSCMD['start-process']=async c=>{const nm=psLo(psStr(psAval(c,0,'filepath','name'))).replace(/\.exe$/,'');const id=PSAPPS[nm]||(A[nm]?nm:null);if(!id||!A[id])throw psErr('This command cannot be run due to the error: The system cannot find the file specified.');
 const rest=c.pos.slice(1).map(psStr);let arg;if(id==='code'&&rest.length){try{const r=await rp(rest[0]);if(r.it&&!r.it.isDirectory)arg={path:r.path}}catch(e){}}openApp(id,arg);return[]};
-PSCMD.cmd=c=>{PSM.on=false;PSM.nested=false;w.setTitle('Terminal');T('NexOS [Version 3.2.0]');return[]};
+PSCMD.cmd=c=>{PSM.on=false;PSM.nested=false;w.setTitle('Terminal');T('NexOS [Version 3.2.1]');return[]};
 PSCMD.exit=c=>{if(PSM.nested){PSM.on=false;PSM.nested=false;w.setTitle('Terminal')}else closeW(w.id,true);return[]};
 PSCMD.hostname=c=>['NEXOS-PC'];PSCMD.whoami=c=>['nexos-pc\\user'];
 PSCMD.systeminfo=async c=>{let m='';try{const s=await NF.sysInfo();const GB=1073741824;m='Total Physical Memory:     '+Math.round(s.total/1048576).toLocaleString('en-US')+' MB\nAvailable Physical Memory: '+Math.round(s.avail/1048576).toLocaleString('en-US')+' MB\nProcessors:                '+(s.cores||'?')+' core(s)'}catch(e){}
@@ -1919,7 +1933,7 @@ if(/^[a-z]:$/i.test(c)){if(c.toLowerCase()!=='c:')E('The system cannot find the 
 switch(c){
 case'help':case'?':HELP.forEach(T);break;
 case'cls':case'clear':out.innerHTML='';break;
-case'ver':T('');T('NexOS [Version 3.2.0]');T('');break;
+case'ver':T('');T('NexOS [Version 3.2.1]');T('');break;
 case'date':{const d=new Date();T('The current date is: '+['Sun','Mon','Tue','Wed','Thu','Fri','Sat'][d.getDay()]+' '+pad2(d.getMonth()+1)+'/'+pad2(d.getDate())+'/'+d.getFullYear());break}
 case'time':{const d=new Date();T('The current time is: '+pad2(d.getHours())+':'+pad2(d.getMinutes())+':'+pad2(d.getSeconds())+'.'+pad2(Math.floor(d.getMilliseconds()/10)));break}
 case'pwd':T(win(cwd));break;
@@ -1947,7 +1961,7 @@ if(line.trim()){hist.push(line);if(hist.length>100)hist.shift()}hi=hist.length;b
 else if(e.key==='ArrowUp'){e.preventDefault();if(hi>0){hi--;inp.value=hist[hi]}}
 else if(e.key==='ArrowDown'){e.preventDefault();if(hi<hist.length-1){hi++;inp.value=hist[hi]}else{hi=hist.length;inp.value=''}}};
 tm.onclick=()=>{if(!String(getSelection()))inp.focus()};
-T('NexOS [Version 3.2.0]');T('Commands run on the NexOS file system (C:\\ = internal storage). Type HELP.');T('');
+T('NexOS [Version 3.2.1]');T('Commands run on the NexOS file system (C:\\ = internal storage). Type HELP.');T('');
 if(!(arg&&arg.bat)){PSM.on=true;psBanner()}
 prompt();setTimeout(()=>inp.focus(),380);
 if(arg&&arg.bat){ready.then(async()=>{const bp=arg.bat,bn=bp.split('/').pop();cwd=bp.slice(0,bp.lastIndexOf('/'))||'/';prompt();w.setTitle(bn+' - Terminal');put(esc(win(cwd)+'>'+bn));busy=true;stopBat=false;try{await runBat(bp,[])}catch(e){E(e&&e.message==='^C'?'^C':((e&&e.message)||String(e)))}busy=false;prompt();inp.focus()})}
@@ -2028,7 +2042,7 @@ const kv=a=>a.map(([k,v])=>`<div class="kv"><span>${k}</span><b>${esc(String(v))
 const REPO='https://github.com/tewtone66-cmd/NexOS';
 const PGS={
 about(){const ua=navigator.userAgent,and=(/Android ([\d.]+)/.exec(ua)||[])[1]||'?',mod=(/;\s*([^;)]+?)\s+Build/.exec(ua)||/Android [\d.]+;\s*([^;)]+)/.exec(ua)||[])[1]||'Unknown',chr=(/Chrome\/([\d.]+)/.exec(ua)||[])[1]||'?';
-return `<h3>About</h3><div class="abh"><div class="abl">${STAR}</div><div><h2>NexOS</h2><p>Version 3.2.0</p></div></div>${kv([['Edition','NexOS Alpha'],['Version','3.0.0 (alpha)'],['Device',mod],['Android',and],['WebView (Chrome)',chr],['Screen',innerWidth+' × '+innerHeight+' (UI '+Math.round(S.ui*100)+'%)'],['CPU cores',navigator.hardwareConcurrency||'?'],['Memory',navigator.deviceMemory?'≥ '+navigator.deviceMemory+' GB':'?'],['Storage access',granted===null?'…':granted?'Allowed':'Not allowed']])}<h4>Update</h4>${kv([['Channel','Alpha'],['Installed version','3.1.8'],['Updates','Installed manually from GitHub']])}<button class="pgb" data-k="go" data-v="${REPO}">Open GitHub</button><h4>What is new in 3.0.0</h4><ul><li>New virtual mouse with cursor states and motion blur</li><li>New taskbar and Start menu with search</li><li>Recycle Bin that really keeps deleted items</li><li>Settings with categories and search</li></ul>`},
+return `<h3>About</h3><div class="abh"><div class="abl">${STAR}</div><div><h2>NexOS</h2><p>Version 3.2.1</p></div></div>${kv([['Edition','NexOS Alpha'],['Version','3.0.0 (alpha)'],['Device',mod],['Android',and],['WebView (Chrome)',chr],['Screen',innerWidth+' × '+innerHeight+' (UI '+Math.round(S.ui*100)+'%)'],['CPU cores',navigator.hardwareConcurrency||'?'],['Memory',navigator.deviceMemory?'≥ '+navigator.deviceMemory+' GB':'?'],['Storage access',granted===null?'…':granted?'Allowed':'Not allowed']])}<h4>Update</h4>${kv([['Channel','Alpha'],['Installed version','3.1.8'],['Updates','Installed manually from GitHub']])}<button class="pgb" data-k="go" data-v="${REPO}">Open GitHub</button><h4>What is new in 3.0.0</h4><ul><li>New virtual mouse with cursor states and motion blur</li><li>New taskbar and Start menu with search</li><li>Recycle Bin that really keeps deleted items</li><li>Settings with categories and search</li></ul>`},
 update(){return `<h3>Update</h3>${kv([['Channel','Alpha'],['Installed version','3.1.8'],['Status','Updates are installed manually: rebuild the app from GitHub']])}<button class="pgb" data-k="go" data-v="${REPO}">Open GitHub</button>`},
 display(){return `<h3>Display & size</h3><h4>App size (whole interface)</h4><div class="step"><button data-k="ui" data-v="-1">&#8722;</button><b>${Math.round(S.ui*100)}%</b><button data-k="ui" data-v="1">+</button><button data-k="ui" data-v="0">Reset</button></div><h4>Desktop icon size</h4>${chips('is',[36,48,60,72],S.is,v=>({36:'Small',48:'Medium',60:'Large',72:'Extra large'})[v])}`},
 storage(){return `<h3>Storage</h3><h4>Access to your files</h4><div class="seg"><button data-k="perm" class="${granted?'sel':''}">${granted===null?'Checking…':granted?'Allowed':'Allow access to files'}</button></div>`},
@@ -2590,7 +2604,7 @@ if(typeof onLong==='function')onLong(sbtn,function(){pmenu()});
 (function(){try{document.body.classList.add('intro');setTimeout(function(){document.body.classList.remove('intro')},4200);var pw=document.getElementById('pw');if(pw)pw.onclick=function(){var sh=document.getElementById('shut');if(sh)sh.classList.add('wake');setTimeout(function(){location.reload()},520)}}catch(e){console.error(e)}})();
 /* WN-3.1.8b */
 (function(){
-var VER='3.2.0',B=document.body;
+var VER='3.2.1',B=document.body;
 /* ---- pause CSS animations while the app is in the background ---- */
 function vis(){B.classList.toggle('hid',document.hidden)}
 document.addEventListener('visibilitychange',vis);vis();
@@ -2610,12 +2624,10 @@ function sample(){
 addEventListener('pointerdown',function(){setTimeout(sample,60)},{passive:true,capture:true});
 /* ---- What's New ---- */
 var ITEMS=[
-['🧲','Move icons anywhere','Drop desktop icons on any free spot, with a snap grid'],
-['🔗','Desktop shortcuts','Drag a file or folder from File Explorer onto the desktop'],
-['🗑️','Drag to Recycle Bin','Works from the desktop and from File Explorer, also into the Recycle Bin window'],
-['📌','Reorder the taskbar','Hold and drag a pinned app to a new place'],
-['🖱️','New cursors','Resize, move, grab and no-drop shapes for the virtual mouse'],
-['⏱️','Fullscreen taskbar','Stays open for 5 seconds after every touch']
+['🔤','Select and copy text','Hold on text to select it (blue, like Windows). Drag to extend, then Copy from the small bar'],
+['🖱️','Works with the virtual mouse','Double click selects a word, triple click a paragraph, right click opens Copy / Paste'],
+['📋','Cut, copy, paste in text boxes','Right click or select text in any input'],
+['📂','Faster File Explorer','Lighter lists, smaller thumbnails and smoother search typing']
 ];
 function nlogo(){return '<svg viewBox="0 0 512 512"><path d="M168 368V144l176 224V144" fill="none" stroke="url(#nxg)" stroke-width="46" stroke-linecap="round" stroke-linejoin="round"/></svg>'}
 function showWN(force){
@@ -2797,6 +2809,85 @@ setInterval(function(){if(!doc.body.classList.contains('peek'))return;var dk=$('
  if(menuOpen||dk.matches(':hover')||(VM.on&&doc.elementsFromPoint(VM.x,VM.y).some(function(x){return x.id==='dock'||(x.closest&&x.closest('#dock'))})))peekKeep()},400);
 /* ---------- go ---------- */
 buildIcons(true);
+})();
+
+/* A2 3.2.1 - text selection (touch long-press, virtual mouse, real mouse) + copy bar */
+(function(){'use strict';
+var SELX='input,textarea,select,button,.row,.di,.dk,.tbar,.ni,.ib,svg,img,canvas,video,iframe,#cur,#pad,#vbtns,#ctx,#selbar,#dock,#start,.ftile,.drive,.btab';
+var EDIT='input,textarea,[contenteditable="true"]';
+var gs=function(){return window.getSelection()};
+var clip='';
+function el(n){return n&&n.nodeType===1?n:(n&&n.parentElement)}
+function selectable(n){n=el(n);if(!n||!n.closest)return false;if(n.closest(SELX))return false;return !!n.closest('.body,.tmo,.cro')}
+function editable(n){n=el(n);return n&&n.closest?n.closest(EDIT):null}
+function caret(x,y){var r=null;try{if(document.caretRangeFromPoint)r=document.caretRangeFromPoint(x,y);else if(document.caretPositionFromPoint){var p=document.caretPositionFromPoint(x,y);if(p){r=document.createRange();r.setStart(p.offsetNode,p.offset)}}}catch(e){}return r}
+function selText(){var a=document.activeElement;if(a&&/^(INPUT|TEXTAREA)$/.test(a.tagName)&&a.selectionStart!=null&&a.selectionEnd>a.selectionStart)return a.value.slice(a.selectionStart,a.selectionEnd);return String(gs())}
+function ensureBar(){var b=document.getElementById('selbar');if(!b){b=document.createElement('div');b.id='selbar';document.body.appendChild(b);
+ b.addEventListener('pointerdown',function(e){e.preventDefault();e.stopPropagation()},true);
+ b.addEventListener('mousedown',function(e){e.preventDefault()},true)}return b}
+function hideBar(){var b=document.getElementById('selbar');if(b)b.classList.remove('show')}
+function copyText(t){clip=t;var ok=false;
+ try{if(navigator.clipboard&&navigator.clipboard.writeText){navigator.clipboard.writeText(t).catch(function(){legacy(t)});ok=true}}catch(e){}
+ if(!ok)legacy(t);toast('Copied')}
+function legacy(t){try{if(document.execCommand('copy'))return}catch(e){}
+ var a=document.createElement('textarea');a.value=t;a.style.cssText='position:fixed;left:-999px;top:0;opacity:0';document.body.appendChild(a);var p=document.activeElement;a.select();try{document.execCommand('copy')}catch(e){}a.remove();try{p&&p.focus&&p.focus()}catch(e){}}
+function act(k,ed){
+ if(k==='copy'){var t=selText();if(t)copyText(t)}
+ else if(k==='all'){if(ed){ed.focus();ed.select()}else{var r=lastRegion||document.body,rg=document.createRange();rg.selectNodeContents(r);gs().removeAllRanges();gs().addRange(rg);showBar()}}
+ else if(k==='cut'&&ed){var t2=selText();if(t2){copyText(t2);var s=ed.selectionStart,e=ed.selectionEnd;ed.setRangeText('',s,e,'end');ed.dispatchEvent(new Event('input',{bubbles:true}))}}
+ else if(k==='paste'&&ed){var ins=function(t){if(t==null)return;var s=ed.selectionStart,e=ed.selectionEnd;ed.setRangeText(t,s,e,'end');ed.dispatchEvent(new Event('input',{bubbles:true}));ed.focus()};
+  try{navigator.clipboard.readText().then(function(t){ins(t||clip)}).catch(function(){ins(clip)})}catch(e){ins(clip)}}
+ hideBar()}
+var lastRegion=null;
+function showBar(ed){var t=selText();if(!t){hideBar();return}ed=ed||editable(document.activeElement);var rect=null;
+ if(ed&&/^(INPUT|TEXTAREA)$/.test(ed.tagName))rect=ed.getBoundingClientRect();
+ else{var s=gs();if(!s.rangeCount)return;rect=s.getRangeAt(0).getBoundingClientRect();if(!rect||(!rect.width&&!rect.height))return}
+ var b=ensureBar();var btn=[['copy','Copy']];if(ed){btn.unshift(['cut','Cut']);btn.push(['paste','Paste'])}btn.push(['all','Select all']);
+ b.innerHTML='';btn.forEach(function(q){var x=document.createElement('button');x.textContent=q[1];x.onclick=function(){act(q[0],ed)};b.appendChild(x)});
+ b.classList.add('show');var w=b.offsetWidth,h=b.offsetHeight,l=Math.max(6,Math.min(rect.left+rect.width/2-w/2,innerWidth-w-6)),tp=rect.top-h-8;if(tp<6)tp=Math.min(rect.bottom+8,innerHeight-h-6);b.style.left=l+'px';b.style.top=tp+'px'}
+/* word / block selection */
+function selWord(x,y){var c=caret(x,y);if(!c)return false;var s=gs();s.removeAllRanges();s.addRange(c);try{s.modify('move','backward','word');s.modify('extend','forward','word')}catch(e){}return String(s).trim().length>0}
+function selBlock(x,y){var c=caret(x,y);if(!c)return;var n=el(c.startContainer),b=n&&n.closest('p,li,pre,div,td,h1,h2,h3,h4,span');if(!b)return;var r=document.createRange();r.selectNodeContents(b);var s=gs();s.removeAllRanges();s.addRange(r)}
+/* custom engine for touch + virtual mouse */
+var drag=null,lp=0,clicks={n:0,t:0,x:0,y:0};
+document.addEventListener('pointerdown',function(e){
+ if(e.target&&e.target.closest&&e.target.closest('#selbar'))return;
+ var vm=e.pointerType==='mouse'&&e.pointerId===99,tc=e.pointerType==='touch';
+ if(!document.getElementById('selbar')||!document.getElementById('selbar').classList.contains('show')){}else hideBar();
+ if(!vm&&!tc){return}
+ var t=e.target;clearTimeout(lp);
+ if(editable(t)){if(vm){var now=Date.now();clicks=(now-clicks.t<450&&Math.hypot(e.clientX-clicks.x,e.clientY-clicks.y)<8)?{n:clicks.n+1,t:now,x:e.clientX,y:e.clientY}:{n:1,t:now,x:e.clientX,y:e.clientY};
+   if(clicks.n>=2){var ed=editable(t);setTimeout(function(){wordIn(ed)},0)}}return}
+ if(!selectable(t)){if(gs().rangeCount&&!gs().isCollapsed&&!(el(t).closest&&el(t).closest('#selbar')))gs().removeAllRanges();return}
+ lastRegion=el(t).closest('.body,.tmo,.cro');
+ if(vm){var n2=Date.now();clicks=(n2-clicks.t<450&&Math.hypot(e.clientX-clicks.x,e.clientY-clicks.y)<8)?{n:Math.min(3,clicks.n+1),t:n2,x:e.clientX,y:e.clientY}:{n:1,t:n2,x:e.clientX,y:e.clientY};
+  if(clicks.n===2){selWord(e.clientX,e.clientY);drag=null;showBar();return}
+  if(clicks.n===3){selBlock(e.clientX,e.clientY);drag=null;showBar();return}
+  var c=caret(e.clientX,e.clientY);gs().removeAllRanges();if(c)drag={pid:e.pointerId,n:c.startContainer,o:c.startOffset,x:e.clientX,y:e.clientY,moved:false}}
+ else{var x0=e.clientX,y0=e.clientY,pid=e.pointerId;gs().removeAllRanges();lp=setTimeout(function(){if(selWord(x0,y0)){var s=gs(),r=s.getRangeAt(0);drag={pid:pid,n:r.startContainer,o:r.startOffset,x:x0,y:y0,moved:true,touch:true};try{navigator.vibrate&&navigator.vibrate(12)}catch(_){}}},450)}
+},true);
+document.addEventListener('pointermove',function(e){
+ if(!drag&&lp&&e.pointerType==='touch'){return}
+ if(!drag||e.pointerId!==drag.pid)return;
+ if(!drag.moved){if(Math.hypot(e.clientX-drag.x,e.clientY-drag.y)<4)return;drag.moved=true}
+ var c=caret(e.clientX,e.clientY);if(!c)return;try{gs().setBaseAndExtent(drag.n,drag.o,c.startContainer,c.startOffset)}catch(_){}},true);
+function endDrag(e){clearTimeout(lp);if(!drag||(e&&e.pointerId!==drag.pid))return;var d=drag;drag=null;if(d.moved&&!gs().isCollapsed)showBar()}
+document.addEventListener('pointerup',endDrag,true);document.addEventListener('pointercancel',function(e){clearTimeout(lp);if(drag&&e.pointerId===drag.pid)drag=null},true);
+/* stop scrolling while a touch selection drag is active; cancel the long-press timer if the finger scrolls */
+document.addEventListener('touchmove',function(e){if(drag&&drag.touch&&e.cancelable)e.preventDefault();else clearTimeout(lp)},{passive:false,capture:true});
+function wordIn(ed){if(!ed||ed.selectionStart==null)return;var v=ed.value,p=ed.selectionStart,a=p,b=p;while(a>0&&/\S/.test(v[a-1]))a--;while(b<v.length&&/\S/.test(v[b]))b++;ed.setSelectionRange(a,b);showBar(ed)}
+/* real mouse: native selection, we only add the bar after it ends */
+document.addEventListener('mouseup',function(e){if(e.isTrusted&&!drag)setTimeout(function(){var ed=editable(e.target);if((ed&&selText())||(!ed&&selectable(e.target)&&!gs().isCollapsed))showBar(ed)},0)},true);
+document.addEventListener('dblclick',function(e){if(!e.isTrusted)return;var ed=editable(e.target);setTimeout(function(){if(selText())showBar(ed)},0)},true);
+/* bar disappears when the selection goes away or the view scrolls */
+document.addEventListener('selectionchange',function(){var a=document.activeElement;var inp=a&&/^(INPUT|TEXTAREA)$/.test(a.tagName)&&a.selectionEnd>a.selectionStart;if(!inp&&gs().isCollapsed)hideBar()});
+document.addEventListener('scroll',hideBar,true);
+/* context menu: Copy / Select all where there is text */
+document.addEventListener('contextmenu',function(e){var ed=editable(e.target),has=selText();
+ if(ed&&!/^(button|submit|checkbox|radio|range|color|file)$/.test(ed.type||'')){e.preventDefault();e.stopImmediatePropagation();hideBar();ed.focus();
+  ctx(e.clientX,e.clientY,[['Cut',function(){act('cut',ed)},'Ctrl+X',!has],['Copy',function(){act('copy',ed)},'Ctrl+C',!has],['Paste',function(){act('paste',ed)},'Ctrl+V'],null,['Select all',function(){act('all',ed)},'Ctrl+A']]);return}
+ if(has&&selectable(e.target)){e.preventDefault();e.stopImmediatePropagation();hideBar();ctx(e.clientX,e.clientY,[['Copy',function(){act('copy')},'Ctrl+C'],['Select all',function(){act('all')},'Ctrl+A']])}},true);
+console.log('NexOS text selection ready');
 })();
 
 </script><!--NEXOS-END--></body></html>
