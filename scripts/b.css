@@ -1,0 +1,48 @@
+/* TBX-3.2.3: full-width taskbar relayout, fit, perf, quick-settings flyout */
+body.tb-full #dock{display:grid;grid-template-columns:1fr auto auto 1fr auto;column-gap:12px;align-items:center;justify-content:stretch;padding:0 16px;border-top:1px solid #ffffff1c!important;box-shadow:none!important}
+body.tb-full #dock>.dv{display:none}
+body.tb-full #startBtn{grid-column:2;grid-row:1}
+body.tb-full #tasks{grid-column:3;grid-row:1;min-width:0}
+body.tb-full #tray{grid-column:4;grid-row:1;justify-self:end;margin-left:0}
+body.tb-full #clock{grid-column:5;grid-row:1}
+body.tb-full.tb-left #dock{grid-template-columns:auto auto 1fr auto auto;justify-content:stretch}
+body.tb-full.tb-left #startBtn{grid-column:1}
+body.tb-full.tb-left #tasks{grid-column:2}
+body.tb-full.tb-left #tray{grid-column:4;margin-left:0}
+#dock.fit #tasks{gap:var(--tbg,6px)}
+#dock.fit .dk{width:calc(var(--tbs,62px)*var(--tbk,1));height:calc(var(--tbs,62px)*var(--tbk,1))}
+#dock.crowd #tasks{overflow-x:auto;overflow-y:hidden;scrollbar-width:none;touch-action:pan-x}
+#dock.crowd #tasks::-webkit-scrollbar{display:none}
+#dock:not(.hov) .dk{will-change:auto}
+#tasks .dk{contain:layout style}
+#trf{width:min(344px,calc(100vw - 16px));padding:14px;border-radius:22px;max-height:calc(100vh - 140px);overflow:auto;scrollbar-width:none}
+#trf::-webkit-scrollbar{display:none}
+#trf.show{animation:qsin .18s cubic-bezier(.2,.9,.3,1.05)}
+@keyframes qsin{from{opacity:0;transform:translateY(10px) scale(.97)}to{opacity:1;transform:none}}
+.qs{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.qt{display:flex;align-items:center;gap:10px;min-width:0;padding:11px 12px;border:0;border-radius:16px;background:var(--hov);color:var(--txt);text-align:left;cursor:pointer;font:inherit;transition:background .15s,transform .12s}
+.qt:active{transform:scale(.97)}
+.qt .qi{flex:none;width:34px;height:34px;border-radius:50%;display:grid;place-items:center;background:#8883}
+.qt .qi svg{width:18px;height:18px}
+.qt .qx{min-width:0;display:flex;flex-direction:column}
+.qt b{font-size:12.5px;font-weight:700;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.qt small{font-size:11px;opacity:.72;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.qt.on{background:var(--acc,#4f7cff);color:var(--accT,#fff)}
+.qt.on .qi{background:#ffffff3a}
+.qb{margin-top:10px;padding:14px;border-radius:18px;background:var(--surf2,#ffffff12)}
+.qh{display:flex;align-items:flex-end;justify-content:space-between;gap:10px}
+.qh b{font-size:34px;line-height:1;font-weight:700;font-variant-numeric:tabular-nums}
+.qh b small{font-size:16px;opacity:.7;margin-left:2px}
+.qh>span{text-align:right;font-size:12.5px;font-weight:600;line-height:1.35}
+.qh em{font-style:normal;font-weight:500;opacity:.7;font-size:11.5px}
+.qbar{position:relative;height:12px;border-radius:6px;background:#8884;margin-top:12px;overflow:hidden}
+.qbar i{display:block;height:100%;border-radius:6px;background:linear-gradient(90deg,#3ddc84,#7ef0b0);transition:width .6s cubic-bezier(.2,.8,.3,1)}
+.qb.lo .qbar i{background:linear-gradient(90deg,#ff5a5a,#ff8a6a)}
+.qb.ch .qbar i{background:linear-gradient(90deg,#2fd27a,#8bf5bd);position:relative}
+.qb.ch .qbar i::after{content:"";position:absolute;inset:0;background:repeating-linear-gradient(115deg,#fff0 0 10px,#ffffff55 10px 20px);background-size:28px 100%;animation:qchg 1s linear infinite}
+@keyframes qchg{to{background-position:28px 0}}
+body.perf .qb.ch .qbar i::after{animation:none}
+.qtip{margin-top:10px;font-size:11.5px;opacity:.8}
+.qlink{display:block;width:100%;margin-top:10px;padding:11px;border:0;border-radius:14px;background:var(--hov);color:var(--txt);font:inherit;font-size:12.5px;font-weight:600;cursor:pointer}
+.qlink:active{transform:scale(.98)}
+@media (max-width:640px){body.tb-full #dock{column-gap:6px;padding:0 8px}body.tb-full #tray .tri{padding:6px 5px}body.tb-full #tray .tri span{display:none}body.tb-full #clock small{display:none}}

@@ -69,3 +69,5 @@
 - v3.2.1 (SEL-3.2.1، بخش A2): انتخاب متن آبی (::selection) داخل .body/.tmo/.cro، موتور انتخاب سفارشی برای لمس (نگه‌داشتن ۴۵۰ms = کلمه، ادامه با کشیدن) و ماوس مجازی (pointerId 99: کلیک دوم=کلمه، سوم=پاراگراف، درگ=بازه)، نوار شناور #selbar (Copy/Cut/Paste/Select all) و منوی راست‌کلیک برای متن و input ها. کلیپبورد: navigator.clipboard با fallback به execCommand و حافظه داخلی. فایل‌منیجر: fragment، content-visibility روی ردیف‌ها، تامبنیل زیر ۲.۵MB، debounce جستجو.
 
 - v3.2.2 (ZOOM-3.2.2، بخش G): زوم مرورگر ۱۰..۲۵۰٪، پیش‌فرض DZ=50، مقدار 0 = «Auto/Fit» (دکمه‌ی Auto)، فلگ zx (انتخاب صریح کاربر/سایت ذخیره‌شده). Java: cssWidth در حالت پنجره‌ای (<۸۵٪ عرض صفحه) و zoom پیش‌فرض یا Auto، عرض layout = w/PAGE_K (شبیه موبایل) و سقف عرض ۱۰۰۰۰. نیاز به build جدید APK.
+
+- v3.2.3 (TBX-3.2.3، بخش B): حالت tb-full با grid بازچینی شد (استارت+برنامه‌ها وسط یا چپ، tray و ساعت راست؛ جداکننده‌ها مخفی). taskFit: اگه dock سرریز کنه gap و سایز آیکن کم میشه (کلاس fit و --tbg/--tbk). will-change فقط هنگام hover. فلای‌اوت tray کامل بازنویسی شد (کاشی‌های Network/Performance/Dark/VM، کارت باتری با انیمیشن شارژ، دکمه All settings). fly/flyPos/handler داخل IIFE تعویض متنی شدن.

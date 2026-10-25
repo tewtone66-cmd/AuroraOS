@@ -609,6 +609,56 @@ body.lite .win{border-color:var(--line)}
 @keyframes selbin{from{opacity:0;transform:translateY(4px) scale(.96)}to{opacity:1;transform:none}}
 
 .bz .bza{min-width:44px}.bz .bza.on{background:var(--acc);color:#fff}
+/*TBX-3.2.3*/
+/* TBX-3.2.3: full-width taskbar relayout, fit, perf, quick-settings flyout */
+body.tb-full #dock{display:grid;grid-template-columns:1fr auto auto 1fr auto;column-gap:12px;align-items:center;justify-content:stretch;padding:0 16px;border-top:1px solid #ffffff1c!important;box-shadow:none!important}
+body.tb-full #dock>.dv{display:none}
+body.tb-full #startBtn{grid-column:2;grid-row:1}
+body.tb-full #tasks{grid-column:3;grid-row:1;min-width:0}
+body.tb-full #tray{grid-column:4;grid-row:1;justify-self:end;margin-left:0}
+body.tb-full #clock{grid-column:5;grid-row:1}
+body.tb-full.tb-left #dock{grid-template-columns:auto auto 1fr auto auto;justify-content:stretch}
+body.tb-full.tb-left #startBtn{grid-column:1}
+body.tb-full.tb-left #tasks{grid-column:2}
+body.tb-full.tb-left #tray{grid-column:4;margin-left:0}
+#dock.fit #tasks{gap:var(--tbg,6px)}
+#dock.fit .dk{width:calc(var(--tbs,62px)*var(--tbk,1));height:calc(var(--tbs,62px)*var(--tbk,1))}
+#dock.crowd #tasks{overflow-x:auto;overflow-y:hidden;scrollbar-width:none;touch-action:pan-x}
+#dock.crowd #tasks::-webkit-scrollbar{display:none}
+#dock:not(.hov) .dk{will-change:auto}
+#tasks .dk{contain:layout style}
+#trf{width:min(344px,calc(100vw - 16px));padding:14px;border-radius:22px;max-height:calc(100vh - 140px);overflow:auto;scrollbar-width:none}
+#trf::-webkit-scrollbar{display:none}
+#trf.show{animation:qsin .18s cubic-bezier(.2,.9,.3,1.05)}
+@keyframes qsin{from{opacity:0;transform:translateY(10px) scale(.97)}to{opacity:1;transform:none}}
+.qs{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.qt{display:flex;align-items:center;gap:10px;min-width:0;padding:11px 12px;border:0;border-radius:16px;background:var(--hov);color:var(--txt);text-align:left;cursor:pointer;font:inherit;transition:background .15s,transform .12s}
+.qt:active{transform:scale(.97)}
+.qt .qi{flex:none;width:34px;height:34px;border-radius:50%;display:grid;place-items:center;background:#8883}
+.qt .qi svg{width:18px;height:18px}
+.qt .qx{min-width:0;display:flex;flex-direction:column}
+.qt b{font-size:12.5px;font-weight:700;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.qt small{font-size:11px;opacity:.72;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.qt.on{background:var(--acc,#4f7cff);color:var(--accT,#fff)}
+.qt.on .qi{background:#ffffff3a}
+.qb{margin-top:10px;padding:14px;border-radius:18px;background:var(--surf2,#ffffff12)}
+.qh{display:flex;align-items:flex-end;justify-content:space-between;gap:10px}
+.qh b{font-size:34px;line-height:1;font-weight:700;font-variant-numeric:tabular-nums}
+.qh b small{font-size:16px;opacity:.7;margin-left:2px}
+.qh>span{text-align:right;font-size:12.5px;font-weight:600;line-height:1.35}
+.qh em{font-style:normal;font-weight:500;opacity:.7;font-size:11.5px}
+.qbar{position:relative;height:12px;border-radius:6px;background:#8884;margin-top:12px;overflow:hidden}
+.qbar i{display:block;height:100%;border-radius:6px;background:linear-gradient(90deg,#3ddc84,#7ef0b0);transition:width .6s cubic-bezier(.2,.8,.3,1)}
+.qb.lo .qbar i{background:linear-gradient(90deg,#ff5a5a,#ff8a6a)}
+.qb.ch .qbar i{background:linear-gradient(90deg,#2fd27a,#8bf5bd);position:relative}
+.qb.ch .qbar i::after{content:"";position:absolute;inset:0;background:repeating-linear-gradient(115deg,#fff0 0 10px,#ffffff55 10px 20px);background-size:28px 100%;animation:qchg 1s linear infinite}
+@keyframes qchg{to{background-position:28px 0}}
+body.perf .qb.ch .qbar i::after{animation:none}
+.qtip{margin-top:10px;font-size:11.5px;opacity:.8}
+.qlink{display:block;width:100%;margin-top:10px;padding:11px;border:0;border-radius:14px;background:var(--hov);color:var(--txt);font:inherit;font-size:12.5px;font-weight:600;cursor:pointer}
+.qlink:active{transform:scale(.98)}
+@media (max-width:640px){body.tb-full #dock{column-gap:6px;padding:0 8px}body.tb-full #tray .tri{padding:6px 5px}body.tb-full #tray .tri span{display:none}body.tb-full #clock small{display:none}}
+
 </style><!--NEXOS-END--></head><body class="booting"><svg width="0" height="0" style="position:absolute" aria-hidden="true"><defs><linearGradient id="nxg" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#22d3ee"/><stop offset="1" stop-color="#8b5cf6"/></linearGradient></defs></svg><div id="boot"><!--NEXOS-START--><div id="nxb"><div class="halo"></div><svg viewBox="0 0 512 512"><path class="p" pathLength="100" d="M168 368V144l176 224V144" fill="none" stroke="url(#nxg)" stroke-width="40" stroke-linecap="round" stroke-linejoin="round"/></svg><h1><span>N</span><span>e</span><span>x</span><span>O</span><span>S</span></h1><div class="bar"><i></i></div></div><!--NEXOS-END--><div class="bd"><i></i><i></i><i></i></div></div><div id="shut"><svg class="lg" viewBox="0 0 512 512"><path d="M168 368V144l176 224V144" fill="none" stroke="url(#nxg)" stroke-width="40" stroke-linecap="round" stroke-linejoin="round"/></svg><div class="slot"><div class="sm"><span>Shutting down</span><div class="bd"><i></i><i></i><i></i></div></div><button id="pw" aria-label="Power on"><svg viewBox="0 0 24 24"><path d="M12 3v8M6.6 6.8a8 8 0 1 0 10.8 0"/></svg></button></div><div class="hint">Tap to power on</div></div><script>(function(){var t0=Date.now(),d=0;function go(){if(d)return;d=1;var b=document.getElementById("boot");document.body.classList.remove("booting");if(b){b.classList.add("out");setTimeout(function(){b.remove()},800)}}function chk(){setTimeout(go,Math.max(0,1700-(Date.now()-t0)))}if(document.readyState==="complete")chk();else addEventListener("load",chk);setTimeout(go,5000)})();</script>
 <svg width="0" height="0" style="position:absolute"><defs><linearGradient id="gs" x1="0" y1="0" x2="1" y2="1"><stop stop-color="#8f9bff"/><stop offset="1" stop-color="#c26bff"/></linearGradient><linearGradient id="gl" x1="0" y1="1" x2="1" y2="0"><stop stop-color="#34d399"/><stop offset="1" stop-color="#22d3ee"/></linearGradient><linearGradient id="gr" x1="1" y1="1" x2="0" y2="0"><stop stop-color="#a78bfa"/><stop offset="1" stop-color="#22d3ee"/></linearGradient><linearGradient id="gw" x1="0" y1="0" x2="1" y2="0"><stop stop-color="#5eead4"/><stop offset="1" stop-color="#c4b5fd"/></linearGradient></defs></svg>
 <div id="desk"><div id="icons"></div></div>
@@ -1887,7 +1937,7 @@ for(const k of Object.keys(W)){let a='',t='';try{t=$('.tbar span',W[k].el).textC
 if(!hit)throw psErr('Cannot find a process with the specified name or Id.');return[]};
 PSCMD['start-process']=async c=>{const nm=psLo(psStr(psAval(c,0,'filepath','name'))).replace(/\.exe$/,'');const id=PSAPPS[nm]||(A[nm]?nm:null);if(!id||!A[id])throw psErr('This command cannot be run due to the error: The system cannot find the file specified.');
 const rest=c.pos.slice(1).map(psStr);let arg;if(id==='code'&&rest.length){try{const r=await rp(rest[0]);if(r.it&&!r.it.isDirectory)arg={path:r.path}}catch(e){}}openApp(id,arg);return[]};
-PSCMD.cmd=c=>{PSM.on=false;PSM.nested=false;w.setTitle('Terminal');T('NexOS [Version 3.2.2]');return[]};
+PSCMD.cmd=c=>{PSM.on=false;PSM.nested=false;w.setTitle('Terminal');T('NexOS [Version 3.2.3]');return[]};
 PSCMD.exit=c=>{if(PSM.nested){PSM.on=false;PSM.nested=false;w.setTitle('Terminal')}else closeW(w.id,true);return[]};
 PSCMD.hostname=c=>['NEXOS-PC'];PSCMD.whoami=c=>['nexos-pc\\user'];
 PSCMD.systeminfo=async c=>{let m='';try{const s=await NF.sysInfo();const GB=1073741824;m='Total Physical Memory:     '+Math.round(s.total/1048576).toLocaleString('en-US')+' MB\nAvailable Physical Memory: '+Math.round(s.avail/1048576).toLocaleString('en-US')+' MB\nProcessors:                '+(s.cores||'?')+' core(s)'}catch(e){}
@@ -1934,7 +1984,7 @@ if(/^[a-z]:$/i.test(c)){if(c.toLowerCase()!=='c:')E('The system cannot find the 
 switch(c){
 case'help':case'?':HELP.forEach(T);break;
 case'cls':case'clear':out.innerHTML='';break;
-case'ver':T('');T('NexOS [Version 3.2.2]');T('');break;
+case'ver':T('');T('NexOS [Version 3.2.3]');T('');break;
 case'date':{const d=new Date();T('The current date is: '+['Sun','Mon','Tue','Wed','Thu','Fri','Sat'][d.getDay()]+' '+pad2(d.getMonth()+1)+'/'+pad2(d.getDate())+'/'+d.getFullYear());break}
 case'time':{const d=new Date();T('The current time is: '+pad2(d.getHours())+':'+pad2(d.getMinutes())+':'+pad2(d.getSeconds())+'.'+pad2(Math.floor(d.getMilliseconds()/10)));break}
 case'pwd':T(win(cwd));break;
@@ -1962,7 +2012,7 @@ if(line.trim()){hist.push(line);if(hist.length>100)hist.shift()}hi=hist.length;b
 else if(e.key==='ArrowUp'){e.preventDefault();if(hi>0){hi--;inp.value=hist[hi]}}
 else if(e.key==='ArrowDown'){e.preventDefault();if(hi<hist.length-1){hi++;inp.value=hist[hi]}else{hi=hist.length;inp.value=''}}};
 tm.onclick=()=>{if(!String(getSelection()))inp.focus()};
-T('NexOS [Version 3.2.2]');T('Commands run on the NexOS file system (C:\\ = internal storage). Type HELP.');T('');
+T('NexOS [Version 3.2.3]');T('Commands run on the NexOS file system (C:\\ = internal storage). Type HELP.');T('');
 if(!(arg&&arg.bat)){PSM.on=true;psBanner()}
 prompt();setTimeout(()=>inp.focus(),380);
 if(arg&&arg.bat){ready.then(async()=>{const bp=arg.bat,bn=bp.split('/').pop();cwd=bp.slice(0,bp.lastIndexOf('/'))||'/';prompt();w.setTitle(bn+' - Terminal');put(esc(win(cwd)+'>'+bn));busy=true;stopBat=false;try{await runBat(bp,[])}catch(e){E(e&&e.message==='^C'?'^C':((e&&e.message)||String(e)))}busy=false;prompt();inp.focus()})}
@@ -2043,7 +2093,7 @@ const kv=a=>a.map(([k,v])=>`<div class="kv"><span>${k}</span><b>${esc(String(v))
 const REPO='https://github.com/tewtone66-cmd/NexOS';
 const PGS={
 about(){const ua=navigator.userAgent,and=(/Android ([\d.]+)/.exec(ua)||[])[1]||'?',mod=(/;\s*([^;)]+?)\s+Build/.exec(ua)||/Android [\d.]+;\s*([^;)]+)/.exec(ua)||[])[1]||'Unknown',chr=(/Chrome\/([\d.]+)/.exec(ua)||[])[1]||'?';
-return `<h3>About</h3><div class="abh"><div class="abl">${STAR}</div><div><h2>NexOS</h2><p>Version 3.2.2</p></div></div>${kv([['Edition','NexOS Alpha'],['Version','3.0.0 (alpha)'],['Device',mod],['Android',and],['WebView (Chrome)',chr],['Screen',innerWidth+' × '+innerHeight+' (UI '+Math.round(S.ui*100)+'%)'],['CPU cores',navigator.hardwareConcurrency||'?'],['Memory',navigator.deviceMemory?'≥ '+navigator.deviceMemory+' GB':'?'],['Storage access',granted===null?'…':granted?'Allowed':'Not allowed']])}<h4>Update</h4>${kv([['Channel','Alpha'],['Installed version','3.1.8'],['Updates','Installed manually from GitHub']])}<button class="pgb" data-k="go" data-v="${REPO}">Open GitHub</button><h4>What is new in 3.0.0</h4><ul><li>New virtual mouse with cursor states and motion blur</li><li>New taskbar and Start menu with search</li><li>Recycle Bin that really keeps deleted items</li><li>Settings with categories and search</li></ul>`},
+return `<h3>About</h3><div class="abh"><div class="abl">${STAR}</div><div><h2>NexOS</h2><p>Version 3.2.3</p></div></div>${kv([['Edition','NexOS Alpha'],['Version','3.0.0 (alpha)'],['Device',mod],['Android',and],['WebView (Chrome)',chr],['Screen',innerWidth+' × '+innerHeight+' (UI '+Math.round(S.ui*100)+'%)'],['CPU cores',navigator.hardwareConcurrency||'?'],['Memory',navigator.deviceMemory?'≥ '+navigator.deviceMemory+' GB':'?'],['Storage access',granted===null?'…':granted?'Allowed':'Not allowed']])}<h4>Update</h4>${kv([['Channel','Alpha'],['Installed version','3.1.8'],['Updates','Installed manually from GitHub']])}<button class="pgb" data-k="go" data-v="${REPO}">Open GitHub</button><h4>What is new in 3.0.0</h4><ul><li>New virtual mouse with cursor states and motion blur</li><li>New taskbar and Start menu with search</li><li>Recycle Bin that really keeps deleted items</li><li>Settings with categories and search</li></ul>`},
 update(){return `<h3>Update</h3>${kv([['Channel','Alpha'],['Installed version','3.1.8'],['Status','Updates are installed manually: rebuild the app from GitHub']])}<button class="pgb" data-k="go" data-v="${REPO}">Open GitHub</button>`},
 display(){return `<h3>Display & size</h3><h4>App size (whole interface)</h4><div class="step"><button data-k="ui" data-v="-1">&#8722;</button><b>${Math.round(S.ui*100)}%</b><button data-k="ui" data-v="1">+</button><button data-k="ui" data-v="0">Reset</button></div><h4>Desktop icon size</h4>${chips('is',[36,48,60,72],S.is,v=>({36:'Small',48:'Medium',60:'Large',72:'Extra large'})[v])}`},
 storage(){return `<h3>Storage</h3><h4>Access to your files</h4><div class="seg"><button data-k="perm" class="${granted?'sel':''}">${granted===null?'Checking…':granted?'Allowed':'Allow access to files'}</button></div>`},
@@ -2386,14 +2436,23 @@ var trf=document.createElement('div');trf.id='trf';document.body.appendChild(trf
 function draw(){if(!tray)return;var c=navigator.connection,on=navigator.onLine!==false,t=c&&c.type,h='<button class="tri" id="trNet" title="Network">'+(!on?ico.off:(t==='cellular'?ico.cell:ico.wifi))+'</button>';
  if(BAT){var p=Math.round(BAT.level*100);h+='<button class="tri" id="trBat" title="Battery '+p+'%">'+batIco(BAT.level,BAT.charging)+'<span>'+p+'%</span></button>'}
  tray.innerHTML=h}
-function fly(){var c=navigator.connection,on=navigator.onLine!==false,h='';
- if(BAT){var p=Math.round(BAT.level*100),tm=BAT.charging?BAT.chargingTime:BAT.dischargingTime,ts=(isFinite(tm)&&tm>0)?Math.floor(tm/3600)+' h '+Math.round(tm%3600/60)+' min '+(BAT.charging?'until full':'remaining'):'';
-  h+='<div class="tfr"><b>Battery</b><span>'+p+'% · '+(BAT.charging?'Charging':'On battery')+(ts?' · '+ts:'')+'</span><div class="tfb"><i style="width:'+p+'%"></i></div></div>'}
- h+='<div class="tfr"><b>Network</b><span>'+(on?('Online'+((c&&c.type&&c.type!=='unknown')?' · '+c.type:((c&&c.effectiveType)?' · '+c.effectiveType:''))+((c&&c.downlink)?' · '+c.downlink+' Mbps':'')):'Offline')+'</span></div>'
-  +'<div class="tfg"><button data-q="perf" class="'+(S.perf?'on':'')+'">Performance mode</button><button data-q="theme">Dark / Light</button></div>';
+function cap(x){return x?x.charAt(0).toUpperCase()+x.slice(1):x}
+function qt(k,ic,t,sub,on){return '<button class="qt'+(on?' on':'')+'" data-q="'+k+'"><span class="qi">'+ic+'</span><span class="qx"><b>'+t+'</b><small>'+sub+'</small></span></button>'}
+function fly(){var c=navigator.connection,on=navigator.onLine!==false,dark=document.documentElement.dataset.theme==='dark',h='';
+ var ty=!on?'Offline':((c&&c.type&&c.type!=='unknown'&&c.type!=='none')?cap(c.type):(c&&c.effectiveType?c.effectiveType.toUpperCase():'Online'));
+ var sub=!on?'No connection':([c&&c.downlink?c.downlink+' Mbps':'',c&&c.saveData?'Data saver':''].filter(Boolean).join(' · ')||'Connected');
+ h+='<div class="qs">'+qt('net',!on?ico.off:((c&&c.type==='cellular')?ico.cell:ico.wifi),ty,sub,on)
+  +qt('perf',svg('<path d="M13 2L4 14h7l-1 8 9-12h-7z"/>'),'Performance',S.perf?'On':'Off',!!S.perf)
+  +qt('theme',svg('<path d="M21 13A9 9 0 1 1 11 3a7 7 0 0 0 10 10z"/>'),'Dark mode',dark?'On':'Off',dark)
+  +qt('vm',svg('<rect x="6" y="3" width="12" height="18" rx="6"/><path d="M12 3v7"/>'),'Virtual mouse'.slice(0,0)+'Mouse',VM.on?'On':'Off',!!VM.on)+'</div>';
+ if(BAT){var p=Math.round(BAT.level*100),ch=!!BAT.charging,tm=ch?BAT.chargingTime:BAT.dischargingTime,hr=Math.floor(tm/3600),mn=Math.round(tm%3600/60),
+   ts=(isFinite(tm)&&tm>0)?((hr?hr+' h ':'')+mn+' min '+(ch?'to full':'left')):'',stt=(p>=100&&ch)?'Fully charged':(ch?'Charging':'On battery');
+  h+='<div class="qb'+(ch?' ch':'')+((p<20&&!ch)?' lo':'')+'"><div class="qh"><b>'+p+'<small>%</small></b><span>'+stt+(ts?'<br><em>'+ts+'</em>':'')+'</span></div><div class="qbar"><i style="width:'+p+'%"></i></div>'
+   +((p<20&&!ch)?'<div class="qtip">Battery is low. Performance mode can help it last longer.</div>':'')+'</div>'}
+ h+='<button class="qlink" data-q="set">All settings</button>';
  trf.innerHTML=h}
-function flyPos(){var d=dock.getBoundingClientRect();trf.style.bottom=Math.max(8,innerHeight-d.top+10)+'px'}
-trf.addEventListener('click',function(e){e.stopPropagation();var q=e.target.closest&&e.target.closest('[data-q]');if(!q)return;if(q.dataset.q==='perf')setPerf(!S.perf);else if(q.dataset.q==='theme'&&typeof togTheme==='function')togTheme();fly()});
+function flyPos(){var d=dock.getBoundingClientRect(),t=tray.getBoundingClientRect(),w=Math.min(344,innerWidth-16);trf.style.bottom=Math.max(8,innerHeight-d.top+10)+'px';var r=t.width?Math.max(8,innerWidth-t.right-6):12;trf.style.right=Math.max(8,Math.min(r,innerWidth-w-8))+'px'}
+trf.addEventListener('click',function(e){e.stopPropagation();var q=e.target.closest&&e.target.closest('[data-q]');if(!q)return;var k=q.dataset.q;if(k==='perf')setPerf(!S.perf);else if(k==='theme'&&typeof togTheme==='function')togTheme();else if(k==='vm'){vmSet(!VM.on)}else if(k==='net'||k==='set'){closeMenus();openApp('set');return}fly();draw()});
 if(tray)tray.addEventListener('click',function(e){e.stopPropagation();var open=trf.classList.contains('show');closeMenus();if(open)return;fly();flyPos();trf.classList.add('show');menuOpen=true;sync()});
 if(navigator.getBattery)navigator.getBattery().then(function(b){BAT=b;['levelchange','chargingchange','chargingtimechange','dischargingtimechange'].forEach(function(n){b.addEventListener(n,function(){draw();if(trf.classList.contains('show'))fly()})});draw()}).catch(function(){});
 addEventListener('online',draw);addEventListener('offline',draw);if(navigator.connection&&navigator.connection.addEventListener)navigator.connection.addEventListener('change',draw);
@@ -2605,7 +2664,7 @@ if(typeof onLong==='function')onLong(sbtn,function(){pmenu()});
 (function(){try{document.body.classList.add('intro');setTimeout(function(){document.body.classList.remove('intro')},4200);var pw=document.getElementById('pw');if(pw)pw.onclick=function(){var sh=document.getElementById('shut');if(sh)sh.classList.add('wake');setTimeout(function(){location.reload()},520)}}catch(e){console.error(e)}})();
 /* WN-3.1.8b */
 (function(){
-var VER='3.2.2',B=document.body;
+var VER='3.2.3',B=document.body;
 /* ---- pause CSS animations while the app is in the background ---- */
 function vis(){B.classList.toggle('hid',document.hidden)}
 document.addEventListener('visibilitychange',vis);vis();
@@ -2625,10 +2684,11 @@ function sample(){
 addEventListener('pointerdown',function(){setTimeout(sample,60)},{passive:true,capture:true});
 /* ---- What's New ---- */
 var ITEMS=[
-['🔍','Zoom 10% to 250%','Zoom out much further to see a full PC page'],
-['📐','Auto (Fit)','New Auto button fits the page to the window instead of a 0% zoom'],
-['⭐','Default zoom is 50%','New pages open at 50%; Reset goes back to it'],
-['🪟','Windowed browser','When the window is not full width the page now fits it automatically until you pick a zoom']
+['🪟','Full-width taskbar fixed','Start and apps sit in the middle (or left), tray and clock stay on the right'],
+['📏','Always fits','When many apps are pinned, gaps and icons shrink so none gets cut off'],
+['⚡','Quick settings','New Network / Performance / Dark mode / Virtual mouse tiles'],
+['🔋','New battery card','Big percentage, animated charging bar, time left and low-battery tip'],
+['🚀','Lighter taskbar','Fewer GPU layers while idle']
 ];
 function nlogo(){return '<svg viewBox="0 0 512 512"><path d="M168 368V144l176 224V144" fill="none" stroke="url(#nxg)" stroke-width="46" stroke-linecap="round" stroke-linejoin="round"/></svg>'}
 function showWN(force){
@@ -2891,4 +2951,17 @@ document.addEventListener('contextmenu',function(e){var ed=editable(e.target),ha
 console.log('NexOS text selection ready');
 })();
 
+/* TBX-3.2.3 - keep every pinned app visible when the dock is crowded */
+(function(){var dk=$('#dock'),tk=$('#tasks'),raf=0;if(!dk||!tk)return;
+function over(){return dk.scrollWidth>dk.clientWidth+1||tk.scrollWidth>tk.clientWidth+1}
+function fit(){raf=0;dk.classList.remove('fit','crowd');dk.style.removeProperty('--tbg');dk.style.removeProperty('--tbk');if(!over())return;dk.classList.add('fit');
+ var gs=[12,8,5,3],ks=[1,.92,.84,.76,.68,.6],done=false;
+ for(var i=0;i<ks.length&&!done;i++){dk.style.setProperty('--tbk',ks[i]);for(var j=0;j<gs.length;j++){dk.style.setProperty('--tbg',gs[j]+'px');if(!over()){done=true;break}}}if(!done)dk.classList.add('crowd')}
+function soon(){if(!raf)raf=requestAnimationFrame(fit)}
+var _du=dockUpdate;dockUpdate=function(){var r=_du.apply(this,arguments);soon();return r};
+var _at=applyTb;applyTb=function(){var r=_at.apply(this,arguments);soon();return r};
+addEventListener('resize',soon);addEventListener('orientationchange',soon);
+try{new MutationObserver(soon).observe(tk,{childList:true})}catch(e){}
+try{new MutationObserver(soon).observe($('#tray'),{childList:true})}catch(e){}
+soon()})();
 </script><!--NEXOS-END--></body></html>
