@@ -44,3 +44,6 @@ Claude Code واقعی داخل شبیه‌ساز اجرا نمیشه (برنا�
 ## Done in 3.2.8
 - Winlator calls verified against source, real Fill/Keep toggle, Wine cursor shapes. Phone test pending. Still open: partial clip behind other windows, Wine inside the main Activity.
 
+## Done in 3.2.9
+- Clip behind windows (setting), cursor signature log. Phone test pending. Next: map cursor crcs from aurora-cursors.txt to NexOS shapes.
+

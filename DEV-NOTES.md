@@ -90,3 +90,10 @@
 - Cursor shapes: Wine cursor with hotspot (0,0) = arrow -> NexOS cursor overlay. Any other visible Wine cursor (hand, I-beam, resize ...) is drawn by Wine (renderer.setCursorVisible(true)) and the overlay is hidden. A cursor the program hides stays hidden.
 - Not done on purpose: clipping the exe window behind other windows (window-resize + offset needs Winlator view/touch changes; setClipBounds leaves the window capturing touches).
 
+## 3.2.9 - clip behind windows + cursor log (aurora-clip-3.2.9)
+- JS exeClip(w): covering NexOS windows (above in z-order or the top window) -> largest free rectangle (min 96x64 CSS px, max 6 covers). Sent as rect.clip. Setting aur.exc (default on); "Hide fully" = old behaviour.
+- Java applyRectClip: Wine window = visible rectangle (so the cut-off part does not catch touches); XServerView gets a fixed full size + translation (GL surface is not resized). vwOf/vhOf/xvTx/xvTy keep pointer + cursor mapping on the full view.
+- Part of the exe outside the rectangle but not covered stays empty (largest rectangle only).
+- Wine inside the main Activity: NOT done. XServerView is a GLSurfaceView: a SurfaceView is either under the WebView (hole) or over it, so NexOS windows could still not be drawn over a program; needs a TextureView renderer rewrite.
+- Cursor shapes: Winlator keeps only bitmap + hotspot (no shape name). New cursors are written to Download/aurora-cursors.txt; map them by crc in the next update.
+

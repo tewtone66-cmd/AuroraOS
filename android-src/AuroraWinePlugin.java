@@ -512,14 +512,15 @@ public class AuroraWinePlugin extends Plugin {
                         overlayOk = false;
                         return;
                     }
-                    int vw = root.getWidth(), vh = root.getHeight();
+                    int vw = vwOf(root), vh = vhOf(root);
                     if (vw > 0 && vh > 0) {
                         float[] fm = fitMap(vw, vh, sw, sh);
-                        iv.setTranslationX(fm[0] + pt.getClampedX() * fm[1]);
-                        iv.setTranslationY(fm[2] + pt.getClampedY() * fm[3]);
+                        iv.setTranslationX(xvTx(root) + fm[0] + pt.getClampedX() * fm[1]);
+                        iv.setTranslationY(xvTy(root) + fm[2] + pt.getClampedY() * fm[3]);
                         try { // aurora-fill-3.2.8: arrow = NexOS cursor, other shapes = Wine's own, hidden stays hidden
                             com.winlator.xserver.Window pw = ((com.winlator.xserver.XServer) xs).inputDeviceManager.getPointWindow();
                             com.winlator.xserver.Cursor cu = pw != null ? pw.attributes.getCursor() : null;
+                            if (cu != null && cu != lastCu) { lastCu = cu; logCursor(cu); }
                             boolean hide = cu != null && !cu.isVisible();
                             boolean own = cu != null && cu.isVisible() && (cu.hotSpotX != 0 || cu.hotSpotY != 0);
                             int vis = (hide || own) ? android.view.View.INVISIBLE : android.view.View.VISIBLE;
@@ -659,7 +660,7 @@ public class AuroraWinePlugin extends Plugin {
         a.runOnUiThread(() -> {
             boolean ok = true;
             try {
-                int vw = root.getWidth(), vh = root.getHeight();
+                int vw = vwOf(root), vh = vhOf(root);
                 if (vw > 0 && vh > 0 && rw > 0 && rh > 0) {
                     float[] fm = fitMap(vw, vh, xsW, xsH);
                     int px = Math.max(0, Math.min(xsW - 1, (int) Math.round((x / rw * vw - fm[0]) / fm[1])));
@@ -688,6 +689,125 @@ public class AuroraWinePlugin extends Plugin {
             o.put("ok", ok);
             call.resolve(o);
         });
+    }
+
+    /** aurora-clip-3.2.9: the X view (child of the program root) */
+    private static android.view.View xView(android.widget.FrameLayout root) {
+        for (int i = 0; i < root.getChildCount(); i++) {
+            android.view.View c = root.getChildAt(i);
+            if (c instanceof com.winlator.widget.XServerView) return c;
+        }
+        return root;
+    }
+
+    private static int vwOf(android.widget.FrameLayout root) {
+        android.view.View v = xView(root);
+        android.view.ViewGroup.LayoutParams p = v.getLayoutParams();
+        return (v != root && p != null && p.width > 0) ? p.width : v.getWidth();
+    }
+
+    private static int vhOf(android.widget.FrameLayout root) {
+        android.view.View v = xView(root);
+        android.view.ViewGroup.LayoutParams p = v.getLayoutParams();
+        return (v != root && p != null && p.height > 0) ? p.height : v.getHeight();
+    }
+
+    private static float xvTx(android.widget.FrameLayout root) {
+        android.view.View v = xView(root);
+        return v == root ? 0f : v.getTranslationX();
+    }
+
+    private static float xvTy(android.widget.FrameLayout root) {
+        android.view.View v = xView(root);
+        return v == root ? 0f : v.getTranslationY();
+    }
+
+    /** w/h <= 0 = fill the window (normal), otherwise a fixed size moved by tx/ty (clipped by the smaller window). */
+    private static void setViewBox(android.view.View v, int w, int h, float tx, float ty) {
+        android.view.ViewGroup.LayoutParams p = v.getLayoutParams();
+        android.widget.FrameLayout.LayoutParams lp = p instanceof android.widget.FrameLayout.LayoutParams
+            ? (android.widget.FrameLayout.LayoutParams) p : new android.widget.FrameLayout.LayoutParams(-1, -1);
+        int ww = w > 0 ? w : -1, hh = h > 0 ? h : -1;
+        if (lp.width != ww || lp.height != hh || lp.gravity != (Gravity.TOP | Gravity.LEFT)) {
+            lp.width = ww;
+            lp.height = hh;
+            lp.gravity = Gravity.TOP | Gravity.LEFT;
+            v.setLayoutParams(lp);
+        }
+        if (v.getTranslationX() != tx) v.setTranslationX(tx);
+        if (v.getTranslationY() != ty) v.setTranslationY(ty);
+    }
+
+    /** r = full program rect, c = visible part (screen px) or null. Window = visible part, view = full size moved back. UI thread. */
+    public static void applyRectClip(Activity a, int[] r, int[] c) {
+        if (a == null || r == null || r.length < 4) return;
+        android.widget.FrameLayout root = fitRoot;
+        android.view.View v = root != null ? xView(root) : null;
+        boolean ok = c != null && v != null && v != root;
+        int cx = 0, cy = 0, cx2 = 0, cy2 = 0;
+        if (ok) {
+            cx = Math.max(c[0], r[0]);
+            cy = Math.max(c[1], r[1]);
+            cx2 = Math.min(c[0] + c[2], r[0] + r[2]);
+            cy2 = Math.min(c[1] + c[3], r[1] + r[3]);
+            ok = cx2 - cx >= 64 && cy2 - cy >= 64;
+        }
+        if (!ok) {
+            applyRect(a, r);
+            if (v != null && v != root) setViewBox(v, -1, -1, 0f, 0f);
+            return;
+        }
+        applyRect(a, new int[]{cx, cy, cx2 - cx, cy2 - cy});
+        setViewBox(v, r[2], r[3], r[0] - cx, r[1] - cy);
+    }
+
+    /** {clip:{x,y,w,h}} of a rect object -> screen px, or null. */
+    private int[] clipRect(JSONObject o) {
+        try {
+            JSONObject c = o == null ? null : o.optJSONObject("clip");
+            if (c == null) return null;
+            c.put("vw", o.optDouble("vw", 0));
+            c.put("vh", o.optDouble("vh", 0));
+            return rectToScreen(c);
+        } catch (Throwable e) {
+            return null;
+        }
+    }
+
+    private static volatile com.winlator.xserver.Cursor lastCu;
+    private static final java.util.HashSet<String> cuSeen = new java.util.HashSet<>();
+
+    /** Writes every new Wine cursor (size, hotspot, crc, small ascii picture) to Download/aurora-cursors.txt. Never throws. */
+    private static void logCursor(com.winlator.xserver.Cursor cu) {
+        try {
+            com.winlator.xserver.Drawable d = cu.cursorImage;
+            if (d == null || d.getData() == null || cuSeen.size() >= 80) return;
+            java.nio.ByteBuffer bb = d.getData().duplicate();
+            bb.rewind();
+            int W = d.width, H = d.height;
+            if (W <= 0 || H <= 0) return;
+            byte[] b = new byte[Math.min(bb.remaining(), W * H * 4)];
+            bb.get(b);
+            java.util.zip.CRC32 crc = new java.util.zip.CRC32();
+            crc.update(b);
+            String sig = W + "x" + H + " hot=" + cu.hotSpotX + "," + cu.hotSpotY + " crc=" + Long.toHexString(crc.getValue());
+            if (!cuSeen.add(sig)) return;
+            StringBuilder sb = new StringBuilder(sig).append('\n');
+            int gw = Math.min(W, 24), gh = Math.min(H, 16);
+            for (int gy = 0; gy < gh; gy++) {
+                for (int gx = 0; gx < gw; gx++) {
+                    int idx = ((gy * H / gh) * W + (gx * W / gw)) * 4 + 3;
+                    sb.append(idx < b.length && (b[idx] & 0xff) > 127 ? '#' : '.');
+                }
+                sb.append('\n');
+            }
+            sb.append('\n');
+            File dl = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS);
+            if (dl == null) return;
+            try (java.io.FileOutputStream fo = new java.io.FileOutputStream(new File(dl, "aurora-cursors.txt"), true)) {
+                fo.write(sb.toString().getBytes(java.nio.charset.StandardCharsets.UTF_8));
+            }
+        } catch (Throwable ignored) { }
     }
 
     /** Sends the whole app to the background (programs keep running). */
@@ -990,7 +1110,7 @@ public class AuroraWinePlugin extends Plugin {
         final JSObject data = call.getData();
         getActivity().runOnUiThread(() -> {
             int[] r = rectToScreen(data);
-            if (r != null) applyRect(curActivity, r); // aurora-fill-3.2.7: apply at once (JS already sends one per frame)
+            if (r != null) applyRectClip(curActivity, r, clipRect(data)); // aurora-clip-3.2.9
             call.resolve();
         });
     }
@@ -1044,7 +1164,7 @@ public class AuroraWinePlugin extends Plugin {
         m.runOnUiThread(() -> {
             try {
                 int[] r = rectToScreen(data);
-                if (r != null) applyRect(a, r);
+                if (r != null) applyRectClip(a, r, null);
                 Intent it = new Intent(m, XServerDisplayActivity.class);
                 it.addFlags(Intent.FLAG_ACTIVITY_REORDER_TO_FRONT);
                 m.startActivity(it);
