@@ -41,3 +41,6 @@ Claude Code واقعی داخل شبیه‌ساز اجرا نمیشه (برنا�
 ## Done in 3.2.7
 - Exe: virtual mouse reaches Wine, Fill/Keep aspect, rAF rect sync. Only phone-testable. Not done: moving Wine into the main Activity (high risk), clipping the exe window behind other Aurora windows (currently it is hidden completely when another window is on top), cursor shapes other than the arrow inside Wine.
 
+## Done in 3.2.8
+- Winlator calls verified against source, real Fill/Keep toggle, Wine cursor shapes. Phone test pending. Still open: partial clip behind other windows, Wine inside the main Activity.
+

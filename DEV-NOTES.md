@@ -85,3 +85,8 @@
 - Fill / Keep aspect: Settings > Mouse (bottom chips "Windows programs: screen", S.exf, ls aur.exf). Java `setExeFit` calls renderer.setFullscreen(bool) by reflection; `fitMap` maps pointer/cursor for both modes. If the switch is missing it stays on Fill.
 - Window rect: JS `w.sched` uses requestAnimationFrame, `push` sends one setExeRect at a time (latest wins, serial); Java applies at once. Visibility check `w.chk` runs on pointerdown/class change + 250 ms safety timer (was 120 ms polling only).
 
+## 3.2.8 - Wine/EXE follow-up (aurora-fill-3.2.8 in AuroraWinePlugin.java)
+- Checked against Winlator pin 8077f374: XServer.injectPointerMove(int,int), injectPointerButtonPress/Release(Pointer.Button) exist; GLRenderer has NO setFullscreen(boolean), only toggleFullscreen()/isFullscreen(). Fill = renderer fullscreen (stretch), Keep = default letterbox. `applyFit` toggles only when the mode differs (guard 300 ms, up to 4 re-checks); `fitMap` follows the renderer's real mode (isFullscreen), so pointer/cursor mapping is always right.
+- Cursor shapes: Wine cursor with hotspot (0,0) = arrow -> NexOS cursor overlay. Any other visible Wine cursor (hand, I-beam, resize ...) is drawn by Wine (renderer.setCursorVisible(true)) and the overlay is hidden. A cursor the program hides stays hidden.
+- Not done on purpose: clipping the exe window behind other windows (window-resize + offset needs Winlator view/touch changes; setClipBounds leaves the window capturing touches).
+
