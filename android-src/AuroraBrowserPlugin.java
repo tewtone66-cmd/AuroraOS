@@ -140,6 +140,8 @@ public class AuroraBrowserPlugin extends Plugin {
         }, 400);
     }
     private final Map<String, Integer> zoomOf = new HashMap<>();
+    /** true = the user (or a saved site zoom) chose this zoom; false = default value. */
+    private final Map<String, Boolean> zxOf = new HashMap<>();
     /** Width (Aurora CSS px) of each tab's visible area; set by create()/show(). */
     private final Map<String, Float> viewW = new HashMap<>();
     /** Aurora CSS px per page CSS px at 100% zoom (bigger = bigger pages). Tune here. */
@@ -152,10 +154,17 @@ public class AuroraBrowserPlugin extends Plugin {
         Float w = viewW.get(tabId);
         if (w == null || w < 40f) return 0;
         Integer z = zoomOf.get(tabId);
-        float zoom = (z == null ? 100 : z) / 100f;
+        int zi = (z == null ? 50 : z);
+        Boolean zx = zxOf.get(tabId);
+        boolean windowed = screenW > 200f && w < screenW * 0.85f;
+        /* ZOOM-3.2.2: Auto (0) or default zoom in a non-full-width window = fit the page to the window */
+        if (zi == 0 || (windowed && (zx == null || !zx))) {
+            return Math.max(320, Math.min(10000, Math.round(w / PAGE_K)));
+        }
+        float zoom = zi / 100f;
         /* BRSIZE-3.0.4: lay the page out like a PC screen refW px wide (default 1280) when the Aurora window is full width */
         float base = (screenW > 200f) ? (w * refW / (screenW * zoom)) : (w / (PAGE_K * zoom));
-        return Math.max(320, Math.min(4000, Math.round(base)));
+        return Math.max(320, Math.min(10000, Math.round(base)));
     }
 
     /** Forces <meta viewport width=W> (and keeps it forced); the WebView then fits the page to the view, like Chrome zoom. */
@@ -242,15 +251,17 @@ public class AuroraBrowserPlugin extends Plugin {
         final String url = call.getString("url", "about:blank");
         Float vwf = call.getFloat("vw", 0f);
         final float vw0 = vwf == null ? 0f : vwf;
-        Integer zf = call.getInt("z", 100);
-        final int z0 = zf == null ? 100 : zf;
+        Integer zf = call.getInt("z", 50);
+        final int z0 = zf == null ? 50 : zf;
+        final boolean zx0 = call.getBoolean("zx", false);
         Float cwf0 = call.getFloat("cw", 0f); if (cwf0 != null && cwf0 > 200f) screenW = cwf0;
         Float rf0 = call.getFloat("ref", 0f); if (rf0 != null && rf0 > 300f) refW = rf0;
         dens(call);
         ui(() -> {
             if (views.containsKey(id)) { call.resolve(); return; }
             if (vw0 > 40f) viewW.put(id, vw0);
-            zoomOf.put(id, Math.max(40, Math.min(300, z0)));
+            zoomOf.put(id, z0 == 0 ? 0 : Math.max(10, Math.min(300, z0)));
+            zxOf.put(id, zx0);
             final WebView w = new WebView(getContext());
             WebSettings s = w.getSettings();
             s.setJavaScriptEnabled(true);
@@ -524,7 +535,8 @@ public class AuroraBrowserPlugin extends Plugin {
             else if ("stop".equals(a)) w.stopLoading();
             else if ("zset".equals(a)) {
                 int zv = call.getInt("v", 100);
-                zoomOf.put(call.getString("id", ""), Math.max(40, Math.min(300, zv)));
+                zoomOf.put(call.getString("id", ""), zv == 0 ? 0 : Math.max(10, Math.min(300, zv)));
+                zxOf.put(call.getString("id", ""), call.getBoolean("zx", true));
                 applyZoom(w, call.getString("id", ""));
             } else if ("zin".equals(a) || "zout".equals(a) || "zreset".equals(a)) {
                 int zt = w.getSettings().getTextZoom();
