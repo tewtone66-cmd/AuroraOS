@@ -782,6 +782,11 @@ body.perf #lck::before{display:none}body.perf #lck .lh i{animation:none}
 .acc0 b{display:block;font-size:16px}.acc0 small{color:var(--mut)}
 .av2{width:56px;height:56px;border-radius:50%;display:grid;place-items:center;font-size:24px;font-weight:600;color:#fff;background:linear-gradient(135deg,var(--acc),#8b5cf6)}
 
+/*TERM-3.2.6*/
+.tmk{display:flex;gap:6px;padding:0 8px 8px;overflow-x:auto;scrollbar-width:none;touch-action:pan-x;flex:none}
+.tmk::-webkit-scrollbar{display:none}
+.tmk button{flex:none;border:1px solid #ffffff2a;background:#ffffff14;color:#ddd;border-radius:8px;padding:5px 11px;font:600 11.5px system-ui,sans-serif;cursor:pointer}
+.tmk button:active{background:#ffffff33}
 </style><!--NEXOS-END--></head><body class="booting"><svg width="0" height="0" style="position:absolute" aria-hidden="true"><defs><linearGradient id="nxg" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#22d3ee"/><stop offset="1" stop-color="#8b5cf6"/></linearGradient></defs></svg><div id="boot"><!--NEXOS-START--><div id="nxb"><div class="halo"></div><svg viewBox="0 0 512 512"><path class="p" pathLength="100" d="M168 368V144l176 224V144" fill="none" stroke="url(#nxg)" stroke-width="40" stroke-linecap="round" stroke-linejoin="round"/></svg><h1><span>N</span><span>e</span><span>x</span><span>O</span><span>S</span></h1><div class="bar"><i></i></div></div><!--NEXOS-END--><div class="bd"><i></i><i></i><i></i></div></div><div id="shut"><svg class="lg" viewBox="0 0 512 512"><path d="M168 368V144l176 224V144" fill="none" stroke="url(#nxg)" stroke-width="40" stroke-linecap="round" stroke-linejoin="round"/></svg><div class="slot"><div class="sm"><span>Shutting down</span><div class="bd"><i></i><i></i><i></i></div></div><button id="pw" aria-label="Power on"><svg viewBox="0 0 24 24"><path d="M12 3v8M6.6 6.8a8 8 0 1 0 10.8 0"/></svg></button></div><div class="hint">Tap to power on</div></div><script>(function(){var t0=Date.now(),d=0;function go(){if(d)return;d=1;var b=document.getElementById("boot");document.body.classList.remove("booting");if(b){b.classList.add("out");setTimeout(function(){b.remove()},800)}}function chk(){setTimeout(go,Math.max(0,1700-(Date.now()-t0)))}if(document.readyState==="complete")chk();else addEventListener("load",chk);setTimeout(go,5000)})();</script>
 <svg width="0" height="0" style="position:absolute"><defs><linearGradient id="gs" x1="0" y1="0" x2="1" y2="1"><stop stop-color="#8f9bff"/><stop offset="1" stop-color="#c26bff"/></linearGradient><linearGradient id="gl" x1="0" y1="1" x2="1" y2="0"><stop stop-color="#34d399"/><stop offset="1" stop-color="#22d3ee"/></linearGradient><linearGradient id="gr" x1="1" y1="1" x2="0" y2="0"><stop stop-color="#a78bfa"/><stop offset="1" stop-color="#22d3ee"/></linearGradient><linearGradient id="gw" x1="0" y1="0" x2="1" y2="0"><stop stop-color="#5eead4"/><stop offset="1" stop-color="#c4b5fd"/></linearGradient></defs></svg>
 <div id="desk"><div id="icons"></div></div>
@@ -1430,14 +1435,14 @@ drawH();show();
 /* ---------- Terminal (v3-p07) ---------- */
 function appTerm(w,arg){
 const B=w.body;let root='/storage/emulated/0',cwd=root,busy=false,hist=[],hi=0,errl=0,waitIn=null,stopBat=false;
-B.innerHTML='<div class="tm"><div class="tmo"></div><div class="tml"><span></span><input spellcheck="false" autocapitalize="off" autocomplete="off" autocorrect="off" enterkeyhint="send"></div></div>';
+B.innerHTML='<div class="tm"><div class="tmo"></div><div class="tml"><span></span><input spellcheck="false" autocapitalize="off" autocomplete="off" autocorrect="off" enterkeyhint="send"></div><div class="tmk"><button data-k="tab">Tab</button><button data-k="up">&#8593;</button><button data-k="dn">&#8595;</button><button data-k="c">Ctrl+C</button><button data-k="copy">Copy</button><button data-k="paste">Paste</button><button data-k="cls">Clear</button></div></div>';
 const tm=$('.tm',B),out=$('.tmo',B),inp=$('input',B),pr=$('.tml span',B);
 const win=p=>p===root?'C:\\':p.startsWith(root+'/')?'C:'+p.slice(root.length).replace(/\//g,'\\'):p.replace(/\//g,'\\');
 const put=(s,c)=>{out.appendChild(h('div',c||'',s===''?'&#8203;':s));while(out.childElementCount>1500)out.firstChild.remove();out.scrollTop=out.scrollHeight};
-const T=s=>put(esc(s)),E=s=>put(esc(s),'e');
+let ES=0;/*TERM-3.2.6*/const T=s=>put(esc(s)),E=s=>{ES++;put(esc(s),'e')};
 var PSM={on:false,nested:false,vars:{},funcs:{},mode:'ps',pend:''};
-const prompt=()=>{pr.textContent=(PSM.on?'PS ':'')+win(cwd)+'>'};
-const NOPATH='The system cannot find the path specified.',FL=/^(\/[a-z]|-[a-z]+)$/i;
+const prompt=()=>{pr.textContent=(PSM.on?'PS ':'')+win(cwd)+'>';try{w.setTitle(PSM.on?'Windows PowerShell':'Command Prompt')}catch(e){}};
+const NOTHERE=/^(claude|claude-code|npm|npx|node|nodejs|yarn|pnpm|git|python3?|pip3?|winget|choco|scoop|docker|cargo|go|java)(\.exe|\.cmd)?$/i,NOTHERE_MSG=n=>"Note: '"+n+"' is a real program. The NexOS terminal only emulates Windows commands, so it cannot run it. To use it on your phone, install Termux.";const NOPATH='The system cannot find the path specified.',FL=/^(\/[a-z]|-[a-z]+)$/i;
 const ready=(async()=>{try{const r=await NF.roots();root=cwd=((r.roots||[])[0]||{}).path||root}catch(e){}prompt();try{const s=await NF.status();if(!s.granted)E('Storage access is not allowed. Open Settings > Storage and allow access to files.')}catch(e){}})();
 const ls=async d=>{const r=await NF.list({path:d});return(r.items||[]).slice().sort((a,b)=>(b.isDirectory?1:0)-(a.isDirectory?1:0)||a.name.localeCompare(b.name,undefined,{sensitivity:'base'}))};
 const dirIt=p=>({path:p,name:p.split('/').pop(),isDirectory:true});
@@ -1908,7 +1913,7 @@ if(v instanceof Date){L.push(psFmtLong(v));i++;continue}
 if(Array.isArray(v)){for(const x of v)L.push(psStr(x));i++;continue}
 L.push(psStr(v));i++}return L}
 async function psPrint(items){if(!items.length)return;for(const l of psFmtOut(items))put(esc(l))}
-function psShowErr(e){if(!e)return;if(e.psflow)return;if(e.message==='^C'){E('^C');return}errl=1;PSV['?']=false;const m=(e&&e.message)||String(e);PSV.error=[{Exception:{Message:m},Message:m,__str:m}].concat((PSV.error||[]).slice(0,20));E((e.cmd?e.cmd+' : ':'')+m)}
+function psShowErr(e){if(!e)return;if(e.psflow)return;if(e.message==='^C'){E('^C');return}errl=1;PSV['?']=false;const m=(e&&e.message)||String(e);PSV.error=[{Exception:{Message:m},Message:m,__str:m}].concat((PSV.error||[]).slice(0,20));E((e.cmd?e.cmd+' : ':'')+m);if(/is not recognized as the name/.test(m)&&e.cmd&&NOTHERE.test(e.cmd))T(NOTHERE_MSG(e.cmd))}
 async function psRun(raw,nested,mode){PSM.mode=mode||'ps';try{for(const t of psParts(raw)){psChk();const acc=[];try{await psStmt(t,acc)}catch(e){await psPrint(acc);throw e}await psPrint(acc)}}catch(e){psShowErr(e)}finally{if(PSM.pend){put(PSM.pend);PSM.pend=''}}return true}
 function psBanner(){out.innerHTML='';w.setTitle('Windows PowerShell');T('Windows PowerShell (NexOS emulation)');T('Type Get-Help for the supported commands. Type cmd to switch to Command Prompt.');T('')}
 async function psCmdMode(raw){const m=/^(powershell|pwsh)(?:\.exe)?(?:\s+([\s\S]*))?$/i.exec(raw);
@@ -1925,7 +1930,7 @@ let psNet;const psNetP=()=>{if(psNet!==undefined)return psNet;try{const C=window
 function psNetMsg(e,o){const m=(e&&e.message)||String(e);let host=o&&o.host;if(!host&&o&&o.url){try{host=new URL(o.url).hostname}catch(x){host=o.url}}
 if(/UnknownHost|Unable to resolve|No address associated/i.test(m))return"The remote name could not be resolved: '"+host+"'";
 if(/Timeout|timed out/i.test(m))return'The operation has timed out.';
-if(/Connect|refused|Unreachable|Network is/i.test(m))return'Unable to connect to the remote server';
+const cause=m.replace(/^[A-Za-z.]*Exception:\s*/,'').slice(0,170);if(/SSL|Handshake|certificate|Trust anchor|TLS/i.test(m))return'The underlying connection was closed: Could not establish trust relationship for the SSL/TLS secure channel. ('+cause+')';if(/Connect|refused|Unreachable|Network is|reset|abort|EPIPE|closed/i.test(m))return'Unable to connect to the remote server ('+cause+')';
 if(/not implemented|UNIMPLEMENTED/i.test(m))return'The NexOS native network plugin is not available in this build.';
 return m.replace(/^[A-Za-z.]*Exception:\s*/,'')}
 async function psFetchHttp(o){let r;try{r=await fetch(o.url,{method:o.method,headers:o.headers||{},body:o.body||undefined})}catch(e){throw psErr('Unable to connect to the remote server')}const body=await r.text();const h={};r.headers.forEach((v,k)=>{h[k]=v});return{status:r.status,statusText:r.statusText,url:r.url||o.url,headers:h,body,size:body.length,contentType:r.headers.get('content-type')||''}}
@@ -2060,7 +2065,7 @@ for(const k of Object.keys(W)){let a='',t='';try{t=$('.tbar span',W[k].el).textC
 if(!hit)throw psErr('Cannot find a process with the specified name or Id.');return[]};
 PSCMD['start-process']=async c=>{const nm=psLo(psStr(psAval(c,0,'filepath','name'))).replace(/\.exe$/,'');const id=PSAPPS[nm]||(A[nm]?nm:null);if(!id||!A[id])throw psErr('This command cannot be run due to the error: The system cannot find the file specified.');
 const rest=c.pos.slice(1).map(psStr);let arg;if(id==='code'&&rest.length){try{const r=await rp(rest[0]);if(r.it&&!r.it.isDirectory)arg={path:r.path}}catch(e){}}openApp(id,arg);return[]};
-PSCMD.cmd=c=>{PSM.on=false;PSM.nested=false;w.setTitle('Terminal');T('NexOS [Version 3.2.5]');return[]};
+PSCMD.cmd=c=>{PSM.on=false;PSM.nested=false;w.setTitle('Terminal');T('NexOS [Version 3.2.6]');return[]};
 PSCMD.exit=c=>{if(PSM.nested){PSM.on=false;PSM.nested=false;w.setTitle('Terminal')}else closeW(w.id,true);return[]};
 PSCMD.hostname=c=>['NEXOS-PC'];PSCMD.whoami=c=>['nexos-pc\\user'];
 PSCMD.systeminfo=async c=>{let m='';try{const s=await NF.sysInfo();const GB=1073741824;m='Total Physical Memory:     '+Math.round(s.total/1048576).toLocaleString('en-US')+' MB\nAvailable Physical Memory: '+Math.round(s.avail/1048576).toLocaleString('en-US')+' MB\nProcessors:                '+(s.cores||'?')+' core(s)'}catch(e){}
@@ -2096,7 +2101,19 @@ for(const a of it.addresses){if(a.family===4)o.push('   IPv4 Address. . . . . . 
 for(const k of Object.keys(PSCMD)){if(typeof PSCMD[k]!=='function')delete PSCMD[k]}
 
 const HELP=['NexOS terminal. Commands work on the NexOS file system (C:\\ = internal storage).','','DIR [path|pattern]    Detailed list of a folder   (LS: names only)','CD [path]             Show or change folder (.. goes up)','MKDIR path            Create a folder (MD)','TYPE file             Show a text file (CAT)','COPY src dest-folder  Copy (CP); wildcards * and ? work','MOVE src dest         Move to a folder, or rename in the same folder (MV)','REN file newname      Rename (RENAME)','DEL file              Delete files to the Recycle Bin (RM)','RMDIR [/s] folder     Remove a folder (RD)','ECHO text [> file]    Print text, or write it to a file (>> appends)','CLS                   Clear the screen (CLEAR)','VER  DATE  TIME  PWD  EXIT','CALL file.bat         Run a batch file (or type its name)','SET  IF  FOR  GOTO  PAUSE  TIMEOUT  TITLE  work in batch files','Ctrl+C                Stop a running batch file','','Real Windows programs (.exe) cannot be started from here.'];
-const run=async line=>{const raw=line.trim();if(!raw)return;
+const splitChain=(line,ps)=>{if(!ps&&/^\s*(if|for)\s/i.test(line))return null;const parts=[];let cur='',q=null,dp=0,op='',n=0;
+ for(let i=0;i<line.length;i++){const ch=line[i],n2=line.substr(i,2);
+  if(q){cur+=ch;if(ch===q)q=null;continue}
+  if((ps&&ch==='`')||(!ps&&ch==='^')){cur+=ch+(line[i+1]||'');i++;continue}
+  if(ch==='"'||(ps&&ch==="'")){q=ch;cur+=ch;continue}
+  if(ch==='('||ch==='{'||ch==='[')dp++;else if(ch===')'||ch==='}'||ch===']')dp=Math.max(0,dp-1);
+  if(!dp){if(n2==='&&'||n2==='||'){parts.push({t:cur,op});op=n2;cur='';i++;n++;continue}
+   if(!ps&&ch==='&'&&line[i-1]!=='>'&&line[i+1]!=='&'&&line[i+1]!=='>'){parts.push({t:cur,op});op='&';cur='';n++;continue}}
+  cur+=ch}
+ if(!n)return null;parts.push({t:cur,op});return parts};
+const run=async line=>{const parts=splitChain(line,PSM.on);if(!parts){await run1(line);return}
+ let ok=true;for(const p of parts){if(stopBat)break;if(p.op==='&&'&&!ok)continue;if(p.op==='||'&&ok)continue;if(!p.t.trim())continue;const before=ES;PSV['?']=true;errl=0;await run1(p.t);ok=ES===before&&PSV['?']!==false&&errl===0}};
+const run1=async line=>{const raw=line.trim();if(!raw)return;
 if(PSM.on){if(await psRun(raw,false,'ps'))return}else if(await psCmdMode(raw))return;
 if(/^(set|pause|timeout|title|color|rem|if|for|call|goto|setlocal|endlocal)(\s|$)/i.test(raw)){try{await ready;await execBat(mkFr([raw],[''],'',false))}catch(e){E(e&&e.message==='^C'?'^C':((e&&e.message)||String(e)))}return}
 errl=0;
@@ -2107,7 +2124,7 @@ if(/^[a-z]:$/i.test(c)){if(c.toLowerCase()!=='c:')E('The system cannot find the 
 switch(c){
 case'help':case'?':HELP.forEach(T);break;
 case'cls':case'clear':out.innerHTML='';break;
-case'ver':T('');T('NexOS [Version 3.2.5]');T('');break;
+case'ver':T('');T('NexOS [Version 3.2.6]');T('');break;
 case'date':{const d=new Date();T('The current date is: '+['Sun','Mon','Tue','Wed','Thu','Fri','Sat'][d.getDay()]+' '+pad2(d.getMonth()+1)+'/'+pad2(d.getDate())+'/'+d.getFullYear());break}
 case'time':{const d=new Date();T('The current time is: '+pad2(d.getHours())+':'+pad2(d.getMinutes())+':'+pad2(d.getSeconds())+'.'+pad2(Math.floor(d.getMilliseconds()/10)));break}
 case'pwd':T(win(cwd));break;
@@ -2126,16 +2143,39 @@ case'echo':await cmdEcho(raw);break;
 case'exit':closeW(w.id,true);break;
 default:{let bf=null;for(const cnd of[toks[0],toks[0]+'.bat',toks[0]+'.cmd']){try{const r0=await rp(cnd);if(r0.it&&!r0.it.isDirectory&&/\.(bat|cmd)$/i.test(r0.it.name)){bf=r0.path;break}}catch(e0){}}
 if(bf){await runBat(bf,a);break}
-errl=9009;E("'"+toks[0]+"' is not recognized as an internal or external command,\noperable program or batch file.")}}
+errl=9009;E("'"+toks[0]+"' is not recognized as an internal or external command,\noperable program or batch file.");if(NOTHERE.test(toks[0]))T(NOTHERE_MSG(toks[0]))}}
 }catch(e){errl=1;E(e&&e.message==='^C'?'^C':((e&&e.message)||String(e)))}};
+const submitLine=async line=>{if(waitIn){const r=waitIn;waitIn=null;put(esc(line));r(line);return}if(busy)return;stopBat=false;put(esc((PSM.on?pr.textContent+' ':pr.textContent)+line));
+if(line.trim()){hist.push(line);if(hist.length>100)hist.shift()}hi=hist.length;busy=true;try{await run(line)}finally{busy=false;prompt();out.scrollTop=out.scrollHeight}};
+const CMDS=['help','cls','clear','ver','date','time','pwd','dir','ls','cd','chdir','mkdir','md','type','cat','copy','cp','xcopy','move','mv','ren','rename','del','erase','rm','rmdir','rd','echo','exit','set','pause','timeout','title','color','rem','call','goto','powershell','pwsh','curl','ping','ipconfig','nslookup','hostname','whoami','systeminfo'];
+let tc=null;
+const names=()=>{const o=new Set(CMDS);if(PSM.on){Object.keys(PSCMD).forEach(k=>{if(k.indexOf('.')<0&&k.indexOf('-')>0)o.add(psCap(k));else o.add(k)});Object.keys(PSALIAS).forEach(k=>o.add(k))}return[...o]};
+const complete=async back=>{const v=inp.value,pos=inp.selectionStart==null?v.length:inp.selectionStart;
+ if(tc&&tc.val===v&&tc.pos===pos){tc.i=(tc.i+(back?-1:1)+tc.c.length)%tc.c.length;const nv=tc.mk(tc.i);inp.value=nv.v;inp.setSelectionRange(nv.p,nv.p);tc.val=nv.v;tc.pos=nv.p;return}
+ const before=v.slice(0,pos),after=v.slice(pos),m=/("?)([^\s"]*)$/.exec(before),tok=m[2],qs=m[1],st=before.length-tok.length-qs.length,first=!/\S/.test(before.slice(0,st));let cands=[];
+ try{if(first&&!/[\\\/]/.test(tok)){const lt=tok.toLowerCase();cands=names().filter(n=>n.toLowerCase().startsWith(lt)).sort((a,b)=>a.localeCompare(b,undefined,{sensitivity:'base'}));const dd=cands.filter(n=>n.toLowerCase()===lt);if(dd.length===cands.length)cands=cands.slice(0,1)}
+  const ix=Math.max(tok.lastIndexOf('/'),tok.lastIndexOf('\\')),dirPart=tok.slice(0,ix+1),namePart=tok.slice(ix+1).toLowerCase();
+  if(!cands.length||!first||/[\\\/]/.test(tok)){await ready;const r=await rp(dirPart||'.');if(r.it&&r.it.isDirectory){const items=await ls(r.path),sep=dirPart.indexOf('/')>=0&&dirPart.indexOf('\\')<0?'/':'\\';const pc=items.filter(x=>x.name.toLowerCase().startsWith(namePart)&&(namePart||x.name[0]!=='.')).map(x=>dirPart+x.name+(x.isDirectory?sep:''));cands=cands.length&&first?cands.concat(pc):pc}}}catch(e){cands=[]}
+ if(!cands.length)return;const mk=i=>{let c=cands[i];const q=qs||(/\s/.test(c)?'"':'');const t=q+c;return{v:before.slice(0,st)+t+after,p:st+t.length}};
+ tc={val:'',pos:0,c:cands,i:0,mk};const nv=mk(0);inp.value=nv.v;inp.setSelectionRange(nv.p,nv.p);tc.val=nv.v;tc.pos=nv.p;if(cands.length>1&&!first){}};
+inp.addEventListener('paste',e=>{const t=(e.clipboardData&&e.clipboardData.getData('text'))||'';if(!/[\r\n]/.test(t.replace(/[\r\n]+$/,'')))return;e.preventDefault();const ls2=t.replace(/\r/g,'').split('\n');if(!ls2[ls2.length-1])ls2.pop();(async()=>{for(let i=0;i<ls2.length;i++){const part=i===0?inp.value.slice(0,inp.selectionStart||0)+ls2[0]+inp.value.slice(inp.selectionEnd||0):ls2[i];inp.value='';await submitLine(part);}})()});
+const doCopy=()=>{let t=String(getSelection());if(!t)t=out.innerText;try{navigator.clipboard.writeText(t).then(()=>toast(String(getSelection())?'Copied':'Copied the whole screen')).catch(()=>{document.execCommand('copy')})}catch(x){try{document.execCommand('copy')}catch(y){}}};
+const doPaste=async()=>{let t='';try{t=await navigator.clipboard.readText()}catch(x){toast('Allow clipboard access, or long-press the input and choose Paste');return}if(!t)return;inp.focus();const a=inp.selectionStart||0,b=inp.selectionEnd||0;if(/[\r\n]/.test(t.replace(/[\r\n]+$/,''))){const ls2=t.replace(/\r/g,'').split('\n');if(!ls2[ls2.length-1])ls2.pop();for(let i=0;i<ls2.length;i++){const part=i===0?inp.value.slice(0,a)+ls2[0]+inp.value.slice(b):ls2[i];inp.value='';await submitLine(part)}}else{inp.value=inp.value.slice(0,a)+t+inp.value.slice(b);inp.setSelectionRange(a+t.length,a+t.length)}};
+const tmk=$('.tmk',B);if(tmk)tmk.addEventListener('pointerdown',e=>e.preventDefault());
+if(tmk)tmk.onclick=e=>{const b=e.target.closest('button');if(!b)return;const k=b.dataset.k;
+ if(k==='tab')complete(false);else if(k==='up'&&hi>0){hi--;inp.value=hist[hi]}else if(k==='dn'){if(hi<hist.length-1){hi++;inp.value=hist[hi]}else{hi=hist.length;inp.value=''}}
+ else if(k==='c'){if(busy||waitIn){stopBat=true;if(waitIn){const r=waitIn;waitIn=null;r('')}}else{inp.value='';put('^C','e')}}
+ else if(k==='copy')doCopy();else if(k==='paste')doPaste();else if(k==='cls')out.innerHTML='';inp.focus()};
 inp.onkeydown=async e=>{
+if(e.key==='Tab'){e.preventDefault();await complete(e.shiftKey);return}
+if(e.ctrlKey&&(e.key==='l'||e.key==='L')){e.preventDefault();out.innerHTML='';return}
+if(e.key==='Escape'){inp.value='';return}
 if(e.ctrlKey&&(e.key==='c'||e.key==='C')&&busy&&!String(getSelection())){e.preventDefault();stopBat=true;if(waitIn){const r=waitIn;waitIn=null;r('')}return}
-if(e.key==='Enter'||e.keyCode===13){e.preventDefault();if(waitIn){const v=inp.value;inp.value='';put(esc(v));const r=waitIn;waitIn=null;r(v);return}if(busy)return;stopBat=false;const line=inp.value;inp.value='';put(esc(win(cwd)+'>'+line));
-if(line.trim()){hist.push(line);if(hist.length>100)hist.shift()}hi=hist.length;busy=true;await run(line);busy=false;prompt();out.scrollTop=out.scrollHeight}
+if(e.key==='Enter'||e.keyCode===13){e.preventDefault();if(waitIn){const v=inp.value;inp.value='';put(esc(v));const r=waitIn;waitIn=null;r(v);return}if(busy)return;const line=inp.value;inp.value='';await submitLine(line)}
 else if(e.key==='ArrowUp'){e.preventDefault();if(hi>0){hi--;inp.value=hist[hi]}}
 else if(e.key==='ArrowDown'){e.preventDefault();if(hi<hist.length-1){hi++;inp.value=hist[hi]}else{hi=hist.length;inp.value=''}}};
 tm.onclick=()=>{if(!String(getSelection()))inp.focus()};
-T('NexOS [Version 3.2.5]');T('Commands run on the NexOS file system (C:\\ = internal storage). Type HELP.');T('');
+T('NexOS [Version 3.2.6]');T('Commands run on the NexOS file system (C:\\ = internal storage). Type HELP.');T('');
 if(!(arg&&arg.bat)){PSM.on=true;psBanner()}
 prompt();setTimeout(()=>inp.focus(),380);
 if(arg&&arg.bat){ready.then(async()=>{const bp=arg.bat,bn=bp.split('/').pop();cwd=bp.slice(0,bp.lastIndexOf('/'))||'/';prompt();w.setTitle(bn+' - Terminal');put(esc(win(cwd)+'>'+bn));busy=true;stopBat=false;try{await runBat(bp,[])}catch(e){E(e&&e.message==='^C'?'^C':((e&&e.message)||String(e)))}busy=false;prompt();inp.focus()})}
@@ -2216,8 +2256,8 @@ const kv=a=>a.map(([k,v])=>`<div class="kv"><span>${k}</span><b>${esc(String(v))
 const REPO='https://github.com/tewtone66-cmd/NexOS';
 const PGS={
 about(){const ua=navigator.userAgent,and=(/Android ([\d.]+)/.exec(ua)||[])[1]||'?',mod=(/;\s*([^;)]+?)\s+Build/.exec(ua)||/Android [\d.]+;\s*([^;)]+)/.exec(ua)||[])[1]||'Unknown',chr=(/Chrome\/([\d.]+)/.exec(ua)||[])[1]||'?';
-return `<h3>About</h3><div class="abh"><div class="abl">${STAR}</div><div><h2>NexOS</h2><p>Version 3.2.5</p></div></div>${kv([['Edition','NexOS Alpha'],['Version','3.2.5'],['Device',mod],['Android',and],['WebView (Chrome)',chr],['Screen',innerWidth+' × '+innerHeight+' (UI '+Math.round(S.ui*100)+'%)'],['CPU cores',navigator.hardwareConcurrency||'?'],['Memory',navigator.deviceMemory?'≥ '+navigator.deviceMemory+' GB':'?'],['Storage access',granted===null?'…':granted?'Allowed':'Not allowed']])}<h4>Update</h4>${kv([['Channel','Alpha'],['Installed version','3.2.5'],['Updates','Installed manually from GitHub']])}<button class="pgb" data-k="go" data-v="${REPO}">Open GitHub</button><h4>What is new in 3.0.0</h4><ul><li>New virtual mouse with cursor states and motion blur</li><li>New taskbar and Start menu with search</li><li>Recycle Bin that really keeps deleted items</li><li>Settings with categories and search</li></ul>`},
-update(){return `<h3>Update</h3>${kv([['Channel','Alpha'],['Installed version','3.2.5'],['Status','Updates are installed manually: rebuild the app from GitHub']])}<button class="pgb" data-k="go" data-v="${REPO}">Open GitHub</button>`},
+return `<h3>About</h3><div class="abh"><div class="abl">${STAR}</div><div><h2>NexOS</h2><p>Version 3.2.6</p></div></div>${kv([['Edition','NexOS Alpha'],['Version','3.2.6'],['Device',mod],['Android',and],['WebView (Chrome)',chr],['Screen',innerWidth+' × '+innerHeight+' (UI '+Math.round(S.ui*100)+'%)'],['CPU cores',navigator.hardwareConcurrency||'?'],['Memory',navigator.deviceMemory?'≥ '+navigator.deviceMemory+' GB':'?'],['Storage access',granted===null?'…':granted?'Allowed':'Not allowed']])}<h4>Update</h4>${kv([['Channel','Alpha'],['Installed version','3.2.6'],['Updates','Installed manually from GitHub']])}<button class="pgb" data-k="go" data-v="${REPO}">Open GitHub</button><h4>What is new in 3.0.0</h4><ul><li>New virtual mouse with cursor states and motion blur</li><li>New taskbar and Start menu with search</li><li>Recycle Bin that really keeps deleted items</li><li>Settings with categories and search</li></ul>`},
+update(){return `<h3>Update</h3>${kv([['Channel','Alpha'],['Installed version','3.2.6'],['Status','Updates are installed manually: rebuild the app from GitHub']])}<button class="pgb" data-k="go" data-v="${REPO}">Open GitHub</button>`},
 display(){return `<h3>Display & size</h3><h4>App size (whole interface)</h4><div class="step"><button data-k="ui" data-v="-1">&#8722;</button><b>${Math.round(S.ui*100)}%</b><button data-k="ui" data-v="1">+</button><button data-k="ui" data-v="0">Reset</button></div><h4>Desktop icon size</h4>${chips('is',[36,48,60,72],S.is,v=>({36:'Small',48:'Medium',60:'Large',72:'Extra large'})[v])}`},
 storage(){return `<h3>Storage</h3><h4>Access to your files</h4><div class="seg"><button data-k="perm" class="${granted?'sel':''}">${granted===null?'Checking…':granted?'Allowed':'Allow access to files'}</button></div>`},
 bg(){return `<h3>Background</h3><div class="walls">${WALL.map((g,i)=>`<button data-k="wall" data-v="${i}" class="${!S.wc&&i===S.wall?'sel':''}" style="background:${g}"></button>`).join('')}</div><h4>Solid color</h4><div class="sw">${['#0b1d3a','#111827','#1f3b2d','#3b1f3a','#3a2a1f','#475569','#e5e7eb'].map(c=>`<button data-k="wc" data-v="${c}" class="${S.wc===c?'sel':''}" style="background:${c}"></button>`).join('')}</div>`},
@@ -2801,7 +2841,7 @@ if(typeof onLong==='function')onLong(sbtn,function(){pmenu()});
 (function(){try{document.body.classList.add('intro');setTimeout(function(){document.body.classList.remove('intro')},4200);var pw=document.getElementById('pw');if(pw)pw.onclick=function(){var sh=document.getElementById('shut');if(sh)sh.classList.add('wake');setTimeout(function(){location.reload()},520)}}catch(e){console.error(e)}})();
 /* WN-3.1.8b */
 (function(){
-var VER='3.2.5',B=document.body;
+var VER='3.2.6',B=document.body;
 /* ---- pause CSS animations while the app is in the background ---- */
 function vis(){B.classList.toggle('hid',document.hidden)}
 document.addEventListener('visibilitychange',vis);vis();
@@ -2821,11 +2861,11 @@ function sample(){
 addEventListener('pointerdown',function(){setTimeout(sample,60)},{passive:true,capture:true});
 /* ---- What's New ---- */
 var ITEMS=[
-['🎨','New app icon','A new N icon with aurora colors (shows after you install the new APK)'],
-['⏻','Shutdown animation','Windows fold away, then a progress ring around the logo'],
-['👋','First-run setup','Name, theme, wallpaper, optional PIN and file access'],
-['🔒','New lock and login screen','Big clock, swipe up, PIN pad with shake and wait time'],
-['👤','Account page','Change your name or PIN, lock now, run setup again in Settings']
+['⌨️','&& and || work','Chain commands in both Command Prompt and PowerShell (&amp; too in Command Prompt)'],
+['↹','Tab completion','Commands and file names; Tab again for the next match, Shift+Tab goes back'],
+['📋','Copy and paste','New Copy / Paste / Ctrl+C / Tab buttons under the input; pasting many lines runs them one by one'],
+['🪟','Clear modes','Window title and prompt show Command Prompt or PowerShell'],
+['🌐','Clearer network errors','Shows the real reason behind "Unable to connect to the remote server"']
 ];
 function nlogo(){return '<svg viewBox="0 0 512 512"><path d="M168 368V144l176 224V144" fill="none" stroke="url(#nxg)" stroke-width="46" stroke-linecap="round" stroke-linejoin="round"/></svg>'}
 function showWN(force){

@@ -77,3 +77,5 @@
 - v3.2.5 (NX-ICON-3.2.5، بخش D1): آیکن جدید: مونوگرام N + حلقه‌ی مداری روی پس‌زمینه‌ی شفق؛ فایل‌ها: assets/nexos-{bg,fg,icon,logo,splash}.svg. فورگراند داخل safe-zone ادپتیو (شعاع ۱۱۳ از ۱۳۲ در ۴۳۲px). نیاز به بیلد کامل APK.
 
 - v3.2.5 (SYS-3.2.5، بخش D): آیکن/لوگو/اسپلش جدید (assets/*.svg؛ make-icons.mjs در CI رندر میکنه). doShut: پنجره‌ها shdn، حلقه‌ی پیشرفت دور لوگو. قفل: lck با بخش .lgn (آواتار، نام، نقطه‌های PIN، keypad)، swipe-up، کلاس pin، ۵ اشتباه=۳۰ ثانیه صبر. PIN هش SHA-256 (aur.pinh/aur.pinl)، نام aur.user، قفل موقع استارت aur.lockboot. OOBE (aur.oobe) ۶ مرحله. صفحه‌ی Account در Settings. NX4 در window. دقت: قفل فقط داخل NexOS هست و امنیت گوشی نیست.
+
+- v3.2.6 (TERM-3.2.6، بخش E): ترمینال: splitChain/run/run1 برای && و || (هر دو حالت) و & (فقط CMD)، موفقیت با شمارنده‌ی ES (E) و PSV['?']. Tab completion (complete(): دستورها + مسیرها با rp/ls، چرخشی)، نوار .tmk (Tab، ↑↓، Ctrl+C، Copy، Paste، Clear)، paste چندخطی با submitLine، عنوان پنجره Command Prompt/Windows PowerShell، prompt اکو در PS با 'PS '. psNetMsg علت واقعی خطا را در پرانتز نشان می‌دهد. NOTHERE: برای claude/npm/node/git/... پیام Termux.
