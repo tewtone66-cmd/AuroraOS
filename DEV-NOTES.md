@@ -102,3 +102,8 @@
 - Java shapeOf(cursor): hotspot (0,0) = arrow; else crc lookup in Download/aurora-cursor-map.txt ("crc=hand|ibeam|busy|arrow|wine"), else guessShape (hand + I-beam only, geometry, UNVERIFIED). null = Wine's own cursor. aurora-cursors.txt now shows guess= per cursor: compare with the real shape, then add exact crc lines / a built-in table.
 - Setting aur.exs (default on); off = 3.2.9 behaviour.
 
+## 3.2.11 - cursor-log diagnostics (aurora-diag-3.2.11)
+- No aurora-cursors.txt appeared after 3.2.9/3.2.10 and every failure was silent. curNote() now writes "# ..." lines into the same file: overlay called/running, state under the pointer, cursors without image data.
+- Reading the file: no "overlay: called" = cursorOverlay never ran; "called" without "running" = early return; "no window under pointer" / "window has no cursor set" = X never gives a cursor, so nothing to map; "visible hot=.." without a cursor entry = see "without image data".
+- BUILTIN_MAP in AuroraWinePlugin.java is empty on purpose; fill it with verified "crc=shape" lines from aurora-cursors.txt (shapeOf checks Download/aurora-cursor-map.txt first, then BUILTIN_MAP).
+

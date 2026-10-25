@@ -1,6 +1,6 @@
 {
   "name": "nexos-android",
-  "version": "3.2.10",
+  "version": "3.2.11",
   "private": true,
   "description": "NexOS Android wrapper",
   "scripts": {

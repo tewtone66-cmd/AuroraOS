@@ -486,6 +486,7 @@ public class AuroraWinePlugin extends Plugin {
     public static void cursorOverlay(final Activity a, final android.widget.FrameLayout root, final Object xs) {
         try {
             final android.graphics.Bitmap bmp = cursorBmp;
+            curNote("overlay: called, nexos cursor image=" + (bmp != null) + ", screen=" + (a == null ? "null" : a.getIntent().getStringExtra("aurora_screen")));
             if (bmp == null || a == null || root == null || xs == null) return;
             String scr = a.getIntent().getStringExtra("aurora_screen");
             if (scr == null || scr.indexOf('x') < 0) return;
@@ -493,7 +494,7 @@ public class AuroraWinePlugin extends Plugin {
             final int sh = Integer.parseInt(scr.substring(scr.indexOf('x') + 1));
             if (sw <= 0 || sh <= 0) return;
             Object po = xs.getClass().getField("pointer").get(xs);
-            if (!(po instanceof com.winlator.xserver.Pointer)) return;
+            if (!(po instanceof com.winlator.xserver.Pointer)) { curNote("overlay: xs.pointer is not a Pointer"); return; }
             final com.winlator.xserver.Pointer pt = (com.winlator.xserver.Pointer) po;
             xsRef = xs; fitRoot = root; xsW = sw; xsH = sh; // aurora-fill-3.2.7
             applyFit(root);
@@ -504,6 +505,7 @@ public class AuroraWinePlugin extends Plugin {
             iv.setFocusable(false);
             root.addView(iv, new android.widget.FrameLayout.LayoutParams(cursorW, cursorH));
             overlayOk = true;
+            curNote("overlay: running (frame loop started)");
             android.view.Choreographer.getInstance().postFrameCallback(new android.view.Choreographer.FrameCallback() {
                 @Override
                 public void doFrame(long t) {
@@ -520,6 +522,7 @@ public class AuroraWinePlugin extends Plugin {
                         try { // aurora-fill-3.2.8: arrow = NexOS cursor, other shapes = Wine's own, hidden stays hidden
                             com.winlator.xserver.Window pw = ((com.winlator.xserver.XServer) xs).inputDeviceManager.getPointWindow();
                             com.winlator.xserver.Cursor cu = pw != null ? pw.attributes.getCursor() : null;
+                            curState(pw != null, cu);
                             if (cu != null && cu != lastCu) { lastCu = cu; logCursor(cu); }
                             boolean hide = cu != null && !cu.isVisible();
                             String shp = (cu != null && cu.isVisible()) ? shapeOf(cu) : null;
@@ -791,7 +794,11 @@ public class AuroraWinePlugin extends Plugin {
     private static void logCursor(com.winlator.xserver.Cursor cu) {
         try {
             com.winlator.xserver.Drawable d = cu.cursorImage;
-            if (d == null || d.getData() == null || cuSeen.size() >= 80) return;
+            if (d == null || d.getData() == null) {
+                if (cuSeen.add("nodata " + cu.hotSpotX + "," + cu.hotSpotY)) curNote("cursor without image data: hot=" + cu.hotSpotX + "," + cu.hotSpotY + " image=" + (d != null));
+                return;
+            }
+            if (cuSeen.size() >= 80) return;
             java.nio.ByteBuffer bb = d.getData().duplicate();
             bb.rewind();
             int W = d.width, H = d.height;
@@ -906,13 +913,56 @@ public class AuroraWinePlugin extends Plugin {
                 bb.get(b);
                 java.util.zip.CRC32 crc = new java.util.zip.CRC32();
                 crc.update(b);
-                String t = tabLookup(Long.toHexString(crc.getValue()));
+                String hx = Long.toHexString(crc.getValue());
+                String t = tabLookup(hx);
+                if (t == null) t = builtinShape(hx);
                 r = t != null ? t : guessShape(b, W, H, cu.hotSpotX, cu.hotSpotY);
             }
         } catch (Throwable ignored) { }
         shapeVal = r;
         shapeCu = cu;
         return r;
+    }
+
+    /** aurora-diag-3.2.11 */
+    private static int noteN = 0;
+    private static String lastSt = "";
+    /** Verified Wine cursors: lines "crc=hand|ibeam|busy|arrow|wine" (same format as Download/aurora-cursor-map.txt). Empty until aurora-cursors.txt gives real crc values. */
+    private static final String BUILTIN_MAP = "";
+
+    /** Appends one "# ..." line to Download/aurora-cursors.txt (at most 80 per app start). Never throws. */
+    private static void curNote(String msg) {
+        try {
+            if (noteN >= 80) return;
+            noteN++;
+            File dl = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS);
+            if (dl == null) return;
+            String line = "# " + new java.util.Date() + " " + msg + "\n";
+            try (java.io.FileOutputStream fo = new java.io.FileOutputStream(new File(dl, "aurora-cursors.txt"), true)) {
+                fo.write(line.getBytes(java.nio.charset.StandardCharsets.UTF_8));
+            }
+        } catch (Throwable ignored) { }
+    }
+
+    /** Notes a change of what X reports under the pointer (once per change). */
+    private static void curState(boolean hasWin, com.winlator.xserver.Cursor cu) {
+        String st = !hasWin ? "no window under pointer"
+            : cu == null ? "window has no cursor set"
+            : cu.isVisible() ? "cursor visible hot=" + cu.hotSpotX + "," + cu.hotSpotY
+            : "cursor hidden";
+        if (st.equals(lastSt)) return;
+        lastSt = st;
+        curNote("state: " + st);
+    }
+
+    private static String builtinShape(String crc) {
+        for (String line : BUILTIN_MAP.split("\\r?\\n")) {
+            String t = line.trim();
+            int e = t.indexOf('=');
+            if (t.startsWith("#") || e <= 0) continue;
+            if (t.substring(0, e).trim().equalsIgnoreCase(crc)) return t.substring(e + 1).trim().toLowerCase();
+        }
+        return null;
     }
 
     /** Sends the whole app to the background (programs keep running). */

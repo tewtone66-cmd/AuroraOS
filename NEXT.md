@@ -50,3 +50,6 @@ Claude Code واقعی داخل شبیه‌ساز اجرا نمیشه (برنا�
 ## Done in 3.2.10
 - Cursor shapes (map file + guess). Phone test pending. Next: built-in crc table from verified aurora-cursors.txt.
 
+## Done in 3.2.11
+- Cursor-log diagnostics + empty BUILTIN_MAP slot. Phone test pending. Next: fill BUILTIN_MAP from a verified aurora-cursors.txt.
+
