@@ -62,3 +62,5 @@ Claude Code واقعی داخل شبیه‌ساز اجرا نمیشه (برنا�
 ## Done in 3.2.14
 - BUILTIN_MAP: busy + arrow verified from the log; mouse no longer hidden. Phone test pending. Open: hand/I-beam crc (need samples), NexOS-window-over-Wine glitch (needs a description).
 
+## Done in 3.2.15
+- Start timer only. Still open: test 3.2.12-3.2.14, Wine black (XServerDisplayActivity background), hand/I-beam crc, window overlap description.
