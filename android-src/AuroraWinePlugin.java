@@ -497,6 +497,7 @@ public class AuroraWinePlugin extends Plugin {
             if (!(po instanceof com.winlator.xserver.Pointer)) { curNote("overlay: xs.pointer is not a Pointer"); return; }
             final com.winlator.xserver.Pointer pt = (com.winlator.xserver.Pointer) po;
             xsRef = xs; fitRoot = root; xsW = sw; xsH = sh; // aurora-fill-3.2.7
+            com.winlator.renderer.GLRenderer.auroraClear = true; // aurora-clear-3.2.13: Wine desktop not drawn inside an Aurora window
             applyFit(root);
             final android.widget.ImageView iv = new android.widget.ImageView(a);
             iv.setImageBitmap(bmp);
@@ -511,6 +512,7 @@ public class AuroraWinePlugin extends Plugin {
                 public void doFrame(long t) {
                     if (a.isFinishing() || a.isDestroyed()) {
                         fitRoot = null; xsRef = null; fitRend = null;
+                        com.winlator.renderer.GLRenderer.auroraClear = false;
                         overlayOk = false;
                         return;
                     }
@@ -530,9 +532,12 @@ public class AuroraWinePlugin extends Plugin {
                             float[] sht = sbm == null ? null : shapeHot.get(shp);
                             curHx = sht != null ? sht[0] : 0f;
                             curHy = sht != null ? sht[1] : 0f;
-                            android.graphics.Bitmap wantB = sbm != null ? sbm : bmp;
+                            boolean own0 = cu != null && cu.isVisible() && (cu.hotSpotX != 0 || cu.hotSpotY != 0) && sbm == null && !"arrow".equals(shp);
+                            android.graphics.Bitmap ownB = own0 ? wineBmp(cu) : null;
+                            android.graphics.Bitmap wantB = ownB != null ? ownB : (sbm != null ? sbm : bmp);
+                            sizeCursor(iv, ownB, cu);
                             if (iv.getTag() != wantB) { iv.setImageBitmap(wantB); iv.setTag(wantB); }
-                            boolean own = cu != null && cu.isVisible() && (cu.hotSpotX != 0 || cu.hotSpotY != 0) && sbm == null && !"arrow".equals(shp);
+                            boolean own = own0 && ownB == null;
                             int vis = (hide || own) ? android.view.View.INVISIBLE : android.view.View.VISIBLE;
                             if (iv.getVisibility() != vis) iv.setVisibility(vis);
                             com.winlator.renderer.GLRenderer rr = fitRend;
@@ -963,6 +968,57 @@ public class AuroraWinePlugin extends Plugin {
             if (t.substring(0, e).trim().equalsIgnoreCase(crc)) return t.substring(e + 1).trim().toLowerCase();
         }
         return null;
+    }
+
+    /** aurora-owncur-3.2.12 */
+    private static volatile com.winlator.xserver.Cursor wbCu;
+    private static volatile android.graphics.Bitmap wbBmp;
+
+    /** The Wine cursor as an Android bitmap (assumes B,G,R,A bytes; a red/blue swap would only change colours). null = unusable. Cached. */
+    private static android.graphics.Bitmap wineBmp(com.winlator.xserver.Cursor cu) {
+        if (cu == wbCu) return wbBmp;
+        android.graphics.Bitmap r = null;
+        try {
+            com.winlator.xserver.Drawable d = cu.cursorImage;
+            if (d != null && d.getData() != null && d.width > 0 && d.height > 0 && d.width * d.height <= 128 * 128) {
+                int W = d.width, H = d.height;
+                java.nio.ByteBuffer bb = d.getData().duplicate();
+                bb.rewind();
+                byte[] b = new byte[W * H * 4];
+                if (bb.remaining() >= b.length) {
+                    bb.get(b);
+                    int[] px = new int[W * H];
+                    boolean any = false;
+                    for (int i = 0; i < px.length; i++) {
+                        int bl = b[i * 4] & 255, gr = b[i * 4 + 1] & 255, rd = b[i * 4 + 2] & 255, al = b[i * 4 + 3] & 255;
+                        if (al > 0) any = true;
+                        px[i] = (al << 24) | (rd << 16) | (gr << 8) | bl;
+                    }
+                    if (any) r = android.graphics.Bitmap.createBitmap(px, W, H, android.graphics.Bitmap.Config.ARGB_8888);
+                }
+            }
+        } catch (Throwable ignored) { }
+        wbBmp = r;
+        wbCu = cu;
+        return r;
+    }
+
+    /** Size of the overlay image: NexOS cursor size, or the Wine bitmap scaled like the NexOS arrow (28 css px = cursorH); sets the hotspot offset. */
+    private static void sizeCursor(android.widget.ImageView iv, android.graphics.Bitmap ownB, com.winlator.xserver.Cursor cu) {
+        int w = cursorW, h = cursorH;
+        if (ownB != null) {
+            float k = cursorH / 28f;
+            w = Math.max(8, Math.round(ownB.getWidth() * k));
+            h = Math.max(8, Math.round(ownB.getHeight() * k));
+            curHx = cu.hotSpotX * k;
+            curHy = cu.hotSpotY * k;
+        }
+        android.view.ViewGroup.LayoutParams lp = iv.getLayoutParams();
+        if (lp != null && (lp.width != w || lp.height != h)) {
+            lp.width = w;
+            lp.height = h;
+            iv.setLayoutParams(lp);
+        }
     }
 
     /** Sends the whole app to the background (programs keep running). */

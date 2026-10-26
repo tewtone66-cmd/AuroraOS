@@ -107,3 +107,12 @@
 - Reading the file: no "overlay: called" = cursorOverlay never ran; "called" without "running" = early return; "no window under pointer" / "window has no cursor set" = X never gives a cursor, so nothing to map; "visible hot=.." without a cursor entry = see "without image data".
 - BUILTIN_MAP in AuroraWinePlugin.java is empty on purpose; fill it with verified "crc=shape" lines from aurora-cursors.txt (shapeOf checks Download/aurora-cursor-map.txt first, then BUILTIN_MAP).
 
+## 3.2.13 - no black Wine screen (aurora-clear-3.2.13)
+- Read from Winlator 8077f37: GLRenderer clears to alpha 0 and the EGL config has alpha, but the surface was opaque and the Wine desktop window (explorer.exe, black) was drawn. Build-time patch scripts/patch-exe-clear.py (called from patch-exe-window.py): GLRenderer.auroraClear skips desktop windows, XServerView surface TRANSLUCENT, AuroraExeWindow windowBackground transparent. AuroraWinePlugin turns the flag on in cursorOverlay and off when the program ends.
+- Unverified on device. If the black stays: XServerDisplayActivity may set its own background (grep setBackground|FLXServerDisplay in com/winlator/XServerDisplayActivity.java).
+- Side effect: Wine's own taskbar (also WM_CLASS explorer.exe) is not drawn either.
+
+## 3.2.12 - Wine cursors drawn by NexOS (aurora-owncur-3.2.12)
+- Phone test of 3.2.10: mouse vanished while dragging a window. Unknown Wine cursors (hotspot != 0, no NexOS shape) were left to Wine's renderer while the NexOS overlay hid itself. Now NexOS draws the cursor's own bitmap in the overlay (wineBmp/sizeCursor); the old renderer path remains only if the bitmap is unusable.
+- Unverified on device: byte order (B,G,R,A assumed), size scale (cursorH/28 per bitmap pixel), hotspot position.
+

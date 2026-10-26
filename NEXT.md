@@ -53,3 +53,9 @@ Claude Code واقعی داخل شبیه‌ساز اجرا نمیشه (برنا�
 ## Done in 3.2.11
 - Cursor-log diagnostics + empty BUILTIN_MAP slot. Phone test pending. Next: fill BUILTIN_MAP from a verified aurora-cursors.txt.
 
+## Done in 3.2.13
+- No black Wine screen (build-time patch). Phone test pending. Open: Wine startup delay (mostly Wine/box64 boot time), NexOS window over Wine glitch (needs a description), BUILTIN_MAP.
+
+## Done in 3.2.12
+- Unknown Wine cursors drawn by NexOS (drag-vanish fix, phone test pending). Open: Wine black screen, Wine/NexOS window overlap bug, Wine window delay, BUILTIN_MAP.
+

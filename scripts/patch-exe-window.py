@@ -158,3 +158,7 @@ if new_man != man:
 if new_act != act:
     ACT.write_text(new_act, encoding='utf-8')
 print('EXE window patch applied: translucent theme, aurora_screen intent extra, exe staging')
+
+# aurora-clear-3.2.13: no black Wine screen
+import subprocess, sys
+subprocess.run([sys.executable, 'scripts/patch-exe-clear.py'], check=True)
