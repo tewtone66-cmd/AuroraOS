@@ -921,7 +921,7 @@ public class AuroraWinePlugin extends Plugin {
                 String hx = Long.toHexString(crc.getValue());
                 String t = tabLookup(hx);
                 if (t == null) t = builtinShape(hx);
-                r = t != null ? t : guessShape(b, W, H, cu.hotSpotX, cu.hotSpotY);
+                r = t; // aurora-noguess-3.2.15: no geometric guess; unknown cursors are drawn from Wine's own bitmap (wineBmp)
             }
         } catch (Throwable ignored) { }
         shapeVal = r;

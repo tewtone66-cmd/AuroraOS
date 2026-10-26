@@ -37,3 +37,7 @@ if 'android:windowBackground' not in y:
             '<item name="android:windowAnimationStyle">@null</item>\n        <item name="android:windowBackground">@android:color/transparent</item> <!-- ' + MARK + ' -->', 'theme')
 GL.write_text(g, encoding='utf-8'); XV.write_text(x, encoding='utf-8'); STY.write_text(y, encoding='utf-8')
 print('aurora-clear applied: Wine desktop not drawn, translucent surface, transparent window background')
+
+# aurora-clear2-3.2.15
+import subprocess, sys
+subprocess.run([sys.executable, 'scripts/patch-exe-clear2.py'], check=True)
