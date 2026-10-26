@@ -526,7 +526,7 @@ public class AuroraWinePlugin extends Plugin {
                             com.winlator.xserver.Cursor cu = pw != null ? pw.attributes.getCursor() : null;
                             curState(pw != null, cu);
                             if (cu != null && cu != lastCu) { lastCu = cu; logCursor(cu); }
-                            boolean hide = cu != null && !cu.isVisible();
+                            boolean hide = false; // aurora-nohide-3.2.14: a hidden Wine cursor shows the NexOS arrow instead of nothing
                             String shp = (cu != null && cu.isVisible()) ? shapeOf(cu) : null;
                             android.graphics.Bitmap sbm = shp == null ? null : shapeBmp.get(shp);
                             float[] sht = sbm == null ? null : shapeHot.get(shp);
@@ -932,8 +932,9 @@ public class AuroraWinePlugin extends Plugin {
     /** aurora-diag-3.2.11 */
     private static int noteN = 0;
     private static String lastSt = "";
+    private static int stateN = 0;
     /** Verified Wine cursors: lines "crc=hand|ibeam|busy|arrow|wine" (same format as Download/aurora-cursor-map.txt). Empty until aurora-cursors.txt gives real crc values. */
-    private static final String BUILTIN_MAP = "";
+    private static final String BUILTIN_MAP = "deadd746=busy\n1d2d519e=arrow\n"; // aurora-nohide-3.2.14: verified on a phone (aurora-cursors.txt)
 
     /** Appends one "# ..." line to Download/aurora-cursors.txt (at most 80 per app start). Never throws. */
     private static void curNote(String msg) {
@@ -957,7 +958,7 @@ public class AuroraWinePlugin extends Plugin {
             : "cursor hidden";
         if (st.equals(lastSt)) return;
         lastSt = st;
-        curNote("state: " + st);
+        if (stateN++ < 12) curNote("state: " + st);
     }
 
     private static String builtinShape(String crc) {

@@ -59,3 +59,6 @@ Claude Code واقعی داخل شبیه‌ساز اجرا نمیشه (برنا�
 ## Done in 3.2.12
 - Unknown Wine cursors drawn by NexOS (drag-vanish fix, phone test pending). Open: Wine black screen, Wine/NexOS window overlap bug, Wine window delay, BUILTIN_MAP.
 
+## Done in 3.2.14
+- BUILTIN_MAP: busy + arrow verified from the log; mouse no longer hidden. Phone test pending. Open: hand/I-beam crc (need samples), NexOS-window-over-Wine glitch (needs a description).
+

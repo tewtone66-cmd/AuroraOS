@@ -116,3 +116,7 @@
 - Phone test of 3.2.10: mouse vanished while dragging a window. Unknown Wine cursors (hotspot != 0, no NexOS shape) were left to Wine's renderer while the NexOS overlay hid itself. Now NexOS draws the cursor's own bitmap in the overlay (wineBmp/sizeCursor); the old renderer path remains only if the bitmap is unusable.
 - Unverified on device: byte order (B,G,R,A assumed), size scale (cursorH/28 per bitmap pixel), hotspot position.
 
+## 3.2.14 - cursor table from the real log + no hidden mouse (aurora-nohide-3.2.14)
+- Real aurora-cursors.txt: deadd746 = hourglass 20x20 hot 10,10 (busy); 1d2d519e = arrow 20x20 hot 0,0; 2144df1c = 1x1 blank (Wine "hidden"). Table is in BUILTIN_MAP (AuroraWinePlugin.java). Hand and I-beam crc values are still unknown (no sample yet: hover a link and a text box in an EXE, then read the log again).
+- Hidden Wine cursor (1x1) used to hide the NexOS mouse; the log showed visible/hidden flipping about once a second. Now the NexOS arrow stays. Side effect: programs that hide the cursor on purpose (games) show the arrow; make it a setting if that matters.
+
