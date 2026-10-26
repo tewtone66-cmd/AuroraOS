@@ -1199,7 +1199,7 @@ b('back').disabled=E.hi<1;b('fwd').disabled=E.hi>=E.hist.length-1;b('up').disabl
 const n=E.path==null&&!E.sr?E.roots.length:vis().length;$('.sc',B).textContent=n+' item'+(n===1?'':'s')+(s.length?'  ·  '+s.length+' selected'+(s.length===1&&!s[0].isDirectory?' ('+fsz(s[0].size)+')':''):'')}
 function mk(it){const k=kind(it),th=k==='img'&&it.size>0&&it.size<2.5e6;const r=h('div','row'+(E.sel.has(it.path)?' sel':''),`<div class="nm">${th?`<img class="th" loading="lazy" decoding="async" fetchpriority="low" alt="" src="${fsrc(it.path)}">`:ficon(it)}<span></span></div><span>${fdate(it.lastModified)}</span><span>${esc(ftype(it))}</span><span>${it.isDirectory?'':fsz(it.size)}</span>`);r.dataset.p=it.path;if(E.sr)r.title=it.path;$('.nm span',r).textContent=it.name;const im=$('img.th',r);if(im)im.onerror=()=>{im.outerHTML=ficon(it)};
 r.onclick=e=>{L.focus();if(e.shiftKey||e.ctrlKey||e.metaKey||E.multi){pick(it,e);return}if(act(r,()=>open(it),e))return;pick(it,e)};
-r.oncontextmenu=e=>{e.preventDefault();e.stopPropagation();if(!E.sel.has(it.path)){E.sel=new Set([it.path]);E.anchor=it;paint()}const one=E.sel.size===1;ctx(e.clientX,e.clientY,[['Open',()=>open(it),'',!one],...(E.sr&&one?[['Open file location',()=>go(dirname(it.path))]]:[]),...(one&&!it.isDirectory?[['Open with Notepad',()=>openApp('notes',{path:it.path})],['Open with Code Editor',()=>openApp('code',{path:it.path})],...(kind(it)==='zip'?[['Extract here',()=>cmd('unzip')],['Extract to…',()=>cmd('unzipto')]]:[])]:[]),['Compress to ZIP',()=>cmd('zip')],...(one&&!it.isDirectory&&kind(it)==='exe'?[['Add to Desktop',()=>addExe({p:it.path})]]:[]),null,['Cut',()=>cmd('cut'),'Ctrl+X'],['Copy',()=>cmd('copy'),'Ctrl+C'],null,['Rename',()=>cmd('ren'),'F2',!one],['Delete',()=>cmd('del'),'Del'],null,['Properties',()=>cmd('props')]])};return r}
+r.oncontextmenu=e=>{e.preventDefault();e.stopPropagation();if(!E.sel.has(it.path)){E.sel=new Set([it.path]);E.anchor=it;paint()}const one=E.sel.size===1;ctx(e.clientX,e.clientY,[['Open',()=>open(it),'',!one],...(E.sr&&one?[['Open file location',()=>go(dirname(it.path))]]:[]),...(one&&!it.isDirectory?[['Open with Notepad',()=>openApp('notes',{path:it.path})],['Open with Code Editor',()=>openApp('code',{path:it.path})],...(kind(it)==='zip'?[['Extract here',()=>cmd('unzip')],['Extract to…',()=>cmd('unzipto')]]:[])]:[]),['Compress to ZIP',()=>cmd('zip')],...(one&&!it.isDirectory&&kind(it)==='exe'?[['Add to Desktop',()=>addExe({p:it.path})]]:[]),...[['Send to Desktop (shortcut)',()=>window.DSKX2&&DSKX2.addIts(selItems())]],null,['Cut',()=>cmd('cut'),'Ctrl+X'],['Copy',()=>cmd('copy'),'Ctrl+C'],null,['Rename',()=>cmd('ren'),'F2',!one],['Delete',()=>cmd('del'),'Del'],null,['Properties',()=>cmd('props')]])};return r}
 function draw(){const v=vis();L.className='elist'+(E.view==='i'&&(E.path!=null||E.sr)?' ic':'')+(E.view==='l'&&(E.path!=null||E.sr)?' lt':'');
 nav.innerHTML='';const sec=t=>nav.appendChild(h('h5','',t)),item=(label,ico,path)=>{const n=h('div','ni'+(E.path===path?' sel':''),ico+'<span></span>');$('span',n).textContent=label;n.onclick=()=>go(path);if(path)n.dataset.dp=path;nav.appendChild(n)};
 const hm=h('div','ni'+(E.path==null?' sel':''),'<svg viewBox="0 0 24 24" width="20" height="20"><rect x="3" y="4" width="18" height="12" rx="2" fill="#4facfe"/><path d="M8 20h8M12 16v4" stroke="#7a8599" stroke-width="2"/></svg><span>This PC</span>');hm.onclick=()=>go(null);nav.appendChild(hm);
@@ -2299,8 +2299,8 @@ const kv=a=>a.map(([k,v])=>`<div class="kv"><span>${k}</span><b>${esc(String(v))
 const REPO='https://github.com/tewtone66-cmd/NexOS';
 const PGS={
 about(){const ua=navigator.userAgent,and=(/Android ([\d.]+)/.exec(ua)||[])[1]||'?',mod=(/;\s*([^;)]+?)\s+Build/.exec(ua)||/Android [\d.]+;\s*([^;)]+)/.exec(ua)||[])[1]||'Unknown',chr=(/Chrome\/([\d.]+)/.exec(ua)||[])[1]||'?';
-return `<h3>About</h3><div class="abh"><div class="abl">${STAR}</div><div><h2>NexOS</h2><p>Version 3.2.6</p></div></div>${kv([['Edition','NexOS Alpha'],['Version','3.2.6'],['Device',mod],['Android',and],['WebView (Chrome)',chr],['Screen',innerWidth+' × '+innerHeight+' (UI '+Math.round(S.ui*100)+'%)'],['CPU cores',navigator.hardwareConcurrency||'?'],['Memory',navigator.deviceMemory?'≥ '+navigator.deviceMemory+' GB':'?'],['Storage access',granted===null?'…':granted?'Allowed':'Not allowed']])}<h4>Update</h4>${kv([['Channel','Alpha'],['Installed version','3.2.19'],['Updates','Installed manually from GitHub']])}<button class="pgb" data-k="go" data-v="${REPO}">Open GitHub</button><h4>What is new in 3.0.0</h4><ul><li>New virtual mouse with cursor states and motion blur</li><li>New taskbar and Start menu with search</li><li>Recycle Bin that really keeps deleted items</li><li>Settings with categories and search</li></ul>`},
-update(){return `<h3>Update</h3>${kv([['Channel','Alpha'],['Installed version','3.2.19'],['Status','Updates are installed manually: rebuild the app from GitHub']])}<button class="pgb" data-k="go" data-v="${REPO}">Open GitHub</button>`},
+return `<h3>About</h3><div class="abh"><div class="abl">${STAR}</div><div><h2>NexOS</h2><p>Version 3.2.6</p></div></div>${kv([['Edition','NexOS Alpha'],['Version','3.2.6'],['Device',mod],['Android',and],['WebView (Chrome)',chr],['Screen',innerWidth+' × '+innerHeight+' (UI '+Math.round(S.ui*100)+'%)'],['CPU cores',navigator.hardwareConcurrency||'?'],['Memory',navigator.deviceMemory?'≥ '+navigator.deviceMemory+' GB':'?'],['Storage access',granted===null?'…':granted?'Allowed':'Not allowed']])}<h4>Update</h4>${kv([['Channel','Alpha'],['Installed version','3.2.20'],['Updates','Installed manually from GitHub']])}<button class="pgb" data-k="go" data-v="${REPO}">Open GitHub</button><h4>What is new in 3.0.0</h4><ul><li>New virtual mouse with cursor states and motion blur</li><li>New taskbar and Start menu with search</li><li>Recycle Bin that really keeps deleted items</li><li>Settings with categories and search</li></ul>`},
+update(){return `<h3>Update</h3>${kv([['Channel','Alpha'],['Installed version','3.2.20'],['Status','Updates are installed manually: rebuild the app from GitHub']])}<button class="pgb" data-k="go" data-v="${REPO}">Open GitHub</button>`},
 display(){return `<h3>Display & size</h3><h4>App size (whole interface)</h4><div class="step"><button data-k="ui" data-v="-1">&#8722;</button><b>${Math.round(S.ui*100)}%</b><button data-k="ui" data-v="1">+</button><button data-k="ui" data-v="0">Reset</button></div><h4>Desktop icon size</h4>${chips('is',[36,48,60,72],S.is,v=>({36:'Small',48:'Medium',60:'Large',72:'Extra large'})[v])}`},
 storage(){return `<h3>Storage</h3><h4>Access to your files</h4><div class="seg"><button data-k="perm" class="${granted?'sel':''}">${granted===null?'Checking…':granted?'Allowed':'Allow access to files'}</button></div>`},
 bg(){return `<h3>Background</h3><div class="walls">${WALL.map((g,i)=>`<button data-k="wall" data-v="${i}" class="${!S.wc&&i===S.wall?'sel':''}" style="background:${g}"></button>`).join('')}</div><h4>Solid color</h4><div class="sw">${['#0b1d3a','#111827','#1f3b2d','#3b1f3a','#3a2a1f','#475569','#e5e7eb'].map(c=>`<button data-k="wc" data-v="${c}" class="${S.wc===c?'sel':''}" style="background:${c}"></button>`).join('')}</div>`},
@@ -2994,12 +2994,121 @@ function addLnk(its,x,y){var g=geom(),r=$('#icons').getBoundingClientRect(),occ=
 function ask(title,def,cb){var m=h('div','dkm','<div class="dkb"><b></b><input spellcheck="false"><div class="r"><button class="ib" data-k="c">Cancel</button><button class="ib pri" data-k="o">OK</button></div></div>');$('b',m).textContent=title;var i=$('input',m);i.value=def;doc.body.appendChild(m);i.focus();i.select();
  var done=function(ok){var v=i.value.trim();m.remove();if(ok&&v)cb(v)};m.addEventListener('click',function(e){var k=e.target.dataset&&e.target.dataset.k;if(k)done(k==='o');else if(e.target===m)done(false)});i.onkeydown=function(e){if(e.key==='Enter')done(true);else if(e.key==='Escape')done(false)}}
 /* ---------- removing things from the desktop ---------- */
-function removeItem(b){var k=b.dataset.k||'';
+function removeItem(b){var k=b.dataset.k||'';if(trashDesk(b))return;
  if(b.dataset.s){DSKX0.siteToTrash(b.dataset.s);delete DP[k];saveDP();return}
  if(b.dataset.e){removeExe(b.dataset.e);delete DP[k];saveDP();return}
  if(b.dataset.l){var id=b.dataset.l;LNKS=LNKS.filter(function(l){return l.id!==id});var i=DESK.findIndex(function(d){return d[0]==='lnk'&&d[2]===id});if(i>=0)DESK.splice(i,1);delete DP[k];saveL();saveDP();buildIcons(true);toast('Shortcut removed');return}
  if(k.split('|')[0]==='trash'){toast("The Recycle Bin can't be removed");return}
  if(HID.indexOf(k)<0)HID.push(k);delete DP[k];ls('aur.dhide',JSON.stringify(HID));saveDP();buildIcons(true);toast('Removed from the desktop (right-click the desktop to restore)')}
+
+/* NX-3.2.20 */
+var ADD=jl('aur.dapps',[]);if(!Array.isArray(ADD))ADD=[];ADD=ADD.filter(function(i){return typeof i==='string'&&A[i]&&i!=='trash'});
+ADD.forEach(function(i){if(!DESK.some(function(d){return d[0]===i}))DESK.push([i])});
+var DDIR='/storage/emulated/0/Desktop';
+var saveAdd=function(){ls('aur.dapps',JSON.stringify(ADD))},saveHid=function(){ls('aur.dhide',JSON.stringify(HID))},saveDesk=function(){ls('aur.desk',JSON.stringify(DESK.map(dkey)))};
+function pushTr(e){e.id=e.k.charAt(0)+Date.now().toString(36)+Math.random().toString(36).slice(2,5);e.t=Date.now();TR.push(e);trSave();return e}
+function relnk(l,pos){if(!LNKS.some(function(q){return q.id===l.id}))LNKS.push(l);if(!DESK.some(function(d){return d[0]==='lnk'&&d[2]===l.id}))DESK.push(['lnk',l.n,l.id]);if(pos)DP['lnk|'+l.id]=pos;saveL();saveDP()}
+function cellAt(x,y){var g=geom(),r=$('#icons').getBoundingClientRect();return[Math.max(0,Math.min(g.cols-1,Math.round((x-43-r.left-PX)/CW))),Math.max(0,Math.min(g.rows-1,Math.round((y-47-r.top-PY)/CH)))]}
+function overDesk(x,y){var t=doc.elementFromPoint(x,y);if(!t||!t.closest)return false;if(t.closest('.win,#dock,#start,#ctx,#trf,#mnpc,#pwm,#tbpv,#np,#npc,.dlg,.dkm'))return false;return!!t.closest('#desk')}
+/* desktop item -> Recycle Bin (shortcuts, apps, programs). returns false for items handled elsewhere (websites, the bin itself) */
+function trashDesk(b){var k=b.dataset.k||'',kk=k.split('|')[0];
+ if(b.dataset.s||kk==='trash')return false;
+ if(b.dataset.l){var id=b.dataset.l,l=LNKS.find(function(q){return q.id===id});if(!l)return false;
+  var snap=JSON.parse(JSON.stringify(l)),pos=DP[k]||null;
+  LNKS=LNKS.filter(function(q){return q.id!==id});var i=DESK.findIndex(function(d){return d[0]==='lnk'&&d[2]===id});if(i>=0)DESK.splice(i,1);delete DP[k];saveL();saveDP();
+  if(l.own&&typeof trashFiles==='function'){
+   trashFiles([{path:l.p,name:l.f||l.n,isDirectory:!!l.d}]).then(function(n){
+    if(!n){relnk(snap,pos);buildIcons(true);toast('Could not move the folder');return}
+    var e=TR.find(function(q){return q.k==='file'&&q.o===l.p});if(e){e.dsk=1;trSave()}else buildIcons(true)
+   }).catch(function(){relnk(snap,pos);buildIcons(true);toast('Could not move the folder')});
+   return true}
+  pushTr({k:'lnk',n:l.n,o:l.p,dir:!!l.d,l:snap,pos:pos});toast('Moved to Recycle Bin');return true}
+ if(b.dataset.e){var eid=b.dataset.e,ex=EXES.find(function(q){return q.id===eid}),de=DESK.find(function(d){return d[0]==='exe'&&d[2]===eid});
+  if(!ex)return false;
+  var sn=JSON.parse(JSON.stringify(ex)),dn=de?de.slice():['exe','',eid],pos2=DP[k]||null;
+  removeExe(eid);delete DP[k];saveDP();
+  pushTr({k:'exe',n:dn[1]||(ex.p?String(ex.p).split('/').pop():'')||'Program',o:ex.p||'Program',ex:sn,de:dn,pos:pos2});toast('Moved to Recycle Bin');return true}
+ if(A[kk]&&kk!=='site'&&kk!=='exe'&&kk!=='lnk'){
+  var added=ADD.indexOf(kk)>=0,dd=DESK.find(function(d){return d[0]===kk}),pos3=DP[k]||null;
+  if(added){ADD.splice(ADD.indexOf(kk),1);saveAdd();var j=DESK.indexOf(dd);if(j>=0)DESK.splice(j,1);saveDesk()}
+  else{if(HID.indexOf(k)<0)HID.push(k);saveHid()}
+  delete DP[k];saveDP();
+  pushTr({k:'app',n:(dd&&dd[1])||A[kk].n,o:'Desktop icon',app:kk,add:added,key:k,de:dd?dd.slice():[kk],pos:pos3});toast('Moved to Recycle Bin');return true}
+ return false}
+function restoreOne(e){
+ if(e.k==='lnk'){relnk(e.l,e.pos)}
+ else if(e.k==='exe'){var xid=e.ex&&e.ex.id;if(!xid)return;if(!EXES.some(function(q){return q.id===xid}))EXES.push(e.ex);
+  var d0=e.de||['exe','',xid];if(!DESK.some(function(d){return d[0]==='exe'&&d[2]===xid}))DESK.push(d0);
+  try{saveExes()}catch(x){}saveDesk();if(e.pos)DP[dkey(d0)]=e.pos;saveDP()}
+ else if(e.k==='app'){
+  if(e.add){if(ADD.indexOf(e.app)<0)ADD.push(e.app);saveAdd();if(!DESK.some(function(d){return d[0]===e.app}))DESK.push(e.de||[e.app])}
+  else{var ix=HID.indexOf(e.key);if(ix>=0)HID.splice(ix,1);saveHid()}
+  saveDesk();if(e.pos)DP[e.key]=e.pos;saveDP()}}
+var NEWK={lnk:1,app:1,exe:1};
+var _trR=trRestore,_trP=trPurge;
+trRestore=async function(ids){ids=ids||[];
+ var mine=TR.filter(function(e){return ids.indexOf(e.id)>=0&&NEWK[e.k]});
+ var rest=ids.filter(function(i){return!mine.some(function(e){return e.id===i})});
+ var dsk=TR.filter(function(e){return rest.indexOf(e.id)>=0&&e.k==='file'&&e.dsk});
+ var r;if(rest.length)r=await _trR(rest);
+ mine.forEach(function(e){try{restoreOne(e)}catch(x){}var i=TR.indexOf(e);if(i>=0)TR.splice(i,1)});
+ if(mine.length)trSave();
+ for(var q=0;q<dsk.length;q++){var f=dsk[q];try{await NF.info({path:f.o});addLnk([{path:f.o,name:f.n,isDirectory:!!f.dir}],0,0);var z=LNKS.find(function(w){return w.p===f.o});if(z){z.own=true;saveL()}}catch(x){}}
+ if(mine.length&&!rest.length)toast(mine.length+' item'+(mine.length>1?'s':'')+' restored');
+ return r};
+trPurge=async function(ids){ids=ids||[];
+ var mine=TR.filter(function(e){return ids.indexOf(e.id)>=0&&NEWK[e.k]});
+ var rest=ids.filter(function(i){return!mine.some(function(e){return e.id===i})});
+ mine.forEach(function(e){var i=TR.indexOf(e);if(i>=0)TR.splice(i,1)});
+ var r;if(rest.length)r=await _trP(rest);
+ if(mine.length)trSave();
+ return r};
+/* new folder: a real folder in /Desktop plus a shortcut icon on the desktop */
+function newFolder(x,y){ask('New folder','New folder',async function(v){
+ v=v.replace(/[\\\/:*?"<>|]/g,'').trim();if(!v||v==='.'||v==='..'){toast('Invalid folder name');return}
+ try{
+  try{await NF.mkdir({path:'/storage/emulated/0',name:'Desktop'})}catch(e){}
+  var have=[];try{have=((await NF.list({path:DDIR})).items||[]).map(function(i){return i.name})}catch(e){}
+  var nm=v,n=2;while(have.indexOf(nm)>=0)nm=v+' ('+(n++)+')';
+  await NF.mkdir({path:DDIR,name:nm});
+  var p=DDIR+'/'+nm;addLnk([{path:p,name:nm,isDirectory:true}],x,y);
+  var q=LNKS.find(function(z){return z.p===p});if(q){q.own=true;saveL()}
+ }catch(err){toast('Could not create the folder')}})}
+/* apps dropped / sent to the desktop */
+function addDeskApp(id,x,y){if(!A[id]||id==='trash'||id==='site'||id==='exe'||id==='lnk')return 0;
+ var ex=DESK.find(function(d){return d[0]===id}),key=ex?dkey(ex):id+'|',hidden=HID.indexOf(key)>=0;
+ if(ex&&!hidden){toast('Already on the desktop');return 0}
+ if(!ex){DESK.push([id]);if(ADD.indexOf(id)<0)ADD.push(id);saveAdd()}
+ if(hidden){HID.splice(HID.indexOf(key),1);saveHid()}
+ var occ={};items().forEach(function(b){var p=DP[b.dataset.k];if(p)occ[p[0]+','+p[1]]=1});
+ var c0=cellAt(x,y);DP[key]=free(geom(),occ,c0[0],c0[1]);
+ saveDesk();saveDP();buildIcons(true);toast('Added to the desktop: '+A[id].n);return 1}
+function addIts(its){return addLnk((its||[]).map(function(i){return{path:i.path,name:i.name,isDirectory:!!i.isDirectory}}),0,0)}
+window.DSKX2={dropApp:function(id,e){if(!A[id]||id==='trash')return false;if(!overDesk(e.clientX,e.clientY))return false;addDeskApp(id,e.clientX,e.clientY);return true},addIts:addIts};
+/* drag an app out of the Start menu onto the desktop (touch: press and hold, mouse / virtual mouse: drag) */
+(function(){var d=null,tm=0,sup=false,ra=0,le=null,cell=null;
+ var SEL='#start button,#start [data-id],#start [data-app]';
+ var appOf=function(t){var b=t&&t.closest&&t.closest(SEL);if(!b)return null;var c=[b.dataset.id,b.dataset.app,b.dataset.a,b.dataset.k],i,v;for(i=0;i<c.length;i++){v=c[i]?String(c[i]).split('|')[0]:'';if(v&&A[v]&&v!=='trash')return{b:b,id:v}}return null};
+ var stop=function(){clearTimeout(tm);tm=0;if(ra){cancelAnimationFrame(ra);ra=0}le=null;if(cell){cell.remove();cell=null}if(d&&d.g)d.g.remove();doc.body.classList.remove('pdrag');if(d&&d.go)dragging=false;d=null};
+ var frame=function(){ra=0;if(!d||!d.go||!le)return;var e=le;le=null;d.g.style.left=(e.clientX-43)+'px';d.g.style.top=(e.clientY-47)+'px';
+  var ok=overDesk(e.clientX,e.clientY);d.g.classList.toggle('bad',!ok);
+  if(ok){var c=cellAt(e.clientX,e.clientY);if(!cell){cell=h('div','dcell','');$('#icons').appendChild(cell)}cell.style.display='block';cell.style.left=(PX+c[0]*CW)+'px';cell.style.top=(PY+c[1]*CH)+'px'}else if(cell)cell.style.display='none'};
+ var arm=function(){if(d){d.armed=true;try{navigator.vibrate&&navigator.vibrate(14)}catch(x){}}};
+ doc.addEventListener('pointerdown',function(e){if(e.button||d)return;var a=appOf(e.target);if(!a)return;var tch=e.pointerType==='touch';
+  d={b:a.b,id:a.id,x:e.clientX,y:e.clientY,pid:e.pointerId,touch:tch,armed:!tch,go:false,g:null};if(tch)tm=setTimeout(arm,380)},true);
+ addEventListener('pointermove',function(e){if(!d||e.pointerId!==d.pid)return;
+  if(!d.go){var mv=Math.hypot(e.clientX-d.x,e.clientY-d.y);if(!d.armed){if(mv>10)stop();return}if(mv<8)return;
+   d.go=true;var g=h('button','di ghost','<div class="t">'+tile(d.id)+'</div><span></span>');$('span',g).textContent=A[d.id].n;
+   g.style.cssText='position:fixed;pointer-events:none;z-index:99999;width:'+CW+'px;height:94px;left:'+(e.clientX-43)+'px;top:'+(e.clientY-47)+'px';
+   doc.body.appendChild(g);d.g=g;doc.body.classList.add('pdrag');dragging=true;sync()}
+  le=e;if(!ra)ra=requestAnimationFrame(frame)});
+ var end=function(e){if(!d||e.pointerId!==d.pid)return;var s=d;if(!s.go){stop();return}
+  var x=e.clientX,y=e.clientY,okc=e.type!=='pointercancel'&&overDesk(x,y);stop();sup=true;setTimeout(function(){sup=false},120);
+  if(okc){addDeskApp(s.id,x,y);try{closeMenus()}catch(z){}}sync()};
+ addEventListener('pointerup',end);addEventListener('pointercancel',end);
+ addEventListener('touchmove',function(e){if(d&&d.touch&&d.armed&&e.cancelable)e.preventDefault()},{passive:false});
+ doc.addEventListener('click',function(e){if(sup&&e.target.closest&&e.target.closest('#start')){e.stopPropagation();e.preventDefault()}},true);
+ addEventListener('keydown',function(e){if(e.key==='Escape'&&d&&d.go){stop();sup=true;setTimeout(function(){sup=false},120);sync()}})})();
 /* ---------- build / menus ---------- */
 var _bi=buildIcons;
 buildIcons=function(re){var keep=DESK.slice(),vis=DESK.filter(function(d){return d[0]!=='lnk'&&HID.indexOf(dkey(d))<0}),r;
@@ -3007,10 +3116,10 @@ buildIcons=function(re){var keep=DESK.slice(),vis=DESK.filter(function(d){return
  try{r=_bi(re)}finally{DESK.splice(0,DESK.length);keep.forEach(function(d){DESK.push(d)})}
  var ic=$('#icons');keep.forEach(function(d){if(d[0]!=='lnk')return;var l=LNKS.find(function(x){return x.id===d[2]});if(l)ic.appendChild(lnkBtn(l,re))});
  layout();return r};
-window.DSKX={menu:function(x,y,t,orig){var di=t.closest('.di');
- if(di&&di.dataset.l){var l=LNKS.find(function(q){return q.id===di.dataset.l});if(!l)return true;ctx(x,y,[['Open',function(){openLnk(l)}],['Open file location',function(){openApp('files',dirOf(l.p))}],['Rename',function(){ask('Rename shortcut',l.n,function(v){l.n=v;var d=DESK.find(function(q){return q[0]==='lnk'&&q[2]===l.id});if(d)d[1]=v;saveL();buildIcons(true)})}],null,['Remove shortcut',function(){removeItem(di)}]]);return true}
- if(di){var k=(di.dataset.k||'').split('|')[0];if(!di.dataset.s&&!di.dataset.e&&k!=='trash'&&A[k]){ctx(x,y,[['Open',function(){openApp(k)}],null,['Remove from desktop',function(){removeItem(di)}]]);return true}return false}
- var m=[['Refresh',function(){buildIcons(true)}],['Sort by name',function(){DP={};saveDP();DSKX0.sortDesk()}],['Reset icon positions',function(){DP={};saveDP();buildIcons(true)}]];
+window.DSKX={menu:function(x,y,t,orig){var di=t.closest('.di'); if(di&&di.dataset.e){var eid=di.dataset.e;ctx(x,y,[['Open',function(){var z=EXES.find(function(q){return q.id===eid});if(z)launchExe(z)}],null,['Move to Recycle Bin',function(){removeItem(di)}]]);return true}
+ if(di&&di.dataset.l){var l=LNKS.find(function(q){return q.id===di.dataset.l});if(!l)return true;ctx(x,y,[['Open',function(){openLnk(l)}],['Open file location',function(){openApp('files',dirOf(l.p))}],['Rename',function(){ask('Rename shortcut',l.n,function(v){l.n=v;var d=DESK.find(function(q){return q[0]==='lnk'&&q[2]===l.id});if(d)d[1]=v;saveL();buildIcons(true)})}],null,['Move to Recycle Bin',function(){removeItem(di)}]]);return true}
+ if(di){var k=(di.dataset.k||'').split('|')[0];if(!di.dataset.s&&!di.dataset.e&&k!=='trash'&&A[k]){ctx(x,y,[['Open',function(){openApp(k)}],null,['Move to Recycle Bin',function(){removeItem(di)}]]);return true}return false}
+ var m=[['Refresh',function(){buildIcons(true)}],['Sort by name',function(){DP={};saveDP();DSKX0.sortDesk()}],['Reset icon positions',function(){DP={};saveDP();buildIcons(true)}]];m.unshift(['New folder',function(){newFolder(x,y)}],null);
  if(HID.length)m.push(['Restore removed icons',function(){HID=[];ls('aur.dhide','[]');buildIcons(true)}]);
  m.push(null,['Personalize',function(){openApp('set','bg')}],['Display settings',function(){openApp('set','display')}],['Settings',function(){openApp('set')}],null,['File Explorer',function(){openApp('files')}],['Recycle Bin',function(){openApp('trash')}],[VM.on?'Virtual mouse: off':'Virtual mouse: on',function(){vmSet(!VM.on)}]);
  ctx(x,y,m);return true}};
@@ -3063,7 +3172,7 @@ window.DNDX={hit:function(s,x,y,e){if(!e)return null;
   if(!d.go){if(Math.hypot(e.clientX-d.x,e.clientY-d.y)<14)return;d.go=true;var r=d.b.getBoundingClientRect(),g=d.b.cloneNode(true);g.className='dkgh';g.style.cssText='left:'+r.left+'px;top:'+r.top+'px;width:'+r.width+'px;height:'+r.height+'px';doc.body.appendChild(g);d.g=g;d.b.classList.add('dkdrag');doc.body.classList.add('pdrag');dragging=true;sync()}
   le=e;if(!ra)ra=requestAnimationFrame(fr)});
  var end=function(e){if(!d||e.pointerId!==d.pid)return;var s=d;d=null;if(!s.go)return;if(ra){cancelAnimationFrame(ra);ra=0}clr();s.g.remove();s.b.classList.remove('dkdrag');doc.body.classList.remove('pdrag');dragging=false;sup=true;setTimeout(function(){sup=false},80);
-  if(e.type!=='pointercancel'){var id=s.b.dataset.id,from=PIN.indexOf(id),to=idx(e.clientX,s.b);if(from>=0){PIN.splice(from,1);PIN.splice(Math.min(to,PIN.length),0,id);ls('aur.pin',JSON.stringify(PIN));dockUpdate()}}sync()};
+  if(e.type!=='pointercancel'){var id=s.b.dataset.id;if(window.DSKX2&&DSKX2.dropApp(id,e)){sync();return}var from=PIN.indexOf(id),to=idx(e.clientX,s.b);if(from>=0){PIN.splice(from,1);PIN.splice(Math.min(to,PIN.length),0,id);ls('aur.pin',JSON.stringify(PIN));dockUpdate()}}sync()};
  addEventListener('pointerup',end);addEventListener('pointercancel',end);
  box.addEventListener('click',function(e){if(sup){e.stopPropagation();e.preventDefault()}},true)})();
 /* ---------- cursors: resize / move / grab / no-drop ---------- */
