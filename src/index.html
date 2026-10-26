@@ -787,6 +787,18 @@ body.perf #lck::before{display:none}body.perf #lck .lh i{animation:none}
 .tmk::-webkit-scrollbar{display:none}
 .tmk button{flex:none;border:1px solid #ffffff2a;background:#ffffff14;color:#ddd;border-radius:8px;padding:5px 11px;font:600 11.5px system-ui,sans-serif;cursor:pointer}
 .tmk button:active{background:#ffffff33}
+/*nx-3.2.16*/
+#swb{position:fixed;inset:0;z-index:99996;display:none;align-items:center;justify-content:center;background:#0b5ed7;color:#fff;font-family:"Segoe UI",system-ui,sans-serif;opacity:0}
+#swb.on{display:flex;animation:swbin .35s ease forwards}@keyframes swbin{to{opacity:1}}
+#swb .swi{max-width:620px;padding:24px;display:flex;flex-direction:column;gap:14px}
+#swb .swf{font-size:84px;line-height:1}#swb h1{margin:0;font-size:26px;font-weight:600}#swb p{margin:0;font-size:15px;opacity:.92}
+#swb .swb2{display:flex;flex-wrap:wrap;gap:10px;margin-top:6px}
+#swb .swb2 button{border:2px solid #fff;background:transparent;color:#fff;padding:10px 16px;font-size:14px;border-radius:2px;cursor:pointer;touch-action:manipulation}
+#swb .swb2 button[data-k=go]{background:#fff;color:#0b5ed7;font-weight:600}#swb .swb2 button:active{background:#ffffff40;color:#fff}
+body.vm.nxtop #pad{z-index:99998}body.vm.nxtop #cur{z-index:99999}body.vm.nxtop #vbtns button{z-index:99999}
+/*nx-3.2.17*/
+#dock.fitm .dk,#dock.fitm #tasks>*{transform:none!important;transition:none!important}
+body:not(.tb-full) #dock.fit{padding-left:18px;padding-right:18px;gap:10px}
 </style><!--NEXOS-END--></head><body class="booting"><svg width="0" height="0" style="position:absolute" aria-hidden="true"><defs><linearGradient id="nxg" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#22d3ee"/><stop offset="1" stop-color="#8b5cf6"/></linearGradient></defs></svg><div id="boot"><!--NEXOS-START--><div id="nxb"><div class="halo"></div><svg viewBox="0 0 512 512"><path class="p" pathLength="100" d="M168 368V144l176 224V144" fill="none" stroke="url(#nxg)" stroke-width="40" stroke-linecap="round" stroke-linejoin="round"/></svg><h1><span>N</span><span>e</span><span>x</span><span>O</span><span>S</span></h1><div class="bar"><i></i></div></div><!--NEXOS-END--><div class="bd"><i></i><i></i><i></i></div></div><div id="shut"><svg class="lg" viewBox="0 0 512 512"><path d="M168 368V144l176 224V144" fill="none" stroke="url(#nxg)" stroke-width="40" stroke-linecap="round" stroke-linejoin="round"/></svg><div class="slot"><div class="sm"><span>Shutting down</span><div class="bd"><i></i><i></i><i></i></div></div><button id="pw" aria-label="Power on"><svg viewBox="0 0 24 24"><path d="M12 3v8M6.6 6.8a8 8 0 1 0 10.8 0"/></svg></button></div><div class="hint">Tap to power on</div></div><script>(function(){var t0=Date.now(),d=0;function go(){if(d)return;d=1;var b=document.getElementById("boot");document.body.classList.remove("booting");if(b){b.classList.add("out");setTimeout(function(){b.remove()},800)}}function chk(){setTimeout(go,Math.max(0,1700-(Date.now()-t0)))}if(document.readyState==="complete")chk();else addEventListener("load",chk);setTimeout(go,5000)})();</script>
 <svg width="0" height="0" style="position:absolute"><defs><linearGradient id="gs" x1="0" y1="0" x2="1" y2="1"><stop stop-color="#8f9bff"/><stop offset="1" stop-color="#c26bff"/></linearGradient><linearGradient id="gl" x1="0" y1="1" x2="1" y2="0"><stop stop-color="#34d399"/><stop offset="1" stop-color="#22d3ee"/></linearGradient><linearGradient id="gr" x1="1" y1="1" x2="0" y2="0"><stop stop-color="#a78bfa"/><stop offset="1" stop-color="#22d3ee"/></linearGradient><linearGradient id="gw" x1="0" y1="0" x2="1" y2="0"><stop stop-color="#5eead4"/><stop offset="1" stop-color="#c4b5fd"/></linearGradient></defs></svg>
 <div id="desk"><div id="icons"></div></div>
@@ -881,9 +893,31 @@ if(!best){if(shown){const id=shownTab;shown=null;const q=++snapSeq;NB.hideAll({i
 if(shown&&shownTab!==best.id){const id=shownTab;shown=null;const q=++snapSeq;NB.hideAll({id}).then(res=>{if(q===snapSeq&&res&&res.img)natSnap(id,res.img)}).catch(()=>{}).then(()=>sync());return}
 const key=[best.id,r.left|0,r.top|0,r.width|0,r.height|0,S.pw].join();if(shown===key)return;shown=key;shownTab=best.id;snapSeq++;natUnsnap(best.id);NB.show({id:best.id,x:r.left,y:r.top,w:r.width,h:r.height,cw:innerWidth,ref:S.pw}).then(vmCursor).catch(()=>{})}
 function startReset(){const s=$('#start'),q=$('#sq');if(!s||!q)return;q.value='';s.classList.remove('q')}
-const closeAll=()=>Object.keys(W).forEach(k=>closeW(k,true));
-function doShut(){closeMenus();document.body.classList.add('shutting');const ws=$$('.win');ws.forEach((w,i)=>{w.style.animationDelay=(i*70)+'ms';w.classList.add('shdn')});const s=$('#shut'),t=380+ws.length*70;setTimeout(()=>{closeAll();s.classList.add('on')},t);setTimeout(()=>s.classList.add('off'),t+2900)}
-function doRestart(){closeMenus();closeAll();document.body.classList.add('booting');setTimeout(()=>location.reload(),900)}
+const closeAll=()=>{saveWins();window.__nxShut=1;Object.keys(W).forEach(k=>closeW(k,true))};
+/*nx-3.2.16*/
+var NXSKIP=['exew','inst','dl','win'];
+function saveWins(){if(!window.__nxRdy)return;try{var a=[];for(var k in W){var w=W[k];if(!w||!w.el||NXSKIP.indexOf(w.app)>-1)continue;var e=w.el,c=e.classList;a.push({a:w.app,l:e.style.left,t:e.style.top,w:e.style.width,h:e.style.height,x:c.contains('max')?1:0,m:c.contains('min')?1:0})}ls('aur.wins',JSON.stringify(a))}catch(x){}}
+window.restoreWins=function(){window.__nxShut=0;var a=[];try{a=JSON.parse(ls('aur.wins')||'[]')}catch(x){}
+ if(!Array.isArray(a)||Object.keys(W).length){window.__nxRdy=1;return}
+ a=a.slice(0,8);
+ a.forEach(function(s,i){setTimeout(function(){try{if(!A[s.a]||NXSKIP.indexOf(s.a)>-1)return;openApp(s.a);var w=wins(s.a).slice(-1)[0];if(!w)return;var e=w.el,mw=innerWidth,mh=innerHeight,ww=Math.min(parseFloat(s.w)||e.offsetWidth,mw-12),hh=Math.min(parseFloat(s.h)||e.offsetHeight,mh-130);
+  e.style.width=ww+'px';e.style.height=hh+'px';e.style.left=Math.max(0,Math.min(parseFloat(s.l)||6,mw-ww))+'px';e.style.top=Math.max(0,Math.min(parseFloat(s.t)||8,mh-hh-60))+'px';
+  if(s.x)setTimeout(function(){try{$('.mx',e).click()}catch(x){}},420);else if(s.m)setTimeout(function(){try{minW(w)}catch(x){}},420)}catch(x){}},i*220)});
+ setTimeout(function(){window.__nxRdy=1},a.length*220+900)};
+setInterval(function(){if(!window.__nxShut)saveWins()},2000);
+addEventListener('pagehide',function(){if(!window.__nxShut)saveWins()});
+document.addEventListener('visibilitychange',function(){if(document.hidden&&!window.__nxShut)saveWins()});
+setTimeout(function(){window.restoreWins()},2300);
+(function(){var el=null;
+function mk(){if(el)return el;el=h('div','','<div class="swi"><div class="swf">:(</div><h1>Windows are still open</h1><p></p><div class="swb2"><button data-k="go">Close windows and shut down</button><button data-k="no">Go back</button></div></div>');el.id='swb';document.body.appendChild(el);
+ el.addEventListener('click',function(e){var b=e.target.closest('[data-k]');if(!b)return;if(b.dataset.k==='go'){window.swHide();doShut(true)}else window.swHide()});return el}
+window.swShow=function(){closeMenus();var n=Object.keys(W).length,e=mk();$('p',e).textContent=n+(n>1?' windows are':' window is')+' still open. Close them and shut down? They come back next time you turn NexOS on.';e.classList.add('on');document.body.classList.add('bsod','nxtop')};
+window.swHide=function(){if(!el||!el.classList.contains('on'))return false;el.classList.remove('on');document.body.classList.remove('bsod','nxtop');return true};
+var pw=document.getElementById('pw');if(pw)pw.addEventListener('click',function(){setTimeout(function(){window.restoreWins()},1500)});
+})();
+/*nx-end*/
+function doShut(force){closeMenus();if(force!==true&&Object.keys(W).length)return window.swShow();saveWins();window.__nxShut=1;document.body.classList.add('shutting');const ws=$$('.win');ws.forEach((w,i)=>{w.style.animationDelay=(i*70)+'ms';w.classList.add('shdn')});const s=$('#shut'),t=380+ws.length*70;setTimeout(()=>{closeAll();s.classList.add('on')},t);setTimeout(()=>s.classList.add('off'),t+2900)}
+function doRestart(){closeMenus();saveWins();closeAll();document.body.classList.add('booting');setTimeout(()=>location.reload(),900)}
 function togTheme(){S.theme=document.documentElement.dataset.theme==='dark'?'light':'dark';ls('aur.theme',S.theme);applyTheme()}
 function startCmds(){const dk=document.documentElement.dataset.theme==='dark';return[['Shut down',doShut],['Restart',doRestart],['Close all apps',closeAll],['Virtual mouse: '+(VM.on?'turn off':'turn on'),()=>vmSet(!VM.on)],['Mouse motion blur: '+(S.mb?'turn off':'turn on'),()=>setMB(!S.mb)],['Theme: '+(dk?'light':'dark'),togTheme],['Settings',()=>openApp('set')]]}
 function startSearch(){const s=$('#start'),q=$('#sq').value.trim(),res=$('#sres'),ql=q.toLowerCase();if(!q){s.classList.remove('q');return}s.classList.add('q');res.innerHTML='';const add=(ic,lb,tag,fn)=>{const b=h('button','sr',ic+'<span></span><small></small>');$('span',b).textContent=lb;$('small',b).textContent=tag;b.onclick=()=>{closeMenus();fn()};res.appendChild(b)};
@@ -896,11 +930,11 @@ function startInit(){$('#power').onclick=()=>{closeAll();closeMenus()};$('#off')
 function closeMenus(){$('#start').classList.remove('show');try{startReset()}catch(e){}$('#ctx').classList.remove('show');menuOpen=false;sync()}
 function ctx(x,y,items){const m=$('#ctx');m.innerHTML='';items.forEach(it=>{if(!it){m.appendChild(h('hr'));return}const [l,f,k,dis]=it;const b=h('button','',`<span>${esc(l)}</span>${k?'<kbd>'+k+'</kbd>':''}`);if(dis)b.disabled=true;b.onclick=()=>{closeMenus();f()};m.appendChild(b)});const hh=items.reduce((a,i)=>a+(i?36:9),10);m.style.left=Math.max(4,Math.min(x,innerWidth-200))+'px';m.style.top=Math.max(4,Math.min(y,innerHeight-hh-8))+'px';m.classList.add('show');menuOpen=true;ctxNew=true;setTimeout(()=>ctxNew=false,0);sync()}
 function drag(el,init,move){el.addEventListener('pointerdown',e=>{if(e.button||e.target.closest('button'))return;const s=init(e);if(!s)return;e.preventDefault();const pid=e.pointerId,x0=e.clientX,y0=e.clientY;dragging=true;document.body.classList.add('pdrag');sync();let ra=0,le=null;const fl=()=>{ra=0;if(le){const q=le;le=null;move(s,q.clientX-x0,q.clientY-y0)}},mv=ev=>{if(ev.pointerId!==pid)return;le=ev;if(!ra)ra=requestAnimationFrame(fl)},up=ev=>{if(ev&&ev.pointerId!==pid)return;if(ra){cancelAnimationFrame(ra);ra=0}if(le)fl();document.body.classList.remove('pdrag');removeEventListener('pointermove',mv);removeEventListener('pointerup',up);removeEventListener('pointercancel',up);dragging=false;sync()};addEventListener('pointermove',mv);addEventListener('pointerup',up);addEventListener('pointercancel',up)})}
-function openApp(id,arg){closeMenus();const a=A[id];let w=null;
+function openApp(id,arg){window.__nxShut=0;closeMenus();const a=A[id];let w=null;
 if(a.multi){if(arg&&arg.path)w=wins(id).find(x=>x.path===arg.path)}else w=wins(id)[0];
 if(w){showW(w);if(!a.multi&&arg!==undefined&&w.open)w.open(arg);return w}
 const key=a.multi?id+'#'+(++uid):id,el=h('div','win'),n=Object.keys(W).length,wd=Math.min(a.w,innerWidth-12),ht=Math.min(a.h,innerHeight-130);
-AuroraBusy.start();el.classList.add('opening');setTimeout(()=>{el.classList.remove('opening');AuroraBusy.stop();sync()},360);el.style.cssText=`left:${Math.max(6,(innerWidth-wd)/2+n*22-30)}px;top:${20+n*22}px;width:${wd}px;height:${ht}px`;
+AuroraBusy.start();el.classList.add('opening');setTimeout(()=>{el.classList.remove('opening');AuroraBusy.stop();sync()},360);el.style.cssText=`left:${Math.round(6+Math.max(0,innerWidth-wd-12)*(.5+(Math.random()-.5)*.7))}px;top:${Math.round(8+Math.max(0,innerHeight-ht-110)*(.5+(Math.random()-.5)*.9))}px;width:${wd}px;height:${ht}px`;
 el.innerHTML=`<div class="tbar"><i class="tt">${tile(id)}</i><span>${a.n}</span><button class="fsd" aria-label="Show dock">${WI.dk}</button><button class="mn" aria-label="Minimize">${WI.mn}</button><button class="mx" aria-label="Maximize">${WI.mx}</button><button class="x" aria-label="Close">${WI.x}</button></div><div class="body"></div><i class="rzr"></i><i class="rzb"></i><i class="rz"></i>`;
 $('#desk').appendChild(el);w=W[key]={el,body:$('.body',el),id:key,app:id,setTitle:t=>$('.tbar span',el).textContent=t};
 el.addEventListener('pointerdown',()=>{if(topId!==key)focusW(key)},true);
@@ -2256,8 +2290,8 @@ const kv=a=>a.map(([k,v])=>`<div class="kv"><span>${k}</span><b>${esc(String(v))
 const REPO='https://github.com/tewtone66-cmd/NexOS';
 const PGS={
 about(){const ua=navigator.userAgent,and=(/Android ([\d.]+)/.exec(ua)||[])[1]||'?',mod=(/;\s*([^;)]+?)\s+Build/.exec(ua)||/Android [\d.]+;\s*([^;)]+)/.exec(ua)||[])[1]||'Unknown',chr=(/Chrome\/([\d.]+)/.exec(ua)||[])[1]||'?';
-return `<h3>About</h3><div class="abh"><div class="abl">${STAR}</div><div><h2>NexOS</h2><p>Version 3.2.6</p></div></div>${kv([['Edition','NexOS Alpha'],['Version','3.2.6'],['Device',mod],['Android',and],['WebView (Chrome)',chr],['Screen',innerWidth+' × '+innerHeight+' (UI '+Math.round(S.ui*100)+'%)'],['CPU cores',navigator.hardwareConcurrency||'?'],['Memory',navigator.deviceMemory?'≥ '+navigator.deviceMemory+' GB':'?'],['Storage access',granted===null?'…':granted?'Allowed':'Not allowed']])}<h4>Update</h4>${kv([['Channel','Alpha'],['Installed version','3.2.15'],['Updates','Installed manually from GitHub']])}<button class="pgb" data-k="go" data-v="${REPO}">Open GitHub</button><h4>What is new in 3.0.0</h4><ul><li>New virtual mouse with cursor states and motion blur</li><li>New taskbar and Start menu with search</li><li>Recycle Bin that really keeps deleted items</li><li>Settings with categories and search</li></ul>`},
-update(){return `<h3>Update</h3>${kv([['Channel','Alpha'],['Installed version','3.2.15'],['Status','Updates are installed manually: rebuild the app from GitHub']])}<button class="pgb" data-k="go" data-v="${REPO}">Open GitHub</button>`},
+return `<h3>About</h3><div class="abh"><div class="abl">${STAR}</div><div><h2>NexOS</h2><p>Version 3.2.6</p></div></div>${kv([['Edition','NexOS Alpha'],['Version','3.2.6'],['Device',mod],['Android',and],['WebView (Chrome)',chr],['Screen',innerWidth+' × '+innerHeight+' (UI '+Math.round(S.ui*100)+'%)'],['CPU cores',navigator.hardwareConcurrency||'?'],['Memory',navigator.deviceMemory?'≥ '+navigator.deviceMemory+' GB':'?'],['Storage access',granted===null?'…':granted?'Allowed':'Not allowed']])}<h4>Update</h4>${kv([['Channel','Alpha'],['Installed version','3.2.17'],['Updates','Installed manually from GitHub']])}<button class="pgb" data-k="go" data-v="${REPO}">Open GitHub</button><h4>What is new in 3.0.0</h4><ul><li>New virtual mouse with cursor states and motion blur</li><li>New taskbar and Start menu with search</li><li>Recycle Bin that really keeps deleted items</li><li>Settings with categories and search</li></ul>`},
+update(){return `<h3>Update</h3>${kv([['Channel','Alpha'],['Installed version','3.2.17'],['Status','Updates are installed manually: rebuild the app from GitHub']])}<button class="pgb" data-k="go" data-v="${REPO}">Open GitHub</button>`},
 display(){return `<h3>Display & size</h3><h4>App size (whole interface)</h4><div class="step"><button data-k="ui" data-v="-1">&#8722;</button><b>${Math.round(S.ui*100)}%</b><button data-k="ui" data-v="1">+</button><button data-k="ui" data-v="0">Reset</button></div><h4>Desktop icon size</h4>${chips('is',[36,48,60,72],S.is,v=>({36:'Small',48:'Medium',60:'Large',72:'Extra large'})[v])}`},
 storage(){return `<h3>Storage</h3><h4>Access to your files</h4><div class="seg"><button data-k="perm" class="${granted?'sel':''}">${granted===null?'Checking…':granted?'Allowed':'Allow access to files'}</button></div>`},
 bg(){return `<h3>Background</h3><div class="walls">${WALL.map((g,i)=>`<button data-k="wall" data-v="${i}" class="${!S.wc&&i===S.wall?'sel':''}" style="background:${g}"></button>`).join('')}</div><h4>Solid color</h4><div class="sw">${['#0b1d3a','#111827','#1f3b2d','#3b1f3a','#3a2a1f','#475569','#e5e7eb'].map(c=>`<button data-k="wc" data-v="${c}" class="${S.wc===c?'sel':''}" style="background:${c}"></button>`).join('')}</div>`},
@@ -2437,8 +2471,8 @@ const bgQuit=()=>setTimeout(()=>{try{NW&&NW.quitApp().catch(()=>{})}catch(e){}},
 const bgExpire=()=>{clearTimeout(bgTm);ls('aur.bgdl','');bsHide();doShut();bgQuit()};
 const bgGo=()=>{const ms=BG_MIN*60000;ls('aur.bgdl',String(Date.now()+ms));clearTimeout(bgTm);bgTm=setTimeout(bgExpire,ms);bsHide();try{NW.bgSchedule({ms}).catch(()=>{});NW.moveToBackground().catch(()=>{})}catch(e){}};
 const bgCheck=()=>{const dl=+ls('aur.bgdl');if(!dl)return;if(Date.now()>=dl)return bgExpire();clearTimeout(bgTm);ls('aur.bgdl','');try{NW.bgCancel().catch(()=>{})}catch(e){}};
-bsod.addEventListener('click',e=>{const b=e.target.closest('[data-k]');if(!b)return;const k=b.dataset.k;if(k==='bg')bgGo();else if(k==='off'){bsHide();doShut();bgQuit()}else bsHide()});
-if(NW){try{NW.addListener('backPressed',()=>{if(bsod.classList.contains('on'))return bsHide();if(menuOpen){closeMenus();return}bsShow()});NW.addListener('appResumed',()=>{bgCheck();if(exeW&&exeW.forcePush)setTimeout(()=>exeW.forcePush(),150)})}catch(e){}}
+bsod.addEventListener('click',e=>{const b=e.target.closest('[data-k]');if(!b)return;const k=b.dataset.k;if(k==='bg')bgGo();else if(k==='off'){bsHide();doShut(true);bgQuit()}else bsHide()});
+if(NW){try{NW.addListener('backPressed',()=>{if(window.swHide&&window.swHide())return;if(bsod.classList.contains('on'))return bsHide();if(menuOpen){closeMenus();return}bsShow()});NW.addListener('appResumed',()=>{bgCheck();if(exeW&&exeW.forcePush)setTimeout(()=>exeW.forcePush(),150)})}catch(e){}}
 document.addEventListener('visibilitychange',()=>{if(!document.hidden)bgCheck()});
 function wineEvents(){if(!NW)return;const lw=(n,f)=>{try{return Promise.resolve(NW.addListener(n,f))}catch(e){return Promise.resolve({remove(){}})}};
 lw('progress',e=>{const t=e.step==='container'?'Creating Windows container…':'Installing Windows runtime… '+(e.pct|0)+'%';toast(t);if(exeW&&W[exeW.id]&&!exeW.owns){exeW.exeStatus(t);if(e.step==='container')exeW.exeStep(1,t);else if(e.step==='rootfs')exeW.exeStep(0,t,(e.pct|0)/100)}});
@@ -2580,7 +2614,7 @@ function appWin(w,arg){
 }
 }
 
-[()=>applyTheme(),()=>applyWall(),()=>applyMouse(),()=>document.body.classList.toggle('perf',!!S.perf),()=>applyTb(),()=>buildUI(),()=>listen('dlprogress',dlEv),()=>{wineEvents();const pd=ls('aur.pend');if(pd)setTimeout(()=>afterExe(pd),1500)},()=>clock(),()=>setInterval(clock,20000),()=>vmSet(ls('aur.vm')==='1'),()=>{const mq=window.matchMedia&&window.matchMedia('(prefers-color-scheme:dark)');if(mq){if(typeof mq.addEventListener==='function')mq.addEventListener('change',applyTheme);else if(typeof mq.addListener==='function')mq.addListener(applyTheme)}}].forEach(f=>{try{f()}catch(e){console.error(e);window.dispatchEvent(new ErrorEvent('error',{message:String(e&&e.message||e)+' in '+f.toString().slice(0,40),lineno:0,colno:0}))}});
+[()=>applyTheme(),()=>applyWall(),()=>applyMouse(),()=>document.body.classList.toggle('perf',!!S.perf),()=>applyTb(),()=>buildUI(),()=>listen('dlprogress',dlEv),()=>{wineEvents();const pd=ls('aur.pend');if(pd)setTimeout(()=>afterExe(pd),1500)},()=>clock(),()=>setInterval(clock,20000),()=>{if(ls('aur.vm316')!=='1'){ls('aur.vm316','1');ls('aur.vm','1')}vmSet(ls('aur.vm')!=='0')},()=>{const mq=window.matchMedia&&window.matchMedia('(prefers-color-scheme:dark)');if(mq){if(typeof mq.addEventListener==='function')mq.addEventListener('change',applyTheme);else if(typeof mq.addListener==='function')mq.addListener(applyTheme)}}].forEach(f=>{try{f()}catch(e){console.error(e);window.dispatchEvent(new ErrorEvent('error',{message:String(e&&e.message||e)+' in '+f.toString().slice(0,40),lineno:0,colno:0}))}});
 </script><!--NEXOS-START--><script>(function(){
 var N="M168 368V144l176 224V144";
 function mk(a,b){var s='<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1600 900" preserveAspectRatio="xMidYMid slice"><defs><radialGradient id="a" cx="25%" cy="20%" r="75%"><stop offset="0" stop-color="'+a+'"/><stop offset="1" stop-color="#06080f"/></radialGradient><radialGradient id="c" cx="82%" cy="88%" r="55%"><stop offset="0" stop-color="'+b+'" stop-opacity=".5"/><stop offset="1" stop-color="#06080f" stop-opacity="0"/></radialGradient><linearGradient id="g" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#22d3ee"/><stop offset="1" stop-color="#8b5cf6"/></linearGradient></defs><rect width="1600" height="900" fill="url(#a)"/><rect width="1600" height="900" fill="url(#c)"/><g transform="translate(800 450) scale(1.6) translate(-256 -256)" opacity=".07"><path d="'+N+'" fill="none" stroke="url(#g)" stroke-width="40" stroke-linecap="round" stroke-linejoin="round"/></g></svg>';return "url('data:image/svg+xml,"+encodeURIComponent(s).replace(/'/g,'%27')+"')";}
@@ -3141,7 +3175,8 @@ console.log('NexOS text selection ready');
 /* TBX-3.2.3 - keep every pinned app visible when the dock is crowded */
 (function(){var dk=$('#dock'),tk=$('#tasks'),raf=0;if(!dk||!tk)return;
 function over(){return dk.scrollWidth>dk.clientWidth+1||tk.scrollWidth>tk.clientWidth+1}
-function fit(){raf=0;dk.classList.remove('fit','crowd');dk.style.removeProperty('--tbg');dk.style.removeProperty('--tbk');if(!over())return;dk.classList.add('fit');
+function fit(){raf=0;dk.classList.add('fitm');try{fit0()}finally{dk.classList.remove('fitm')}}
+function fit0(){dk.classList.remove('fit','crowd');dk.style.removeProperty('--tbg');dk.style.removeProperty('--tbk');if(!over())return;dk.classList.add('fit');
  var gs=[12,8,5,3],ks=[1,.92,.84,.76,.68,.6],done=false;
  for(var i=0;i<ks.length&&!done;i++){dk.style.setProperty('--tbk',ks[i]);for(var j=0;j<gs.length;j++){dk.style.setProperty('--tbg',gs[j]+'px');if(!over()){done=true;break}}}if(!done)dk.classList.add('crowd')}
 function soon(){if(!raf)raf=requestAnimationFrame(fit)}
@@ -3150,6 +3185,12 @@ var _at=applyTb;applyTb=function(){var r=_at.apply(this,arguments);soon();return
 addEventListener('resize',soon);addEventListener('orientationchange',soon);
 try{new MutationObserver(soon).observe(tk,{childList:true})}catch(e){}
 try{new MutationObserver(soon).observe($('#tray'),{childList:true})}catch(e){}
+try{new MutationObserver(soon).observe($('#tray'),{subtree:true,characterData:true,childList:true})}catch(e){}
+try{new MutationObserver(soon).observe($('#clock'),{subtree:true,characterData:true,childList:true})}catch(e){}
+try{if(window.ResizeObserver)new ResizeObserver(soon).observe(dk)}catch(e){}
+try{document.fonts&&document.fonts.ready&&document.fonts.ready.then(soon)}catch(e){}
+addEventListener('load',soon);try{if(window.visualViewport)visualViewport.addEventListener('resize',soon)}catch(e){}
+[400,1200,2600,4500].forEach(function(t){setTimeout(soon,t)});
 soon()})();
 /* SET-3.2.4 - battery page data, night light, dim, reduce motion, auto performance */
 (function(){'use strict';
@@ -3256,10 +3297,10 @@ function oobe(){if(document.getElementById('oobe'))return;var O={name:ls(K.user)
  oc.addEventListener('keydown',function(e){if(e.key==='Enter'){e.preventDefault();next()}});
  st.querySelector('.osk').onclick=function(){ls(K.oobe,'1');st.classList.add('out');setTimeout(function(){st.remove()},650)};
  render();requestAnimationFrame(function(){st.classList.add('on')})}
-function whenBooted(cb){var n=0,iv=setInterval(function(){n++;if(!document.getElementById('boot')||n>80){clearInterval(iv);setTimeout(cb,350)}},250)}
+function whenBooted(cb){var n=0,iv=setInterval(function(){n++;var b=document.getElementById('boot');if(!b||b.classList.contains('out')||n>400){clearInterval(iv);setTimeout(cb,60)}},50)}
 /* ---- shutdown extras: ring around the logo ---- */
 (function(){var s=document.getElementById('shut');if(!s)return;var lg=s.querySelector('.lg');if(!lg||s.querySelector('.lw'))return;var w=document.createElement('div');w.className='lw';w.innerHTML='<div class="rg"><svg viewBox="0 0 120 120"><circle class="bk" cx="60" cy="60" r="54"/><circle cx="60" cy="60" r="54"/></svg></div>';lg.parentNode.insertBefore(w,lg);w.appendChild(lg)})();
-refreshLock();if(lck){buildKp();dots()}
+refreshLock();if(lck){buildKp();dots()};(function(){function u(){document.body.classList.toggle('nxtop',!!document.querySelector('#lck.on,#swb.on'))}var l=document.getElementById('lck');try{if(l)new MutationObserver(u).observe(l,{attributes:true,attributeFilter:['class']})}catch(e){}u()})();
 window.NX4={name:name,setName:setName,hasPin:hasPin,pinLen:pinLen,setPin:setPin,clearPin:clearPin,lockBoot:lockBoot,setLockBoot:setLockBoot,oobe:oobe,lockDown:lockDown,lockUp:lockUp,lockKey:lockKey,lockReset:lockReset};
 whenBooted(function(){if(ls(K.oobe)!=='1')oobe();else if(hasPin()&&lockBoot()&&typeof doLock==='function'){doLock();proceed()}});
 })();
