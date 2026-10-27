@@ -1,5 +1,6 @@
 import fs from 'node:fs';
 import path from 'node:path';
+import { pathToFileURL } from 'node:url';
 
 const root = process.cwd();
 const out = path.join(root, 'www');
@@ -8,6 +9,22 @@ fs.mkdirSync(out, { recursive: true });
 const src = path.join(root, 'src', 'index.html');
 if (!fs.existsSync(src)) throw new Error('Missing src/index.html');
 let html = fs.readFileSync(src, 'utf8');
+
+// Patches: exact text replacements applied to src/index.html at build time.
+// src/patches/*.mjs export default [{ name, find, replace }]. Each `find` must
+// occur exactly once, otherwise the build fails (so a patch can never silently miss).
+const patchDir = path.join(root, 'src', 'patches');
+if (fs.existsSync(patchDir)) {
+  for (const f of fs.readdirSync(patchDir).filter((x) => x.endsWith('.mjs')).sort()) {
+    const list = (await import(pathToFileURL(path.join(patchDir, f)).href)).default;
+    for (const p of list) {
+      const n = html.split(p.find).length - 1;
+      if (n !== 1) throw new Error('Patch "' + p.name + '" (' + f + '): expected 1 match, found ' + n);
+      html = html.replace(p.find, () => p.replace);
+      console.log('Patched: ' + p.name);
+    }
+  }
+}
 
 // Mods: every src/mods/*.js file is injected as an inline <script> right before
 // the final <!--NEXOS-END--></body>, so it runs after the main code has loaded.
