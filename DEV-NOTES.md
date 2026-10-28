@@ -123,3 +123,10 @@
 ## 3.2.15 - Wine start timer (aurora-tick-3.2.15)
 - "Starting Wine..." shows elapsed seconds (exeTick). Most of the delay is Wine/box64 boot, not NexOS code. Untested on phone.
 - NOT done (no data): Wine black check, hand/I-beam crc, NexOS-window-over-Wine glitch.
+
+## 3.4.0 - Themes, new logo, global text selection (THEME-3.4.0)
+- Themes: Dark (default), Light, Liquid Glass. `S.theme` in `dark|light|glass` (key `aur.theme`; old `auto` -> dark). `applyTheme()` sets `<html data-skin>` (chosen theme) and `<html data-theme>` (colour scheme; glass = dark). A tiny head script sets both before first paint.
+- All styling reads CSS tokens (`--surf --surf2 --txt --mut --line --pn --hov --dock-* --win-sh --pop-sh --sel-*`, glass: `--gl-blur --gl-fill --gl-rim --gl-edge`). CSS block `/* THEME-3.4.0 */` at the end of the last `<style>`. Glass rim = `::before` gradient mask; `body.perf/lite` make glass opaque (no blur).
+- Settings > Themes (`PGS.theme`, `THEME_META`). Preview images: `assets/theme-previews/{dark,light,glass}.svg` are placeholders, copied to `www/theme-previews/` by `scripts/prepare-web.mjs`. Replace the files (or change `img` in `THEME_META`).
+- Logo: new N mark (`assets/nexos-mark.svg`, icon/logo/fg/bg/splash SVGs, same path inline as `#nxg` gradient in boot, shutdown, start button, About, What's New, OOBE, favicon).
+- Selection: `::selection` blue via `--sel-bg/--sel-fg` in every theme; selectable regions list `SELR` in the selection engine (now also What's New, setup, dialogs); controls stay non-selectable.

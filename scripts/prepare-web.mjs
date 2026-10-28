@@ -45,4 +45,12 @@ if (fs.existsSync(modsDir)) {
 fs.writeFileSync(path.join(out, 'index.html'), html);
 console.log('NexOS web app written to www/index.html');
 
+// Theme preview images shown in Settings > Themes (assets/theme-previews/*.svg|png|jpg|webp).
+// Replace the placeholder files there (keep the names dark/light/glass) or edit THEME_META in src/index.html.
+const prevDir = path.join(root, 'assets', 'theme-previews');
+if (fs.existsSync(prevDir)) {
+  fs.cpSync(prevDir, path.join(out, 'theme-previews'), { recursive: true });
+  console.log('Copied theme previews');
+}
+
 // v86 (old Windows PC app) is no longer bundled: smaller APK
