@@ -811,14 +811,14 @@ body.fs.peek #dock{visibility:visible!important;opacity:1!important;transform:tr
 :root[data-theme=dark]{color-scheme:dark}
 :root[data-skin=light]{color-scheme:light;--dim:0;--dock-bg:rgba(255,255,255,.66);--dock-bd:rgba(255,255,255,.92);--dock-sh:0 10px 30px rgba(24,36,70,.22),inset 0 1px 0 #fff;--dock-txt:#161a22;--dock-sep:rgba(22,26,34,.26);--win-sh:0 16px 44px rgba(24,36,70,.26),0 2px 8px rgba(24,36,70,.1);--win-sh2:0 8px 22px rgba(24,36,70,.18);--pop-sh:0 14px 38px rgba(24,36,70,.24);--toast-bg:rgba(255,255,255,.92);--toast-fg:#161a22;--sel-bg:rgba(26,115,232,.32);--sel-fg:#0a1020}
 :root[data-skin=glass]{color-scheme:dark;
- --surf:rgba(22,28,46,.66);--surf2:rgba(255,255,255,.085);--txt:#f5f8ff;--mut:rgba(228,236,255,.7);--line:rgba(255,255,255,.15);--hov:rgba(255,255,255,.13);--pn:rgba(24,30,50,.6);--dim:.06;--selbg:rgba(130,170,255,.3);--accT:#fff;
- --gl-blur:blur(30px) saturate(1.8) brightness(.95);
- --gl-fill:radial-gradient(120% 70% at 0% 0%,rgba(255,255,255,.17),rgba(255,255,255,0) 56%),linear-gradient(135deg,rgba(255,255,255,.085),rgba(255,255,255,.012) 48%,rgba(255,255,255,.055));
- --gl-rim:linear-gradient(140deg,rgba(255,255,255,.78),rgba(255,255,255,.17) 24%,rgba(255,255,255,.04) 52%,rgba(255,255,255,.12) 78%,rgba(255,255,255,.48));
- --gl-edge:inset 0 1px 0 rgba(255,255,255,.34),inset 0 -1px 0 rgba(255,255,255,.06),inset 0 0 24px rgba(255,255,255,.035);
- --win-sh:0 1px 3px rgba(0,0,0,.3),0 28px 64px rgba(0,0,0,.42);--win-sh2:0 1px 3px rgba(0,0,0,.25),0 12px 32px rgba(0,0,0,.34);--pop-sh:0 1px 3px rgba(0,0,0,.3),0 22px 54px rgba(0,0,0,.42);
- --dock-bg:rgba(22,28,48,.3);--dock-bd:transparent;--dock-sh:0 1px 2px rgba(0,0,0,.3),0 14px 40px rgba(0,0,0,.4);--dock-txt:#fff;--dock-sep:rgba(255,255,255,.4);
- --toast-bg:rgba(22,28,46,.6);--toast-fg:#fff;--sel-bg:rgba(76,142,255,.62);--sel-fg:#fff}
+ --surf:rgba(30,38,62,.5);--surf2:rgba(255,255,255,.10);--txt:#f7f9ff;--mut:rgba(236,242,255,.76);--line:rgba(255,255,255,.18);--hov:rgba(255,255,255,.16);--pn:rgba(30,38,62,.46);--dim:.04;--selbg:rgba(130,170,255,.3);--accT:#fff;
+ --gl-blur:blur(26px) saturate(2.1) brightness(.97);
+ --gl-fill:radial-gradient(130% 80% at 0% 0%,rgba(255,255,255,.22),rgba(255,255,255,0) 52%),radial-gradient(90% 60% at 100% 100%,rgba(255,255,255,.1),rgba(255,255,255,0) 60%),linear-gradient(180deg,rgba(255,255,255,.12),rgba(255,255,255,0) 24%);
+ --gl-rim:linear-gradient(140deg,rgba(255,255,255,.92),rgba(255,255,255,.22) 22%,rgba(255,255,255,.05) 50%,rgba(255,255,255,.16) 78%,rgba(255,255,255,.62));
+ --gl-edge:inset 0 1px 0 rgba(255,255,255,.55),inset 0 -1px 0 rgba(255,255,255,.14),inset 0 0 16px -2px rgba(255,255,255,.22),inset 0 0 0 1px rgba(255,255,255,.05);
+ --win-sh:0 1px 3px rgba(0,0,0,.28),0 30px 70px rgba(0,0,0,.4);--win-sh2:0 1px 3px rgba(0,0,0,.22),0 14px 36px rgba(0,0,0,.3);--pop-sh:0 1px 3px rgba(0,0,0,.28),0 24px 60px rgba(0,0,0,.4);
+ --dock-bg:rgba(44,54,86,.3);--dock-bd:transparent;--dock-sh:0 1px 2px rgba(0,0,0,.25),0 16px 44px rgba(0,0,0,.36);--dock-txt:#fff;--dock-sep:rgba(255,255,255,.4);
+ --toast-bg:rgba(30,38,62,.5);--toast-fg:#fff;--sel-bg:rgba(76,142,255,.62);--sel-fg:#fff}
 
 /* ---- text selection: blue in every theme ---- */
 ::selection{background:var(--sel-bg);color:var(--sel-fg);text-shadow:none}
@@ -880,6 +880,25 @@ body.fs.peek #dock{visibility:visible!important;opacity:1!important;transform:tr
 :root[data-skin=glass] :is(body.perf,body.lite){--surf:rgba(22,28,46,.95);--pn:rgba(24,30,50,.96)}
 :root[data-skin=glass] :is(body.perf,body.lite) #dock{background:rgba(22,28,48,.94)!important}
 
+/* Liquid Glass v2: iOS/macOS 26 style - clearer glass, concentric radii, capsule controls, floating sidebar */
+:root[data-skin=glass] .win:not(.max){border-radius:22px}
+:root[data-skin=glass] #start{border-radius:30px}
+:root[data-skin=glass] :is(#ctx,#trf,#tbpv,#calf){border-radius:22px}
+:root[data-skin=glass] #ctx button,:root[data-skin=glass] #pwm button{border-radius:12px}
+:root[data-skin=glass] .tbar{background:transparent;box-shadow:none;height:40px}
+:root[data-skin=glass] .tbar span{font-weight:650;letter-spacing:.01em}
+:root[data-skin=glass] .win:not(.max) .tbar{padding-left:14px}
+:root[data-skin=glass] .tbar button{border-radius:50%;width:34px;height:28px;margin:0 3px;align-self:center}
+:root[data-skin=glass] .snav{background:rgba(255,255,255,.05);margin:0 0 10px 10px;border:0;border-radius:18px;box-shadow:inset 0 1px 0 rgba(255,255,255,.18)}
+:root[data-skin=glass] .snav button.sel,:root[data-skin=glass] #snv button.sel{background:rgba(255,255,255,.2);box-shadow:inset 0 1px 0 rgba(255,255,255,.4)}
+:root[data-skin=glass] :is(.seg,.step){border-radius:999px;padding:3px}
+:root[data-skin=glass] :is(.seg button,.step button){border-radius:999px}
+:root[data-skin=glass] :is(.pgb,#wn .ft button){border-radius:999px}
+:root[data-skin=glass] #dock{border-radius:999px}
+:root[data-skin=glass] :is(.win,#dock,#start,#trf,#calf){text-shadow:0 1px 2px rgba(0,0,0,.3)}
+:root[data-skin=glass] .dk{filter:drop-shadow(0 4px 8px rgba(0,0,0,.3))}
+:root[data-skin=glass] .thc{border-radius:22px}
+:root[data-skin=glass] .thi{border-radius:16px}
 /* ---- logo tile in About ---- */
 .abl{display:grid;place-items:center;border-radius:22px;background:radial-gradient(90% 90% at 25% 15%,#232b63,#0c1130 55%,#04060f);box-shadow:inset 0 1px 0 rgba(255,255,255,.2),0 8px 22px rgba(60,70,200,.28)}
 .abl svg{width:70%;height:70%}
