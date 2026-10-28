@@ -1,13 +1,17 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512"><defs>
-<linearGradient id="t" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#1a2250"/><stop offset=".6" stop-color="#0b1030"/><stop offset="1" stop-color="#05070f"/></linearGradient>
-<radialGradient id="g1" cx=".15" cy=".95" r=".75"><stop offset="0" stop-color="#22d3ee" stop-opacity=".42"/><stop offset="1" stop-color="#22d3ee" stop-opacity="0"/></radialGradient>
-<radialGradient id="g2" cx=".9" cy=".05" r=".7"><stop offset="0" stop-color="#8b5cf6" stop-opacity=".42"/><stop offset="1" stop-color="#8b5cf6" stop-opacity="0"/></radialGradient>
-<linearGradient id="sh" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#fff" stop-opacity="0.16"/><stop offset=".5" stop-color="#fff" stop-opacity="0"/></linearGradient>
-<linearGradient id="n" gradientUnits="userSpaceOnUse" x1="190" y1="160" x2="330" y2="352"><stop offset="0" stop-color="#67e8f9"/><stop offset=".55" stop-color="#6366f1"/><stop offset="1" stop-color="#a78bfa"/></linearGradient>
-<filter id="bl" x="-40%" y="-40%" width="180%" height="180%"><feGaussianBlur stdDeviation="14"/></filter>
+<radialGradient id="t" cx=".28" cy=".12" r=".95"><stop offset="0" stop-color="#232b63"/><stop offset=".5" stop-color="#0c1130"/><stop offset="1" stop-color="#04060f"/></radialGradient>
+<radialGradient id="v" cx=".92" cy=".98" r=".7"><stop offset="0" stop-color="#8b5cf6" stop-opacity=".42"/><stop offset="1" stop-color="#8b5cf6" stop-opacity="0"/></radialGradient>
+<radialGradient id="c" cx=".05" cy=".95" r=".6"><stop offset="0" stop-color="#22d3ee" stop-opacity=".28"/><stop offset="1" stop-color="#22d3ee" stop-opacity="0"/></radialGradient>
+<linearGradient id="r" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#fff" stop-opacity=".30"/><stop offset=".5" stop-color="#fff" stop-opacity=".04"/><stop offset="1" stop-color="#fff" stop-opacity=".10"/></linearGradient>
+<linearGradient id="h" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#fff" stop-opacity=".10"/><stop offset="1" stop-color="#fff" stop-opacity="0"/></linearGradient>
+<linearGradient id="g" gradientUnits="userSpaceOnUse" x1="130.7" y1="110.8" x2="381.3" y2="401.2"><stop offset="0" stop-color="#f2fbff"/><stop offset=".32" stop-color="#7fe6ff"/><stop offset=".68" stop-color="#7c93ff"/><stop offset="1" stop-color="#b17dff"/></linearGradient>
+<linearGradient id="s" gradientUnits="userSpaceOnUse" x1="0" y1="110.8" x2="0" y2="401.2"><stop offset="0" stop-color="#fff" stop-opacity=".55"/><stop offset=".55" stop-color="#fff" stop-opacity="0"/></linearGradient>
+<filter id="b" x="-40%" y="-40%" width="180%" height="180%"><feGaussianBlur stdDeviation="20"/></filter>
 </defs>
-<rect width="512" height="512" rx="112" fill="url(#t)"/><rect width="512" height="512" rx="112" fill="url(#g1)"/><rect width="512" height="512" rx="112" fill="url(#g2)"/><rect width="512" height="512" rx="112" fill="url(#sh)"/>
-<rect x="1.5" y="1.5" width="509" height="509" rx="110.5" fill="none" stroke="#fff" stroke-opacity=".14" stroke-width="3"/>
-<path d="M196 348V164L316 348V164" fill="none" stroke="url(#n)" stroke-width="48" stroke-linecap="round" stroke-linejoin="round" filter="url(#bl)" opacity=".6"/>
-<path d="M196 348V164L316 348V164" fill="none" stroke="url(#n)" stroke-width="40" stroke-linecap="round" stroke-linejoin="round"/>
+<rect width="512" height="512" rx="116" fill="url(#t)"/><rect width="512" height="512" rx="116" fill="url(#v)"/><rect width="512" height="512" rx="116" fill="url(#c)"/>
+<path d="M0 116Q0 0 116 0H396Q512 0 512 116V210Q256 250 0 210Z" fill="url(#h)"/>
+<rect x=".75" y=".75" width="510.5" height="510.5" rx="115.25" fill="none" stroke="url(#r)" stroke-width="1.5"/>
+<g filter="url(#b)" opacity=".6"><path d="M130.7 395.2 130.7 116.8 195.7 116.8 321.0 297.8 321.0 116.8 381.3 116.8 381.3 395.2 316.3 395.2 191.0 214.2 191.0 395.2Z" fill="url(#g)" stroke="url(#g)" stroke-width="12" stroke-linejoin="round"/></g>
+<path d="M130.7 395.2 130.7 116.8 195.7 116.8 321.0 297.8 321.0 116.8 381.3 116.8 381.3 395.2 316.3 395.2 191.0 214.2 191.0 395.2Z" fill="url(#g)" stroke="url(#g)" stroke-width="12" stroke-linejoin="round"/>
+<path d="M130.7 395.2 130.7 116.8 195.7 116.8 321.0 297.8 321.0 116.8 381.3 116.8 381.3 395.2 316.3 395.2 191.0 214.2 191.0 395.2Z" fill="url(#s)"/>
 </svg>
