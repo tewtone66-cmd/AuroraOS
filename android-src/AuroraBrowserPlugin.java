@@ -89,6 +89,18 @@ public class AuroraBrowserPlugin extends Plugin {
     }
     private void ui(Runnable r) { getActivity().runOnUiThread(r); }
 
+    /** Cancels (removes) a DownloadManager download: {id}. */
+    @PluginMethod
+    public void cancelDownload(final PluginCall call) {
+        try {
+            DownloadManager m = (DownloadManager) getContext().getSystemService(Context.DOWNLOAD_SERVICE);
+            m.remove(Long.parseLong(call.getString("id", "-1")));
+            call.resolve();
+        } catch (Exception e) {
+            call.reject(e.getMessage() == null ? "Could not cancel" : e.getMessage());
+        }
+    }
+
     /** Polls DownloadManager and reports "dlprogress" events {id,name,got,total,state,path} until the download ends. */
     private void trackDownload(final DownloadManager mgr, final long dlId, final String fileName) {
         main.postDelayed(new Runnable() {
