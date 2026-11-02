@@ -1,14 +1,13 @@
-/* ICONS-3.6.0 - clean colored SVG icons for Settings sections and File Manager (places, folders, file types).
-   Label-driven: finds lists of known names (System, Display, Downloads, ...) and prepends an icon. No emoji. */
+/* ICONS-4.1.0 - clean colored SVG icons for Settings sections and File Manager.
+   v4.1: icons replace the app's own icon IN PLACE (layout untouched), thumbnails are never hidden,
+   scanning runs before paint (no "no icon" flash), titlebars / menus / our own panels are skipped. */
 (function(){'use strict';
 var doc=document;
-/* ---------- palette (gradients live once in a hidden svg) ---------- */
 var COL={blue:['#62B4FF','#1F6BFF'],orange:['#FFC45A','#FF7A1A'],red:['#FF7F96','#EE3560'],green:['#6EE79C','#1DB35B'],purple:['#C7A0FF','#7B4DFF'],teal:['#5BE0D8','#12A39C'],gray:['#AEB8CA','#5F6B82'],indigo:['#93A0FF','#4954E0'],slate:['#6B768D','#2E3748'],pink:['#FF8FC8','#C94BE0'],yellow:['#FFDA78','#F5A524'],sky:['#74D8FF','#1E9BE8']};
-function defs(){var s='<svg width="0" height="0" style="position:absolute" aria-hidden="true"><defs>';
+function defs(){if(doc.getElementById('nxi-defs'))return;var s='<svg width="0" height="0" style="position:absolute" aria-hidden="true"><defs>';
  Object.keys(COL).forEach(function(k){s+='<linearGradient id="nxi-'+k+'" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="'+COL[k][0]+'"/><stop offset="1" stop-color="'+COL[k][1]+'"/></linearGradient>'});
  s+='<linearGradient id="nxi-shine" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#fff" stop-opacity=".34"/><stop offset="1" stop-color="#fff" stop-opacity="0"/></linearGradient></defs></svg>';
  var d=doc.createElement('div');d.id='nxi-defs';d.style.cssText='position:absolute;width:0;height:0;overflow:hidden';d.innerHTML=s;doc.body.appendChild(d)}
-/* ---------- tile icons (Settings) : colored squircle + white glyph ---------- */
 function tile(c,g){return'<svg viewBox="0 0 24 24" aria-hidden="true"><rect width="24" height="24" rx="6.4" fill="url(#nxi-'+c+')"/><path d="M0 6.4A6.4 6.4 0 016.4 0h11.2A6.4 6.4 0 0124 6.4V12H0z" fill="url(#nxi-shine)"/><g transform="translate(12 12) scale(.78) translate(-12 -12)" fill="none" stroke="#fff" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round">'+g+'</g></svg>'}
 var DOT=function(x,y,r){return'<circle cx="'+x+'" cy="'+y+'" r="'+(r||1)+'" fill="#fff" stroke="none"/>'};
 var SET=[
@@ -38,9 +37,9 @@ var SET=[
  ['dev',/^(developer|advanced|terminal)/,'slate','<path d="M8.5 7L3.5 12l5 5M15.5 7l5 5-5 5"/>'],
  ['about',/^(about|info)/,'gray','<circle cx="12" cy="12" r="8.5"/><path d="M12 11v5.2"/>'+DOT(12,7.9,1)]
 ];
-/* ---------- folder / file / drive icons (File Manager) ---------- */
 var WH='fill="none" stroke="#fff" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"';
-function folder(c,g){return'<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M2.5 6.3A1.8 1.8 0 014.3 4.5h4.2c.5 0 .9.2 1.2.6l1 1.2h9a1.8 1.8 0 011.8 1.8v9.9a1.8 1.8 0 01-1.8 1.8H4.3a1.8 1.8 0 01-1.8-1.8z" fill="url(#nxi-'+c+')"/><path d="M2.5 6.3A1.8 1.8 0 014.3 4.5h4.2c.5 0 .9.2 1.2.6l1 1.2h9a1.8 1.8 0 011.8 1.8v9.9a1.8 1.8 0 01-1.8 1.8H4.3a1.8 1.8 0 01-1.8-1.8z" fill="#000" opacity=".16"/><path d="M2.5 10a1.8 1.8 0 011.8-1.8h15.4A1.8 1.8 0 0121.5 10v7.4a1.8 1.8 0 01-1.8 1.8H4.3a1.8 1.8 0 01-1.8-1.8z" fill="url(#nxi-'+c+')"/><path d="M2.5 10a1.8 1.8 0 011.8-1.8h15.4A1.8 1.8 0 0121.5 10v1.2h-19z" fill="url(#nxi-shine)"/>'+(g?'<g '+WH+'>'+g+'</g>':'')+'</svg>'}
+function folder(c,g){var b='M2.5 6.3A1.8 1.8 0 014.3 4.5h4.2c.5 0 .9.2 1.2.6l1 1.2h9a1.8 1.8 0 011.8 1.8v9.9a1.8 1.8 0 01-1.8 1.8H4.3a1.8 1.8 0 01-1.8-1.8z';
+ return'<svg viewBox="0 0 24 24" aria-hidden="true"><path d="'+b+'" fill="url(#nxi-'+c+')"/><path d="'+b+'" fill="#000" opacity=".16"/><path d="M2.5 10a1.8 1.8 0 011.8-1.8h15.4A1.8 1.8 0 0121.5 10v7.4a1.8 1.8 0 01-1.8 1.8H4.3a1.8 1.8 0 01-1.8-1.8z" fill="url(#nxi-'+c+')"/><path d="M2.5 10a1.8 1.8 0 011.8-1.8h15.4A1.8 1.8 0 0121.5 10v1.2h-19z" fill="url(#nxi-shine)"/>'+(g?'<g '+WH+'>'+g+'</g>':'')+'</svg>'}
 var FG={
  downloads:['green','<path d="M12 11.3v5M9.8 14.4l2.2 2.2 2.2-2.2"/>'],
  documents:['blue','<path d="M9 12.2h6M9 14.6h6M9 17h3.4"/>'],
@@ -77,52 +76,70 @@ function fileIcon(ext){for(var k in FT)if(FT[k][2].test(ext))return page(FT[k][0
 var EXT=/\.([a-z0-9]{1,8})$/i;
 /* ---------- helpers ---------- */
 var PICT=/[\p{Extended_Pictographic}\uFE0F\u200D\u203A\u00BB>\u2022\u00B7]/gu;
+var EMO_LEAD=/^\s*[\p{Extended_Pictographic}\uFE0F\u200D]+\s*/u;
 function norm(s){return(s||'').replace(PICT,'').replace(/\s+/g,' ').trim().toLowerCase()}
 function firstLeafText(el){var w=doc.createTreeWalker(el,4),n;while((n=w.nextNode())){var t=norm(n.nodeValue);if(t)return t}return''}
 var cache={};
 function setIcon(name){return cache[name]||(cache[name]=(function(){for(var i=0;i<SET.length;i++)if(SET[i][0]===name)return tile(SET[i][2],SET[i][3]);return''})())}
-function match(el){if(el.dataset.nxi)return null;var txt=norm(el.textContent);if(!txt||txt.length>40)return null;var tries=[txt];var f=firstLeafText(el);if(f&&f!==txt)tries.push(f);
+function match(el){if(el.dataset.nxi)return null;var txt=norm(el.textContent);if(!txt||txt.length>40)return null;var tries=[txt],f=firstLeafText(el);if(f&&f!==txt)tries.push(f);
  for(var t=0;t<tries.length;t++){var s=tries[t];if(s.length>30)continue;
   for(var i=0;i<PLACES.length;i++)if(PLACES[i][1].test(s))return{kind:'place',key:PLACES[i][0]};
   for(i=0;i<SET.length;i++)if(SET[i][1].test(s))return{kind:'set',key:SET[i][0]}}
  return null}
 function nameOf(el){var w=doc.createTreeWalker(el,4),n;while((n=w.nextNode())){var t=(n.nodeValue||'').replace(PICT,'').trim();if(t)return t}return''}
 function isFolderEl(el){return /[\u{1F4C1}\u{1F4C2}\u{1F5C2}]/u.test(el.textContent||'')||/(^|[\s_-])(dir|folder|directory)([\s_-]|$)/i.test(el.className||'')||/^(dir|folder|directory)$/i.test(el.dataset.type||el.dataset.kind||'')}
-function addIcon(el,svg,cls){if(!svg||el.dataset.nxi)return;el.dataset.nxi='1';
- var c=el.firstElementChild,lab=norm(el.textContent);
- if(c&&c.children.length<=1&&norm(c.textContent)!==lab&&(!norm(c.textContent)||/[\p{Extended_Pictographic}]/u.test(c.textContent)||c.querySelector('svg,img')||c.tagName==='IMG'||c.tagName==='SVG'||c.tagName==='svg')){
-  if(!c.classList.contains('nxi')){c.style.display='none';c.setAttribute('data-nxi-old','1')}}
- var f=el.firstChild;if(f&&f.nodeType===3){f.nodeValue=f.nodeValue.replace(/^\s*[\p{Extended_Pictographic}\uFE0F\u200D]+\s*/u,'')}
- var sp=doc.createElement('span');sp.className='nxi '+(cls||'');sp.innerHTML=svg;el.insertBefore(sp,el.firstChild)}
+function bgImg(c){try{var b=getComputedStyle(c).backgroundImage;return!!b&&b!=='none'}catch(e){return false}}
+/* find the app's own icon element (first child that has no text); thumbnails are detected and left alone */
+function slot(el){for(var c=el.firstElementChild;c;c=c.nextElementSibling){
+ if(c.classList.contains('nxi')||c.classList.contains('nxi-in'))return{done:1};
+ if(/^(IMG|CANVAS|VIDEO|PICTURE)$/.test(c.tagName)||(c.querySelector&&c.querySelector('img,canvas,video')))return{thumb:1};
+ if(norm(c.textContent))return{};
+ if(bgImg(c))return{thumb:1};
+ return{node:c}}
+ return{}}
+var Q=[];
+function addIcon(el,svg,cls){if(!svg||el.dataset.nxi)return;var s=slot(el);el.dataset.nxi='1';if(s.thumb||s.done)return;
+ if(s.node){Q.push({k:'in',n:s.node,svg:svg});return}
+ var f=el.firstChild;if(f&&f.nodeType===3&&EMO_LEAD.test(f.nodeValue))f.nodeValue=f.nodeValue.replace(EMO_LEAD,'');
+ Q.push({k:'new',n:el,svg:svg,cls:cls})}
+function flush(){var q=Q.splice(0,Q.length),i,t,px=[];
+ for(i=0;i<q.length;i++){t=q[i];if(t.k==='in'){var b=t.n.getBoundingClientRect();px[i]=Math.round(Math.min(b.width,b.height))}}
+ for(i=0;i<q.length;i++){t=q[i];
+  if(t.k==='in'){t.n.classList.add('nxi-in');t.n.innerHTML=t.svg;var s=t.n.firstChild;if(s&&s.style){var p=px[i];if(p>=10){p=Math.max(16,p);s.style.width=p+'px';s.style.height=p+'px'}else{s.style.width='1.15em';s.style.height='1.15em'}}}
+  else{var sp=doc.createElement('span');sp.className='nxi '+(t.cls||'');sp.innerHTML=t.svg;t.n.insertBefore(sp,t.n.firstChild)}}}
 function placeSvg(k){if(k==='trash')return trash();if(k==='drive')return drive();var g=FG[k];return g?folder(g[0],g[1]):folder('yellow','')}
-function decorate(el,m){if(m.kind==='set')addIcon(el,setIcon(m.key),el.classList.contains('ftile')?'big':'');else addIcon(el,placeSvg(m.key),el.classList.contains('ftile')?'big fl':'fl')}
+function decorate(el,m){var big=el.classList.contains('ftile');if(m.kind==='set')addIcon(el,setIcon(m.key),big?'big':'');else addIcon(el,placeSvg(m.key),big?'big fl':'fl')}
 /* ---------- scan ---------- */
+var SKIP='.tbar,#nxi-defs,.nxkb,#dock,#start,#ctx,#nxd,.nxn,#nxnHost,.nxt,.nxc,.nxs,.nxf,.nxd-set,[role=menu]';
 var SEL='div,button,li,a,span,p,tr';
-function scanParent(p){if(!p||p.dataset.nxScan==='1'&&false)return;var kids=[].slice.call(p.children),hits=[],files=[];
- if(kids.length<2||kids.length>400)return;
- kids.forEach(function(k){if(k.dataset.nxi||k.classList.contains('nxi'))return;var m=match(k);if(m){hits.push([k,m]);return}
-  var nm=nameOf(k);if(nm&&nm.length<120&&EXT.test(nm.split(/\s{2,}/)[0].trim()))files.push(k)});
+function scanParent(p){if(!p||(p.closest&&p.closest(SKIP)))return;var kids=p.children,hits=[],files=[],i,k;
+ if(kids.length<2||kids.length>500)return;
+ for(i=0;i<kids.length;i++){k=kids[i];if(k.dataset.nxi||k.classList.contains('nxi'))continue;
+  if(/^H[1-6]$/.test(k.tagName))continue;
+  var m=match(k);if(m){hits.push([k,m]);continue}
+  var nm=nameOf(k);if(nm&&nm.length<120&&EXT.test(nm.split(/\s{2,}/)[0].trim()))files.push(k)}
  if(hits.length>=3)hits.forEach(function(h){decorate(h[0],h[1])});
- if(files.length>=2){kids.forEach(function(k){if(k.dataset.nxi||k.classList.contains('nxi'))return;var nm=nameOf(k).split(/\s{2,}/)[0].trim(),x=EXT.exec(nm),big=k.classList.contains('ftile')?'big fl':'fl';
-  if(x&&nm.length<120)addIcon(k,fileIcon(x[1].toLowerCase()),big);
-  else if(isFolderEl(k)){var s=norm(nm),key='plain';for(var i=0;i<PLACES.length;i++)if(PLACES[i][1].test(s)&&FG[PLACES[i][0]]){key=PLACES[i][0];break}addIcon(k,placeSvg(key),big)}})}}
-function scan(r){if(!r||r.nodeType!==1||r.closest&&r.closest('#nxi-defs,.nxkb,#dock'))return;
- var ps=new Set();var list=[].slice.call(r.querySelectorAll(SEL));if(r.matches&&r.matches(SEL))list.unshift(r);
- list.forEach(function(el){if(el.children.length<=4&&(el.textContent||'').length<=140&&el.parentElement)ps.add(el.parentElement)});
+ if(files.length>=2){for(i=0;i<kids.length;i++){k=kids[i];if(k.dataset.nxi||k.classList.contains('nxi'))continue;
+  var nm2=nameOf(k).split(/\s{2,}/)[0].trim(),x=EXT.exec(nm2),big=k.classList.contains('ftile')?'big fl':'fl';
+  if(x&&nm2.length<120)addIcon(k,fileIcon(x[1].toLowerCase()),big);
+  else if(isFolderEl(k)){var s=norm(nm2),key='plain';for(var j=0;j<PLACES.length;j++)if(PLACES[j][1].test(s)&&FG[PLACES[j][0]]){key=PLACES[j][0];break}addIcon(k,placeSvg(key),big)}}}}
+function scan(r){if(!r||r.nodeType!==1||(r.closest&&r.closest(SKIP)))return;
+ var ps=new Set(),list=r.querySelectorAll(SEL),i,el;
+ if(r.matches&&r.matches(SEL)&&r.parentElement)ps.add(r.parentElement);
+ for(i=0;i<list.length&&i<2500;i++){el=list[i];if(el.childElementCount<=4&&el.parentElement)ps.add(el.parentElement)}
  ps.forEach(scanParent);
- /* Settings page title */
  var sp=r.id==='spg'?r:(r.querySelector?r.querySelector('#spg'):null);if(!sp&&r.closest)sp=r.closest('#spg');
- if(sp)sp.querySelectorAll('h3').forEach(function(h){if(h.dataset.nxi)return;var s=norm(h.textContent);for(var i=0;i<SET.length;i++)if(SET[i][1].test(s)){addIcon(h,tile(SET[i][2],SET[i][3]),'lg');return}})}
+ if(sp)sp.querySelectorAll('h3').forEach(function(h){if(h.dataset.nxi||h.closest(SKIP))return;var s=norm(h.textContent);for(var i=0;i<SET.length;i++)if(SET[i][1].test(s)){addIcon(h,tile(SET[i][2],SET[i][3]),'lg');return}});
+ flush()}
 /* ---------- css + boot ---------- */
 var st=doc.createElement('style');st.id='nx-icons-css';st.textContent=[
-'.nxi{display:inline-flex;flex:none;width:20px;height:20px;margin-right:10px;vertical-align:-5px;filter:drop-shadow(0 1px 1.5px rgba(0,0,0,.28));pointer-events:none;-webkit-user-select:none;user-select:none}',
+'.nxi{display:inline-flex;flex:none;width:20px;height:20px;margin-right:10px;vertical-align:-5px;pointer-events:none;-webkit-user-select:none;user-select:none}',
 '.nxi svg{width:100%;height:100%;display:block}.nxi.lg{width:26px;height:26px;margin-right:12px;vertical-align:-7px}.nxi.fl{width:22px;height:22px;margin-right:9px;vertical-align:-6px}',
-'.nxi.big{display:flex;width:46px;height:46px;margin:0 auto 6px}'].join('\n');
+'.nxi.big{display:flex;width:46px;height:46px;margin:0 auto 6px}',
+'.nxi-in{display:inline-flex;align-items:center;justify-content:center;line-height:0;flex:none;pointer-events:none}.nxi-in svg{display:block;flex:none}'].join('\n');
 doc.head.appendChild(st);
 defs();
-var pend=[],tm=0;
-new MutationObserver(function(ms){for(var i=0;i<ms.length;i++){var a=ms[i].addedNodes;for(var j=0;j<a.length;j++)if(a[j].nodeType===1&&!a[j].classList.contains('nxi')&&a[j].id!=='nxi-defs')pend.push(a[j])}
- if(!tm&&pend.length)tm=setTimeout(function(){tm=0;var q=pend.splice(0,pend.length).slice(0,60);q.forEach(function(n){if(n.isConnected)scan(n)})},60)}).observe(doc.body,{childList:true,subtree:true});
-window.NXICON={scan:scan,set:setIcon,file:fileIcon};
+new MutationObserver(function(ms){var n=0;for(var i=0;i<ms.length;i++){var a=ms[i].addedNodes;for(var j=0;j<a.length;j++){var x=a[j];if(x.nodeType===1&&!x.classList.contains('nxi')&&!x.classList.contains('nxi-in')&&x.id!=='nxi-defs'){scan(x);if(++n>60)return}}}}).observe(doc.body,{childList:true,subtree:true});
+window.NXICON={scan:scan,set:setIcon,file:fileIcon,folder:placeSvg};
 scan(doc.body);
 })();
