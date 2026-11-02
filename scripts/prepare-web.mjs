@@ -24,6 +24,7 @@ if (fs.existsSync(modsDir)) {
 // src/patches/*.mjs export default [{ name, find, replace, mod?, optional? }].
 //  - without `mod` the patch edits src/index.html, with `mod: 'file.js'` it edits that mod file.
 //  - `find` must occur exactly once, otherwise the build fails (so a patch never silently misses).
+//  - `all: true` replaces every occurrence (at least one must exist).
 //  - `optional: true` only prints a warning instead of failing (used for patches into other mods).
 const patchDir = path.join(root, 'src', 'patches');
 if (fs.existsSync(patchDir)) {
@@ -37,12 +38,12 @@ if (fs.existsSync(patchDir)) {
         throw new Error('Patch "' + p.name + '" (' + f + '): mod ' + p.mod + ' not found');
       }
       const n = text.split(p.find).length - 1;
-      if (n !== 1) {
+      if (p.all ? n < 1 : n !== 1) {
         const msg = 'Patch "' + p.name + '" (' + f + '): expected 1 match, found ' + n;
         if (p.optional) { console.warn('WARN ' + msg); continue; }
         throw new Error(msg);
       }
-      const res = text.replace(p.find, () => p.replace);
+      const res = p.all ? text.split(p.find).join(p.replace) : text.replace(p.find, () => p.replace);
       if (isMod) modText[p.mod] = res; else html = res;
       console.log('Patched: ' + p.name);
     }

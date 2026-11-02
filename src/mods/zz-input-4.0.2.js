@@ -8,9 +8,9 @@ var css=['#cur svg.cs.sr{padding:0!important;gap:0!important;margin:0!important;
 ':root[data-nxcur] #cur::before,:root[data-nxcur] #cur::after{transform:scale(var(--nxs,1));transform-origin:0 0}',
 ':root[data-nxcur] #cur:not(.c-arrow)::before,:root[data-nxcur] #cur:not(.c-arrow)::after{display:none}',
 ':root[data-nxcur] #cur:not(.c-arrow)>*{opacity:1!important}',
-'#dock #nxkbBtn.nxd{position:static;width:34px;height:34px;border-radius:10px;margin:0 4px;flex:none;right:auto;bottom:auto;box-shadow:none;border-color:transparent;background:transparent}',
-'#dock #nxkbBtn.nxd.on{background:var(--acc);color:var(--accT)}',
-'#dock #nxkbBtn.nxd svg{width:20px;height:20px}'].join('\n');
+'#dock #nxkbBtn.nxkd{position:static;width:34px;height:34px;border-radius:10px;margin:0 4px;flex:none;right:auto;bottom:auto;box-shadow:none;border-color:transparent;background:transparent}',
+'#dock #nxkbBtn.nxkd.on{background:var(--acc);color:var(--accT)}',
+'#dock #nxkbBtn.nxkd svg{width:20px;height:20px}'].join('\n');
 var st=doc.createElement('style');st.id='nx-input-css';st.textContent=css;doc.head.appendChild(st);
 var cur=doc.getElementById('cur');
 function scl(){if(!cur)return;var w=parseFloat(cur.style.width)||26;root.style.setProperty('--nxs',(w/26).toFixed(3))}
@@ -42,6 +42,6 @@ function patchDnd(){var D=window.DNDX;if(!D||D._nx)return;D._nx=1;var oh=D.hit;
 /* 6. keyboard button lives in the taskbar (next to the clock) */
 var tries=0,iv=setInterval(function(){tries++;var p=doc.getElementById('nxkb'),b=doc.getElementById('nxkbBtn'),dk=doc.getElementById('dock');
  if(p&&!p._nx){p._nx=1;try{new MutationObserver(resync).observe(p,{attributes:true,attributeFilter:['class','style']})}catch(e){}p.addEventListener('transitionend',resync)}
- if(b&&dk&&!b._nx){b._nx=1;var saved=null;try{saved=ls('aur.kbpos')}catch(e){}if(!saved||saved==='null'){b.classList.add('nxd');var clk=doc.getElementById('clock');dk.insertBefore(b,clk||null)}}
+ if(b&&dk&&!b._nx){b._nx=1;var saved=null;try{saved=ls('aur.kbpos')}catch(e){}if(!saved||saved==='null'){b.classList.add('nxkd');var clk=doc.getElementById('clock');dk.insertBefore(b,clk||null)}}
  patchDnd();if(tries>60||(p&&b&&b._nx&&window.DNDX&&window.DNDX._nx))clearInterval(iv)},250);
 })();
