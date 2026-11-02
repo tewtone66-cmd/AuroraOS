@@ -9,8 +9,10 @@ import android.database.Cursor;
 import android.graphics.Bitmap;
 import android.graphics.Canvas;
 import android.graphics.Color;
+import android.graphics.Matrix;
 import android.graphics.Paint;
 import android.graphics.Path;
+import android.graphics.RectF;
 import android.net.Uri;
 import android.os.Environment;
 import android.os.Handler;
@@ -211,30 +213,114 @@ public class AuroraBrowserPlugin extends Plugin {
         }
     }
 
-    /** Arrow cursor drawn natively so it stays visible above the browser surface. */
+    /** Pointer drawn natively so it stays visible above the browser surface: arrow, hand, text bar and resize arrows. */
     private static class CursorView extends View {
-        private final Paint fill = new Paint(Paint.ANTI_ALIAS_FLAG), line = new Paint(Paint.ANTI_ALIAS_FLAG);
-        private final Path path = new Path();
+        static final int ARROW = 0, HAND = 1, TEXT = 2, EW = 3, NS = 4;
+        private final Paint fill = new Paint(Paint.ANTI_ALIAS_FLAG), line = new Paint(Paint.ANTI_ALIAS_FLAG), halo = new Paint(Paint.ANTI_ALIAS_FLAG);
+        private final Path[] paths = new Path[5];
+        private final float[] hx = { 0f, 11f, 13f, 13f, 13f }, hy = { 0f, 2f, 14f, 14f, 14f };
+        private final float dens;
+        int shape = ARROW;
         CursorView(Context c, float d) {
             super(c);
+            dens = d;
             fill.setColor(Color.WHITE);
             line.setColor(Color.parseColor("#111111"));
             line.setStyle(Paint.Style.STROKE);
             line.setStrokeWidth(1.5f * d);
             line.setStrokeJoin(Paint.Join.ROUND);
+            line.setStrokeCap(Paint.Cap.ROUND);
+            halo.setColor(Color.WHITE);
+            halo.setStyle(Paint.Style.STROKE);
+            halo.setStrokeWidth(4f * d);
+            halo.setStrokeJoin(Paint.Join.ROUND);
+            halo.setStrokeCap(Paint.Cap.ROUND);
             float s = d * 1.0f;
-            path.moveTo(1 * s, 1 * s);
-            path.lineTo(1 * s, 20 * s);
-            path.lineTo(6 * s, 15 * s);
-            path.lineTo(10 * s, 24 * s);
-            path.lineTo(14 * s, 22 * s);
-            path.lineTo(10 * s, 14 * s);
-            path.lineTo(17 * s, 14 * s);
-            path.close();
+            Path a = new Path();
+            a.moveTo(1 * s, 1 * s);
+            a.lineTo(1 * s, 20 * s);
+            a.lineTo(6 * s, 15 * s);
+            a.lineTo(10 * s, 24 * s);
+            a.lineTo(14 * s, 22 * s);
+            a.lineTo(10 * s, 14 * s);
+            a.lineTo(17 * s, 14 * s);
+            a.close();
+            paths[ARROW] = a;
+            Path hand = new Path();
+            hand.addRoundRect(new RectF(9.2f * s, 2f * s, 13.6f * s, 15f * s), 2.2f * s, 2.2f * s, Path.Direction.CW);
+            Path palm = new Path();
+            palm.addRoundRect(new RectF(5f * s, 11.5f * s, 20f * s, 24f * s), 4f * s, 4f * s, Path.Direction.CW);
+            hand.op(palm, Path.Op.UNION);
+            paths[HAND] = hand;
+            Path t = new Path();
+            t.moveTo(8 * s, 3 * s);
+            t.lineTo(18 * s, 3 * s);
+            t.moveTo(13 * s, 3 * s);
+            t.lineTo(13 * s, 25 * s);
+            t.moveTo(8 * s, 25 * s);
+            t.lineTo(18 * s, 25 * s);
+            paths[TEXT] = t;
+            Path e = new Path();
+            e.moveTo(2 * s, 14 * s);
+            e.lineTo(8 * s, 8 * s);
+            e.lineTo(8 * s, 12 * s);
+            e.lineTo(18 * s, 12 * s);
+            e.lineTo(18 * s, 8 * s);
+            e.lineTo(24 * s, 14 * s);
+            e.lineTo(18 * s, 20 * s);
+            e.lineTo(18 * s, 16 * s);
+            e.lineTo(8 * s, 16 * s);
+            e.lineTo(8 * s, 20 * s);
+            e.close();
+            paths[EW] = e;
+            Path n = new Path(e);
+            Matrix m = new Matrix();
+            m.setRotate(90f, 13 * s, 14 * s);
+            n.transform(m);
+            paths[NS] = n;
             setClickable(false);
             setFocusable(false);
         }
-        @Override protected void onDraw(Canvas c) { c.drawPath(path, fill); c.drawPath(path, line); }
+        void setShape(int s) {
+            if (s != shape) { shape = s; invalidate(); }
+        }
+        float offX() { return hx[shape] * dens; }
+        float offY() { return hy[shape] * dens; }
+        @Override protected void onDraw(Canvas c) {
+            Path p = paths[shape];
+            if (shape == TEXT) { c.drawPath(p, halo); c.drawPath(p, line); }
+            else { c.drawPath(p, fill); c.drawPath(p, line); }
+        }
+    }
+
+    private float cbx = 0, cby = 0, ck = 1f;
+    private long probeT = 0;
+
+    private void placeCursor() {
+        if (cursor == null) return;
+        cursor.setTranslationX(cbx - cursor.offX() * ck);
+        cursor.setTranslationY(cby - cursor.offY() * ck);
+    }
+
+    /** Asks the page which CSS cursor is under the pointer and switches the native pointer shape (throttled). */
+    private void probeShape(final WebView w, float x, float y) {
+        long n = SystemClock.uptimeMillis();
+        if (cursor == null || n - probeT < 90) return;
+        probeT = n;
+        String js = "(function(){try{var e=document.elementFromPoint(" + x + "," + y + ");if(!e)return 'a';var c=getComputedStyle(e).cursor;"
+            + "if(c==='auto'||c==='default'){if(e.closest){if(e.closest('input:not([type=button]):not([type=checkbox]):not([type=radio]):not([type=range]):not([type=submit]):not([type=color]):not([type=file]),textarea,[contenteditable=\"\"],[contenteditable=\"true\"]'))return 'text';"
+            + "if(e.closest('a[href],button,summary,select,label,[role=button]'))return 'pointer'}return 'a'}return c}catch(z){return 'a'}})()";
+        w.evaluateJavascript(js, new ValueCallback<String>() {
+            @Override public void onReceiveValue(String value) {
+                String v = value == null ? "" : value.replace("\"", "");
+                int sh = CursorView.ARROW;
+                if ("pointer".equals(v) || "grab".equals(v) || "grabbing".equals(v) || "move".equals(v)) sh = CursorView.HAND;
+                else if ("text".equals(v) || "vertical-text".equals(v)) sh = CursorView.TEXT;
+                else if ("ew-resize".equals(v) || "col-resize".equals(v) || "e-resize".equals(v) || "w-resize".equals(v)) sh = CursorView.EW;
+                else if ("ns-resize".equals(v) || "row-resize".equals(v) || "n-resize".equals(v) || "s-resize".equals(v)) sh = CursorView.NS;
+                if (cursor != null && cursor.shape != sh) { cursor.setShape(sh); placeCursor(); }
+            }
+        });
     }
 
     private void emit(String id, WebView v, boolean loading) {
@@ -557,6 +643,9 @@ public class AuroraBrowserPlugin extends Plugin {
             } else if ("mobile".equals(a) || "desktop".equals(a)) {
                 w.getSettings().setUserAgentString("mobile".equals(a) ? null : DESKTOP_UA);
                 w.reload();
+            } else if ("js".equals(a)) {
+                String js = call.getString("js", "");
+                if (js != null && !js.isEmpty()) w.evaluateJavascript(js, null);
             }
             call.resolve();
         });
@@ -605,12 +694,14 @@ public class AuroraBrowserPlugin extends Plugin {
             getBridge().getWebView().getLocationOnScreen(a);
             getActivity().findViewById(android.R.id.content).getLocationOnScreen(b);
             float d = dd;
-            cursor.setTranslationX(x * d + (a[0] - b[0]));
-            cursor.setTranslationY(y * d + (a[1] - b[1]));
+            cbx = x * d + (a[0] - b[0]);
+            cby = y * d + (a[1] - b[1]);
+            ck = kscale;
             cursor.setPivotX(0f);
             cursor.setPivotY(0f);
             cursor.setScaleX(kscale);
             cursor.setScaleY(kscale);
+            placeCursor();
             if (vis && shownId != null) {
                 if (cursor.getVisibility() != View.VISIBLE) cursor.setVisibility(View.VISIBLE);
                 cursor.bringToFront();
@@ -651,6 +742,7 @@ public class AuroraBrowserPlugin extends Plugin {
                     e.setSource(InputDevice.SOURCE_TOUCHSCREEN);
                     w.dispatchTouchEvent(e);
                     e.recycle();
+                    probeShape(w, x, y);
                 } else if ("up".equals(act)) {
                     long dtu = downT > 0 ? downT : now;
                     MotionEvent e = MotionEvent.obtain(dtu, now, MotionEvent.ACTION_UP, px, py, 0);
@@ -663,6 +755,7 @@ public class AuroraBrowserPlugin extends Plugin {
                     e.setSource(InputDevice.SOURCE_MOUSE);
                     w.dispatchGenericMotionEvent(e);
                     e.recycle();
+                    probeShape(w, x, y);
                 } else if ("scroll".equals(act)) {
                     MotionEvent.PointerProperties[] pp = { new MotionEvent.PointerProperties() };
                     pp[0].id = 0;
