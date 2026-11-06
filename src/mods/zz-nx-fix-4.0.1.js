@@ -13,7 +13,6 @@ function currentVersion(){return g(VER_KEY,BASE_VERSION)||BASE_VERSION}
 function css(){
  if(doc.getElementById('nx-fix-css'))return;
  var s=doc.createElement('style');s.id='nx-fix-css';s.textContent=[
-  /* The Island intentionally blurred every inactive content pane. On some WebViews the blur leaked into the clock and stayed after transitions. */
   '#nxd .nxd-v{filter:none!important;-webkit-filter:none!important;backface-visibility:hidden;transition-property:opacity,transform!important}',
   '.nx-island-size{display:flex;align-items:center;gap:12px;margin:10px 0 16px;padding:10px 12px;border:1px solid var(--line);border-radius:12px;background:var(--surf2)}',
   '.nx-island-size label{flex:1;min-width:100px;font-size:12px;color:var(--mut)}.nx-island-size input{width:min(190px,42%);accent-color:var(--acc)}.nx-island-size output{min-width:42px;text-align:right;font-size:12px;font-variant-numeric:tabular-nums}',
