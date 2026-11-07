@@ -409,33 +409,25 @@ public class AuroraWinePlugin extends Plugin {
         }
     }
 
-    /** True only when this device actually exposes Vulkan hardware (so DXVK has something real to run on). */
-    private boolean hasVulkan(Context ctx) {
-        try {
-            android.content.pm.PackageManager pm = ctx.getPackageManager();
-            return pm.hasSystemFeature(android.content.pm.PackageManager.FEATURE_VULKAN_HARDWARE_VERSION)
-                || pm.hasSystemFeature(android.content.pm.PackageManager.FEATURE_VULKAN_HARDWARE_LEVEL);
-        } catch (Throwable e) {
-            return false;
-        }
-    }
-
     /**
-     * DXVK needs real Vulkan hardware; without it DXVK throws and Wine crashes, so this device falls back to
-     * Wine's own d3d (wined3d). But wined3d does not expose DirectX 11 Feature Level 10+, so any program whose
-     * installer checks that (e.g. Roblox Studio: "Roblox installation requires DirectX 11 Feature Level 10 or
-     * greater") fails outright. So the fallback to wined3d now only happens when Vulkan is genuinely missing;
-     * on a device that does have Vulkan, DXVK is left in place (or restored if a prior run forced wined3d) so
-     * DX11/FL10+ programs work. Never throws. */
+     * REVERTED (2026-11-08): a prior change tried "DXVK when Android reports Vulkan hardware" so DX11/FL10+
+     * installers (e.g. Roblox Studio) would stop failing. That is not the right signal: Android's own Vulkan
+     * support says nothing about whether Winlator's *container* has a working Vulkan driver wired up for the
+     * guest (its own graphicsDriver setting, e.g. turnip/virgl, is separate and not touched here). Result on
+     * at least one device: no error at all, the app just hangs forever on "Starting..." because DXVK silently
+     * never finishes initializing. That is worse than the old, clearly-reported DX11 error, so this is back to
+     * unconditionally forcing wined3d, which is the one combination actually verified to start. Properly
+     * supporting DX11/FL10+ needs the container's graphicsDriver to be set to a real Vulkan driver together
+     * with dxwrapper=dxvk, which this plugin does not currently configure.
+     * DXVK needs Vulkan, which this device lacks (DXVK throws and Wine crashes). Use Wine's own d3d instead. Never throws. */
     private void ensureWineD3D(Context ctx, int containerId) {
         try {
             Container c = new ContainerManager(ctx).getContainerById(containerId);
             if (c == null || c.getRootDir() == null) return;
-            String want = hasVulkan(ctx) ? "dxvk" : "wined3d";
-            if (want.equals(c.getDXWrapper())) return;
-            c.setDXWrapper(want);
+            if ("wined3d".equals(c.getDXWrapper())) return;
+            c.setDXWrapper("wined3d");
             c.saveData();
-            addJavaNote("dxwrapper: container " + containerId + " switched to " + want);
+            addJavaNote("dxwrapper: container " + containerId + " switched to wined3d");
         } catch (Throwable e) {
             addJavaNote("dxwrapper: update FAILED: " + e);
         }
