@@ -4,7 +4,7 @@
   "private": true,
   "description": "NexOS Android wrapper",
   "scripts": {
-    "prepare:web": "node scripts/prepare-web.mjs",
+    "prepare:web": "node scripts/restore-signing-key.mjs && node scripts/prepare-web.mjs",
     "android:sync": "npm run prepare:web && cap sync android"
   },
   "dependencies": {
