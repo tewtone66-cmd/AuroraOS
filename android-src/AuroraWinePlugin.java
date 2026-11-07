@@ -409,15 +409,33 @@ public class AuroraWinePlugin extends Plugin {
         }
     }
 
-    /** DXVK needs Vulkan, which this device lacks (DXVK throws and Wine crashes). Use Wine's own d3d instead. Never throws. */
+    /** True only when this device actually exposes Vulkan hardware (so DXVK has something real to run on). */
+    private boolean hasVulkan(Context ctx) {
+        try {
+            android.content.pm.PackageManager pm = ctx.getPackageManager();
+            return pm.hasSystemFeature(android.content.pm.PackageManager.FEATURE_VULKAN_HARDWARE_VERSION)
+                || pm.hasSystemFeature(android.content.pm.PackageManager.FEATURE_VULKAN_HARDWARE_LEVEL);
+        } catch (Throwable e) {
+            return false;
+        }
+    }
+
+    /**
+     * DXVK needs real Vulkan hardware; without it DXVK throws and Wine crashes, so this device falls back to
+     * Wine's own d3d (wined3d). But wined3d does not expose DirectX 11 Feature Level 10+, so any program whose
+     * installer checks that (e.g. Roblox Studio: "Roblox installation requires DirectX 11 Feature Level 10 or
+     * greater") fails outright. So the fallback to wined3d now only happens when Vulkan is genuinely missing;
+     * on a device that does have Vulkan, DXVK is left in place (or restored if a prior run forced wined3d) so
+     * DX11/FL10+ programs work. Never throws. */
     private void ensureWineD3D(Context ctx, int containerId) {
         try {
             Container c = new ContainerManager(ctx).getContainerById(containerId);
             if (c == null || c.getRootDir() == null) return;
-            if ("wined3d".equals(c.getDXWrapper())) return;
-            c.setDXWrapper("wined3d");
+            String want = hasVulkan(ctx) ? "dxvk" : "wined3d";
+            if (want.equals(c.getDXWrapper())) return;
+            c.setDXWrapper(want);
             c.saveData();
-            addJavaNote("dxwrapper: container " + containerId + " switched to wined3d");
+            addJavaNote("dxwrapper: container " + containerId + " switched to " + want);
         } catch (Throwable e) {
             addJavaNote("dxwrapper: update FAILED: " + e);
         }
