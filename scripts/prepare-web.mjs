@@ -1,5 +1,6 @@
 import fs from 'node:fs';
 import path from 'node:path';
+import crypto from 'node:crypto';
 import { pathToFileURL } from 'node:url';
 
 const root = process.cwd();
@@ -9,9 +10,10 @@ fs.mkdirSync(out, { recursive: true });
 const src = path.join(root, 'src', 'index.html');
 if (!fs.existsSync(src)) throw new Error('Missing src/index.html');
 let html = fs.readFileSync(src, 'utf8');
+const sha1 = (s) => crypto.createHash('sha1').update(s).digest('hex');
 
-// Mods: every src/mods/*.js file is injected as an inline <script> right before
-// the final <!--NEXOS-END--></body>, so it runs after the main code has loaded.
+// Mods: every src/mods/*.js file is injected right before the final <!--NEXOS-END--></body>,
+// so it runs after the main code has loaded.
 const modsDir = path.join(root, 'src', 'mods');
 const modText = {};
 if (fs.existsSync(modsDir)) {
@@ -50,16 +52,39 @@ if (fs.existsSync(patchDir)) {
   }
 }
 
+// Live updates (NXHU): mods are injected as inert <script type="text/x-nxmod"> blocks and started in order by
+// scripts/nxhu-runner.js, which lets a downloaded small update replace one mod without a new APK.
+// `base` = the main page (after patches, without mods); `build` = base + every mod. Both go into the page.
+// With NXHU_OUT=updates/hot the same build also writes the downloadable bundle (manifest + built mods).
 const mods = Object.keys(modText).sort();
 if (mods.length) {
   const tag = '<!--NEXOS-END--></body>';
   const at = html.lastIndexOf(tag);
   if (at < 0) throw new Error('Marker ' + tag + ' not found in src/index.html');
-  const code = mods
-    .map((f) => '<script>/* mod: ' + f + ' */\n' + modText[f].replace(/<\/script/gi, '<\\/script') + '\n</script>')
-    .join('\n');
+  const info = { format: 1, base: sha1(html), mods: {} };
+  for (const f of mods) info.mods[f] = { sha: sha1(modText[f]), size: Buffer.byteLength(modText[f], 'utf8') };
+  info.build = sha1(info.base + mods.map((f) => f + info.mods[f].sha).join(','));
+  const runnerFile = path.join(root, 'scripts', 'nxhu-runner.js');
+  const runner = fs.existsSync(runnerFile) ? fs.readFileSync(runnerFile, 'utf8') : '';
+  const esc = (s) => s.replace(/<\/script/gi, '<\\/script');
+  let code;
+  if (runner) {
+    code = '<script type="application/json" id="nxhu-info">' + JSON.stringify(info).replace(/</g, '\\u003c') + '</script>\n'
+      + mods.map((f) => '<script type="text/x-nxmod" data-nxmod="' + f + '">/* mod: ' + f + ' */\n' + esc(modText[f]) + '\n</script>').join('\n')
+      + '\n<script>/* nxhu runner */\n' + esc(runner) + '\n</script>';
+  } else {
+    code = mods.map((f) => '<script>/* mod: ' + f + ' */\n' + esc(modText[f]) + '\n</script>').join('\n');
+  }
   html = html.slice(0, at) + code + html.slice(at);
   console.log('Injected mods: ' + mods.join(', '));
+  if (process.env.NXHU_OUT) {
+    const dir = path.resolve(root, process.env.NXHU_OUT);
+    fs.rmSync(path.join(dir, 'mods'), { recursive: true, force: true });
+    fs.mkdirSync(path.join(dir, 'mods'), { recursive: true });
+    for (const f of mods) fs.writeFileSync(path.join(dir, 'mods', f), modText[f]);
+    fs.writeFileSync(path.join(dir, 'manifest.json'), JSON.stringify({ format: 1, base: info.base, mods: info.mods }, null, 1) + '\n');
+    console.log('Live update bundle written to ' + process.env.NXHU_OUT + ' (' + mods.length + ' mods)');
+  }
 }
 fs.writeFileSync(path.join(out, 'index.html'), html);
 console.log('NexOS web app written to www/index.html');
