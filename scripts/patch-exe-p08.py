@@ -27,3 +27,6 @@ print('p08 cursor patch applied: Aurora cursor overlay, Wine cursor hidden')
 # aurora-d3d: Direct3D mode patch (Roblox DX11 FL10+), run here so the CI workflow needs no change
 import subprocess, sys
 subprocess.check_call([sys.executable, str(Path(__file__).with_name('patch-d3d.py'))])
+
+# aurora-xinput: answer XInput ListInputDevices with an empty list (Roblox Studio startup crash)
+subprocess.check_call([sys.executable, str(Path(__file__).with_name('patch-xinput.py'))])
