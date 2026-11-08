@@ -1587,7 +1587,11 @@ public class AuroraWinePlugin extends Plugin {
             + "|Program type: [^,]+, native Windows program"
             + "|aurora-v2 launch: .*)$");
 
-    /** Copies .log/.txt files written during this run (users folder of the prefix) to Download/aurora-app-logs, plus _files.txt. Never throws. */
+    /**
+     * Copies .log/.txt files written during this run, plus anything under a ".../logs/crashes/" folder (Roblox
+     * Studio's crash reporter: *.dmp, "metadata", "settings.dat", no extension), from the users folder of the
+     * prefix to Download/aurora-app-logs, plus _files.txt. Never throws.
+     */
     private void copyAppLogs(File dl) {
         try {
             File base = new File(prefixDir(getContext()), "drive_c/users");
@@ -1601,6 +1605,11 @@ public class AuroraWinePlugin extends Plugin {
         } catch (Throwable ignored) { }
     }
 
+    /** True for anything under a ".../logs/crashes/..." folder (Roblox Studio's own crash-reporter folder name). */
+    private static boolean isCrashReportPath(String relLowerCase) {
+        return relLowerCase.contains("/logs/crashes/");
+    }
+
     private static void walkLogs(File base, File dir, File out, long since, int depth, StringBuilder list, int[] n) throws Exception {
         File[] fs = dir.listFiles();
         if (fs == null || depth > 7) return;
@@ -1609,14 +1618,28 @@ public class AuroraWinePlugin extends Plugin {
                 walkLogs(base, f, out, since, depth + 1, list, n);
                 continue;
             }
-            if (f.lastModified() < since) continue;
             String rel = base.toURI().relativize(f.toURI()).getPath();
+            String relLower = rel.toLowerCase();
+            // aurora-crash-logs: a crash report is kept however old it is, so it survives even when the crash
+            // happened in an earlier run; an ordinary .log/.txt still has to be from this run (same as before).
+            boolean crash = isCrashReportPath(relLower);
+            if (f.lastModified() < since && !crash) continue;
             list.append(rel).append("  ").append(f.length()).append('\n');
             String nm = f.getName().toLowerCase();
-            if (n[0] < 30 && f.length() > 0 && f.length() < 3000000 && (nm.endsWith(".log") || nm.endsWith(".txt"))) {
-                n[0]++;
+            boolean wanted = nm.endsWith(".log") || nm.endsWith(".txt")
+                || (crash && (nm.endsWith(".dmp") || nm.equals("metadata") || nm.equals("settings.dat")));
+            // aurora-crash-logs: a Roblox .dmp is routinely several MB; everything else keeps the old 3 MB cap.
+            long maxLen = (crash && nm.endsWith(".dmp")) ? 20_000_000L : 3_000_000L;
+            if (!(n[0] < 30 && f.length() > 0 && f.length() < maxLen && wanted)) continue;
+            try {
+                // rel keeps the full "<user>/AppData/.../reports/<name>" path (flattened with '_'), so nothing
+                // here can collide with a same-named file from a different folder.
                 java.nio.file.Files.copy(f.toPath(), new File(out, rel.replace('/', '_')).toPath(),
                     java.nio.file.StandardCopyOption.REPLACE_EXISTING);
+                n[0]++;
+            } catch (Throwable copyErr) {
+                // aurora-crash-logs: one bad file (permissions, mid-write, whatever) must not stop the rest.
+                list.append("  (copy failed: ").append(copyErr).append(")\n");
             }
         }
     }
