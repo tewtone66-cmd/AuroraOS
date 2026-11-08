@@ -63,7 +63,7 @@ function panel(p){
   if(h&&h.parentNode)h.parentNode.insertBefore(b,h.nextSibling);else p.appendChild(b)}
 function page(){
   var p=D.getElementById('spg');if(!p)return;
-  var h=p.querySelector('h3');if(h&&(h.textContent||'').trim()==='Update')panel(p)}
+  var h=p.querySelector('h3');if(p.querySelector('.nxu')||h&&(h.textContent||'').trim()==='Update')panel(p)}
 function autoCheck(){
   if(g(AUTO)==='0'||navigator.onLine===false)return;
   if(Date.now()-(+g(LAST)||0)<12*3600*1000)return;
