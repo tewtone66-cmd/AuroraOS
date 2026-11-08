@@ -4,6 +4,7 @@ var s=document.createElement('style');s.id='nx-isl-410';
 s.textContent=[
 '.nxd:not([data-v=idle]) .v-idle{opacity:0!important;visibility:hidden!important;pointer-events:none}',
 '.nxd .nxd-v{will-change:opacity,transform}',
+'.nxd .ic{width:26px;height:26px;border-radius:9px;display:grid;place-items:center;flex:none}.nxd .ic svg{width:17px;height:17px;display:block;margin:0;color:#fff}.nxd .ic.o{box-shadow:0 2px 8px rgba(249,115,22,.45)}',
 '.v-idle{gap:8px}.nxd-bp{display:none;align-items:center;gap:5px;font:700 11px system-ui}.nxd[data-bp="1"] .nxd-bp{display:inline-flex}.nxd-bp svg{width:22px;height:13px}',
 '.nxd[data-v=idle][data-bp="1"]{width:132px}',
 /* music: art pops when playing and settles when paused, soft glow like One UI */
