@@ -23,3 +23,7 @@ xa = xa.replace(anchor, anchor + '\n        if (getIntent().hasExtra("aurora_rec
 xa = xa.replace('setCursorVisible(true)', 'setCursorVisible(%s.xCursor(getIntent()))' % P)
 XA.write_text(xa, encoding='utf-8')
 print('p08 cursor patch applied: Aurora cursor overlay, Wine cursor hidden')
+
+# aurora-d3d: Direct3D mode patch (Roblox DX11 FL10+), run here so the CI workflow needs no change
+import subprocess, sys
+subprocess.check_call([sys.executable, str(Path(__file__).with_name('patch-d3d.py'))])
