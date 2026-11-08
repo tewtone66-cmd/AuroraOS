@@ -3,7 +3,7 @@ Replaces the unconditional "force wined3d" with ensureWineD3DMode(), driven by D
   (absent) or auto : wined3d + Mesa GL version override, so wined3d can report DX11 Feature Level 10+
                      (Roblox Studio installer: "requires DirectX 11 Feature Level 10 or greater")
   wined3d          : wined3d only, no override (the old verified-to-start setup)
-  dxvk             : dxvk (needs a real Vulkan driver in the container; may hang on "Starting...")
+  dxvk             : dxvk + Vulkan driver wired (turnip on Adreno, vortek otherwise); untested, may hang
 The anchor must occur exactly once, otherwise nothing is written."""
 import json
 import re
@@ -48,6 +48,15 @@ JAVA = r'''    /**
             if (!wrap.equals(c.getDXWrapper())) {
                 c.setDXWrapper(wrap);
                 dirty = true;
+            }
+            if ("dxvk".equals(mode)) {
+                // dxvk needs a usable Vulkan driver: turnip on Adreno, vortek elsewhere (+ gladio for OpenGL)
+                String drv = com.winlator.container.GraphicsDrivers.getDefaultDriver(ctx);
+                if (!drv.equals(c.getGraphicsDriver())) {
+                    c.setGraphicsDriver(drv);
+                    dirty = true;
+                }
+                addJavaNote("d3d: graphicsDriver=" + drv);
             }
             EnvVars env = new EnvVars(c.getEnvVars());
             String[][] gl = { { "MESA_GL_VERSION_OVERRIDE", "4.6COMPAT" }, { "MESA_GLSL_VERSION_OVERRIDE", "460" } };
