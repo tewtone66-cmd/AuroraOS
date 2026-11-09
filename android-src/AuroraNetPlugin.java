@@ -293,4 +293,33 @@ public class AuroraNetPlugin extends Plugin {
             call.reject(e.getClass().getSimpleName() + ": " + e.getMessage());
         }
     }
+
+    /** Opens an Android settings screen: kind = wifi | bluetooth | data | airplane | sound | display (used by the Control Center). */
+    @PluginMethod
+    public void panel(PluginCall call) {
+        try {
+            String kind = call.getString("kind", "wifi");
+            String action;
+            if ("bluetooth".equals(kind)) {
+                action = android.provider.Settings.ACTION_BLUETOOTH_SETTINGS;
+            } else if ("data".equals(kind)) {
+                if (android.os.Build.VERSION.SDK_INT >= 29) action = android.provider.Settings.Panel.ACTION_INTERNET_CONNECTIVITY;
+                else action = android.provider.Settings.ACTION_DATA_ROAMING_SETTINGS;
+            } else if ("airplane".equals(kind)) {
+                action = android.provider.Settings.ACTION_AIRPLANE_MODE_SETTINGS;
+            } else if ("sound".equals(kind)) {
+                action = android.provider.Settings.ACTION_SOUND_SETTINGS;
+            } else if ("display".equals(kind)) {
+                action = android.provider.Settings.ACTION_DISPLAY_SETTINGS;
+            } else {
+                action = android.provider.Settings.ACTION_WIFI_SETTINGS;
+            }
+            android.content.Intent i = new android.content.Intent(action);
+            i.addFlags(android.content.Intent.FLAG_ACTIVITY_NEW_TASK);
+            getContext().startActivity(i);
+            call.resolve();
+        } catch (Exception e) {
+            call.reject(e.getClass().getSimpleName() + ": " + e.getMessage());
+        }
+    }
 }
