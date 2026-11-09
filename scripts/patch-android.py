@@ -21,7 +21,10 @@ c = set_attr(c, 'application', 'android:usesCleartextTraffic', 'true')
 c = set_attr(c, 'application', 'android:requestLegacyExternalStorage', 'true')
 
 perms = ['android.permission.INTERNET', 'android.permission.MANAGE_EXTERNAL_STORAGE',
-         'android.permission.READ_EXTERNAL_STORAGE', 'android.permission.WRITE_EXTERNAL_STORAGE']
+         'android.permission.READ_EXTERNAL_STORAGE', 'android.permission.WRITE_EXTERNAL_STORAGE',
+         'android.permission.ACCESS_NETWORK_STATE', 'android.permission.ACCESS_WIFI_STATE',
+         'android.permission.READ_MEDIA_AUDIO', 'android.permission.BLUETOOTH',
+         'android.permission.BLUETOOTH_CONNECT']
 add = ''.join('    <uses-permission android:name="%s" />\n' % p for p in perms if p not in c)
 if add:
     c = c.replace('</manifest>', add + '</manifest>')
