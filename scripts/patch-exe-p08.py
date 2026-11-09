@@ -30,3 +30,4 @@ subprocess.check_call([sys.executable, str(Path(__file__).with_name('patch-d3d.p
 
 # aurora-xinput: answer XInput ListInputDevices with an empty list (Roblox Studio startup crash)
 subprocess.check_call([sys.executable, str(Path(__file__).with_name('patch-xinput.py'))])
+subprocess.check_call([sys.executable, str(Path(__file__).with_name('patch-update.py'))])
