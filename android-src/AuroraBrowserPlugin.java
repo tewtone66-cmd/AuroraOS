@@ -452,6 +452,13 @@ public class AuroraBrowserPlugin extends Plugin {
 
                 @Override
                 public void onShowCustomView(View view, CustomViewCallback cb) {
+                    // BRFS-1: a stale customView (its tab was closed, or the app was backgrounded, without
+                    // onHideCustomView ever firing) must not permanently block every later fullscreen request.
+                    // Self-heal: if the old view is no longer actually on screen, drop it and proceed.
+                    if (customView != null && !customView.isAttachedToWindow()) {
+                        customView = null;
+                        customCb = null;
+                    }
                     if (customView != null) { cb.onCustomViewHidden(); return; }
                     customView = view;
                     customCb = cb;
@@ -662,6 +669,17 @@ public class AuroraBrowserPlugin extends Plugin {
                 if (w.getParent() instanceof ViewGroup) ((ViewGroup) w.getParent()).removeView(w);
                 w.destroy();
             }
+            // BRFS-1: closing a tab while its video is fullscreen must not leave customView dangling
+            // (that single field is shared by every tab's WebChromeClient, so a leak here blocks fullscreen
+            // for every other tab too, forever, since onShowCustomView would see it as still "in use").
+            // Only the tab that was actually shown/fullscreen is a plausible owner of customView, so this
+            // never interrupts fullscreen video playing in a different, still-open tab.
+            if (customView != null && (id.equals(shownId) || !customView.isAttachedToWindow())) {
+                if (customView.getParent() instanceof ViewGroup) ((ViewGroup) customView.getParent()).removeView(customView);
+                if (customCb != null) customCb.onCustomViewHidden();
+                customView = null;
+                customCb = null;
+            }
             if (id.equals(shownId)) shownId = null;
             call.resolve();
         });
@@ -771,7 +789,15 @@ public class AuroraBrowserPlugin extends Plugin {
                     w.dispatchGenericMotionEvent(e);
                     e.recycle();
                 } else if ("rclick".equals(act)) {
-                    String js = "(function(){var e=document.elementFromPoint(" + x + "," + y + ");if(e){e.dispatchEvent(new MouseEvent('contextmenu',{bubbles:true,cancelable:true,clientX:" + x + ",clientY:" + y + ",button:2}));}})()";
+                    // RCFIX-1: px,py (device px, the same space down/move/up already dispatch touches in) are NOT
+                    // the page's own CSS pixel space that elementFromPoint/clientX/clientY expect - the page is
+                    // laid out at cssWidth(tabId) and WebView scales it to fit the view, so the two only happen to
+                    // match by coincidence at one particular window size/zoom. Divide by the WebView's actual
+                    // current content scale (device px per page CSS px) to land on the right element every time.
+                    double sc = w.getScale();
+                    float scale = (float) (sc > 0 ? sc : 1.0);
+                    float cx = px / scale, cy = py / scale;
+                    String js = "(function(){var e=document.elementFromPoint(" + cx + "," + cy + ");if(e){e.dispatchEvent(new MouseEvent('contextmenu',{bubbles:true,cancelable:true,clientX:" + cx + ",clientY:" + cy + ",button:2}));}})()";
                     w.evaluateJavascript(js, null);
                 }
             } catch (Throwable ignored) {
@@ -812,5 +838,8 @@ public class AuroraBrowserPlugin extends Plugin {
         main.removeCallbacks(flushMoves);
         for (WebView w : views.values()) w.destroy();
         views.clear();
+        // BRFS-1: don't leave a stale customView pointed at a destroyed plugin instance.
+        customView = null;
+        customCb = null;
     }
 }
