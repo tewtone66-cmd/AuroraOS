@@ -41,6 +41,7 @@ public class MainActivity extends BridgeActivity {
         registerPlugin(AuroraBrowserPlugin.class);
         registerPlugin(AuroraWinePlugin.class);
         registerPlugin(AuroraNetPlugin.class);
+        registerPlugin(AuroraSysPlugin.class);
         pickLauncher = registerForActivityResult(new ActivityResultContracts.StartActivityForResult(), r -> {
             PickCb c = pending;
             pending = null;
